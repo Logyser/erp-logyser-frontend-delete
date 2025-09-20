@@ -19,6 +19,7 @@ npm install
 - `src/`: Código fuente principal
 - `public/`: Archivos públicos y estáticos
 - `docs/`: Documentación
+- `database/`: Esquemas y scripts de base de datos
 
 ## Tecnologías utilizadas
 
