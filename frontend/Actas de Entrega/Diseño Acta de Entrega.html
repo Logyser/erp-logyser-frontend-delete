@@ -1,0 +1,522 @@
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acta de entrega</title>
+    <!-- Incluir html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #fff; /* Fondo blanco */
+            color: #333;
+        }
+        .header-section{
+          display:flex;
+          flex-direction:column;   /* <— apila en columna */
+          align-items:center;
+          justify-content:center;
+          gap:4px;                 /* espacio entre líneas */
+          padding:8px 12px;
+          background:#000b59;
+          border-radius:10px;
+          color:#fff;
+          text-align:center;
+        }
+
+        .header-section .title{ margin:0; line-height:1.1; }
+        .header-section .title-main{ display:block; font-size:24px; font-weight:700; color:#fff; }
+        .header-section .title-sub{ display:block; margin-top:2px; font-size:16px; font-weight:600; color:#fff; }
+
+        .header-section p{ margin:4px 0 0; font-size:14px; color:#fff; }
+
+        .header-logo{
+          height:36px;               /* ajusta si lo quieres más grande */
+          object-fit:contain;
+          filter: brightness(0) invert(1);  /* ¡lo pone blanco! */
+        }
+        @media print{
+          .header-logo{ height:28px; }
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .logo img {
+            max-width: 200px; /* Ajusta el tamaño del logo según sea necesario */
+            height: auto;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #F55400; /* Fondo azul oscuro (#000b59) */
+            color: #fff; /* Texto blanco */
+            text-align: center; /* Alineación centrada */
+        }
+        .items-table{
+          width:100%;
+          border-collapse:collapse;
+          table-layout:fixed;               /* respeta los anchos del colgroup */
+        }
+        .items-table th,
+        .items-table td{
+          text-align:center !important;     /* centra incluso si hay reglas globales */
+          padding:10px;
+          word-break:break-word;
+        }
+
+        /* Elemento y Nota iguales; Cantidad más angosta */
+        .items-table .col-elemento{ width:40%; }
+        .items-table .col-cantidad{ width:15%; }  /* ajústalo a 15% si prefieres */
+        .items-table .col-nota{     width:40%; }
+
+        .signature-section{
+          display:flex;
+          justify-content:center;      /* centra horizontalmente */
+          margin:24px 0;
+        }
+        .signature-box{
+          text-align:center;           /* centra el contenido */
+          width:min(420px, 100%);
+          padding:10px;
+        }
+        .signature-box img{
+          max-width:100%;
+          max-height:160px;            /* evita que se haga muy alta */
+          height:auto;
+          object-fit:contain;
+        }
+        .signature-caption{
+          margin-top:8px;
+          font-size:12px;
+          color:#555;
+        }
+        @media print{
+          .signature-box{ padding:0; }
+          .signature-box img{ max-height:120px; }
+        }
+        .message-section {
+            width: 48%;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center; /* Alineación centrada */
+            background-color: #f9f9f9; /* Fondo gris claro */
+            border: 1px solid #ddd;
+        }
+        /* contenedor */
+        .client-info{
+          display:flex;
+          justify-content:center;
+          align-items:stretch;
+          gap:16px;
+          margin-bottom:2px 0;
+        }
+
+        /* caja de datos (ya la tienes) */
+        .client-info-box{
+          display:flex;
+          flex-direction:column;
+          justify-content:center;
+          padding:8px;
+          border:1px solid #ddd;
+          border-radius:10px;
+          font-size:14px;
+          color:#000b59;
+          line-height:1.05;
+        }
+
+        /* caja de evidencia */
+        .client-evidence{
+          display:flex;
+          flex-direction:column;
+          align-items:center;
+          justify-content:center;
+          padding:10px;
+          border:1px solid #ddd;
+          border-radius:10px;
+          width:min(320px, 45%);   /* más angosta que la info */
+        }
+
+        .client-evidence img{
+          max-width:100%;
+          max-height:200px;
+          height:auto;
+          object-fit:cover;        /* o 'contain' si prefieres ver todo */
+          border-radius:8px;
+        }
+
+        .client-evidence figcaption{
+          margin-top:6px;
+          font-size:12px;
+          color:#555;
+          text-align:center;
+        }
+
+        /* responsive: en móviles apila */
+        @media (max-width: 720px){
+          .client-info{ flex-direction:column; }
+          .client-evidence{ width:100%; }
+        }
+
+        .provisional-message {
+            margin-top: 10px;
+            font-size: 15px; /* Tamaño de letra más pequeño */
+            color: #333;
+            text-align: justify; /* Alineación justificada */
+            padding: 2px; /* Reducir aún más el padding para disminuir la altura */
+            background-color: #FBE2D5; /* Fondo gris claro */
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 16px; /* separa el bloque anterior */
+        }
+
+        .clausula-title { font-size: 16px; }
+        #clausula { white-space: pre-line; } /* respeta \n como saltos de línea */
+
+
+        .notes-section {
+            margin-top: 20px;
+            font-size: 11px;
+            padding: 2px;
+            background-color: #fff; /* Fondo blanco */
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: center; /* Alineación centrada */
+            width: 100%; /* Ancho igual a la franja azul */
+            margin: 0 auto; /* Centrar el marco */
+        }
+        .notes-section p {
+            margin: 5px 0; /* Reducir el margen */
+        }
+        .notes-section p:first-child {
+            font-weight: bold; /* Negrita para "Notas:" */
+            font-size: 10px;
+            color: #000b59; /* Color azul oscuro */
+            font-style: normal; /* Quitar cursiva */
+        }
+        .notes-section p:last-child {
+            font-style: italic; /* Cursiva para el texto de aclaraciones */
+            font-size: 10px;
+            color: #333; /* Color normal */
+        }
+        .footer {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #FBE2D5; /* Fondo azul claro */
+            border-radius: 5px;
+            text-align: center;
+            font-size: 12px; /* Reducir el tamaño de la letra del pie de página */
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .footer span {
+            margin: 0 10px;
+        }
+        .footer .separator {
+            border-left: 1px solid #555;
+            height: 20px;
+            margin: 0 10px;
+        }
+        .highlight {
+            color: #F55400; /* Naranja (#F55400) para resaltar */
+            font-weight: bold; /* Negrita */
+            font-size: 30px; /* Letra más grande */
+            text-align: center; /* Centrar texto */
+            margin: 2px 0; /* Espaciado */
+        }
+        .section-title {
+            font-size: 15px;
+            color: #000b59; /* Azul oscuro (#000b59) */
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: bold; /* Negrita para "Detalles de la Operación" */
+        }
+        .tallas{
+            text-align:center;
+            margin:6px 0 10px;      /* separación respecto al título y la tabla */
+            font-size:13px;
+            color:#000b59;
+          }
+          .tallas:empty{ display:none; }  /* si no hay contenido, no ocupa espacio */
+          .tallas .label{ font-weight:600; }
+        .bold {
+            font-weight: bold; /* Negrita para textos específicos */
+        }
+        .orange-text {
+            color: #F55400; /* Color naranja */
+        }
+        .azul-text {
+            color: #000b59; /* Color azul */
+        }
+        .green-text {
+            color: #25D366; /* Color verde de WhatsApp */
+            font-weight: bold; /* Negrita */
+        }
+        .operation-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .operation-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            width: 25%; /* Igualar el ancho de las columnas */
+        }
+        .operation-table td:first-child,
+        .operation-table td:nth-child(3) {
+            text-align: right; /* Alinear a la derecha las palabras "Operación", "Área", "Proveedor" y "Transportadora" */
+        }
+        .operation-table td:nth-child(2),
+        .operation-table td:nth-child(4) {
+            text-align: center; /* Alinear al centro los campos de respuesta */
+        }
+        /* Estilos para el botón de impresión */
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            color: #000b59;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        .print-button:hover {
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+<!-- Logo de la empresa -->
+<div class="logo">
+   <img src="https://raw.githubusercontent.com/LogyApp/ProvisionalRecaudo/2284a7a7b6adb992c70cf3ed280f5c01e7e9d99b/Logo%20Logyser%20con%20Nit.png">
+</div>
+<!-- Botón de impresión -->
+<button class="print-button" onclick="imprimirPagina()">Imprimir</button>   
+<div id="contenido">
+    <!-- Encabezado -->
+<div class="header-section">
+  <h1 class="title">
+    <span class="title-main">CONSTANCIA DE ENTREGA</span>
+    <span id="categoria" class="title-sub"></span>
+  </h1>
+  <p id="fechaentrega"></p>
+</div>
+
+    <!-- Consecutivo del recibo -->
+    <div class="highlight" id="acta"></div>
+
+    <!-- Sección de datos del cliente -->
+<div class="client-info">
+  <div class="client-info-box">
+    <p><span class="bold">Trabajador:</span> <span class="orange-text" id="nombres"></span></p>
+    <p><span class="bold">Operación:</span> <span class="orange-text" id="operacion"></span></p>
+    <p><span class="bold">Fecha de Ingreso:</span> <span class="orange-text" id="fechaingreso"></span></p>
+    <p><span class="bold">Id Entrega:</span> <span class="orange-text" id="identrega"></span></p>
+  </div>
+
+    <!-- Caja de evidencia (se oculta si no hay URL) -->
+  <figure id="client-evidence" class="client-evidence" hidden>
+    <img id="evidenciaImagen" src="" alt="Foto evidencia">
+    <figcaption>Foto evidencia</figcaption>
+  </figure>
+</div>
+
+    <!-- Mensaje sobre el recibo provisional -->
+<div class="provisional-message" id="bloqueClausula">
+  <p>
+    <strong id="tipoclausula" class="clausula-title"></strong><br>
+    <span id="clausula"></span>
+  </p>
+</div>
+
+    <!-- Tabla de elementos -->
+    <div class="section-title">Detalles de la entrega</div>
+    <div id="tallas" class="tallas"></div>
+    <table class="items-table">
+      <colgroup>
+        <col class="col-elemento">
+        <col class="col-cantidad">
+        <col class="col-nota">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Elemento</th>
+          <th>Cantidad</th>
+          <th>Nota</th>
+        </tr>
+      </thead>
+      <tbody id="items"></tbody>
+    </table>
+
+    <div class="signature-section">
+      <figure class="signature-box">
+        <img id="firmaImagen" src="" alt="Firma del trabajador">
+        <figcaption class="signature-caption">
+          Firma recibido del trabajador<br>
+          <span id="nombreFirmante"></span>
+        </figcaption>
+      </figure>
+    </div>
+
+    <!-- Pie de página -->
+    <div class="footer">
+        <span>IdEmpleado: <span id="iddotacion"></span></span>
+        <div class="separator"></div>
+        <span>Elaborado por: <span id="usuarioTexto"></span></span>
+        <div class="separator"></div>
+        <span>Versión: <span id="hora"></span></span>
+        <div class="separator"></div>
+        <span>LogyApp</span>
+    </div>
+  </div>
+
+    <!-- Script para insertar el contenido dinámico -->
+<script>
+  // helpers
+  const $ = (id) => document.getElementById(id);
+  const setText = (id, v) => { const el=$(id); if (el) el.textContent = v ?? ''; };
+  const fmtDate = (s) => s ? new Date(s).toLocaleDateString('es-CO',{timeZone:'America/Bogota'}) : '';
+  const fmtDateTime = (s) => s ? new Date(s).toLocaleString('es-CO',{timeZone:'America/Bogota'}) : '';
+
+  // Lee parámetros reales del WebApp (no uses window.location.search aquí)
+  google.script.url.getLocation(function(loc){
+    const p = (loc && loc.parameter) || {};
+
+    // encabezado y consecutivo
+    if (p.fechaentrega) setText('fechaentrega', fmtDateTime(p.fechaentrega));
+    setText('acta', p.acta ? `Acta No. ${p.acta}` : '');
+
+    // datos del trabajador
+    setText('nombres', p.nombres);
+    setText('operacion', p.operacion);
+    if (p.fechaingreso) setText('fechaingreso', fmtDate(p.fechaingreso));
+    setText('identrega', p.identrega);
+
+    // evidencia (opcional), acepta Url_Evidencia | url_evidencia | evidencia
+    let evUrl = p.url_evidencia || p.url_evidencia || p.evidencia || '';
+    if (evUrl) {
+      const box = document.getElementById('client-evidence');
+      const img = document.getElementById('evidenciaImagen');
+      if (box && img) {
+        img.src = evUrl;
+        box.hidden = false;
+        img.addEventListener('error', () => {
+          // si falla, quitamos la imagen para no dejar un cuadro vacío
+          box.remove();
+        });
+      }
+    } else {
+      const box = document.getElementById('client-evidence');
+      if (box) box.remove();
+    }
+
+    // tallas (opcional)
+    const elTallas = document.getElementById('tallas');
+    if (elTallas) {
+      if (p.tallas && p.tallas.trim()) {
+        elTallas.textContent = p.tallas;   // solo el mensaje
+      } else {
+        elTallas.remove();                  // si no viene, no muestra nada
+      }
+    }
+
+    // categoria (opcional)
+    if (p.categoria && p.categoria.trim()) {
+      setText('categoria', p.categoria);
+    } else {
+      // si no viene, elimina el nodo para que no deje espacio
+      const cat = document.getElementById('categoria');
+      if (cat) cat.remove();
+    }
+
+    // cláusula (opcional)
+      const bloque = document.getElementById('bloqueClausula');
+      const titulo = document.getElementById('tipoclausula');
+      const texto  = document.getElementById('clausula');
+
+      const tieneTitulo  = p.tipoclausula && p.tipoclausula.trim();
+      const tieneClausula = p.clausula && p.clausula.trim();
+
+      if (bloque) {
+        if (tieneTitulo) titulo.textContent = p.tipoclausula;
+        if (tieneClausula) texto.textContent = p.clausula;
+
+        // Si no llega nada, ocultar el bloque para que no deje espacio
+        if (!tieneTitulo && !tieneClausula) bloque.remove();
+    }
+
+    // pie de página
+    setText('iddotacion', p.iddotacion || p.identrega);
+    setText('usuarioTexto', p.usuarioTexto || p.usuario);
+    setText('hora', new Date().toLocaleString('es-CO',{timeZone:'America/Bogota'}));
+
+    // firma: acepta URL directa o JSON {"Url":"..."}
+    let firmaUrl = p.firma || '';
+    try { if (firmaUrl && firmaUrl.trim().startsWith('{')) firmaUrl = JSON.parse(firmaUrl).Url || ''; } catch(e){}
+    if (firmaUrl && $('firmaImagen')) {
+      const img = $('firmaImagen');
+      img.src = firmaUrl;
+      img.addEventListener('error', () => {
+        const line = document.createElement('div');
+        line.textContent = '______________________________';
+        line.style.margin = '24px 0';
+        img.replaceWith(line);
+      });
+    }
+    setText('nombreFirmante', p.nombres);
+
+    // items: JSON (?items=[{...}]) o HTML prearmado (?itemsHtml=<tr>...</tr>)
+    if (p.items) {
+      try { renderItems(JSON.parse(p.items)); } catch(e){ renderItems([]); }
+    } else if (p.itemsHtml) {
+      $('items').innerHTML = p.itemsHtml;
+    } else {
+      renderItems([]);
+    }
+  });
+
+  function renderItems(list){
+    const tbody = $('items');
+    tbody.innerHTML = '';
+    if (!Array.isArray(list) || !list.length) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 3; td.textContent = 'Sin elementos registrados.';
+      tr.appendChild(td); tbody.appendChild(tr); return;
+    }
+    list.forEach(it => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>{it.Elemento??''}</td><td>{it.Cantidad??''}</td><td>{it.Nota??''}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // imprimir
+  function imprimirPagina(){ window.print(); }
+  window.imprimirPagina = imprimirPagina;
+</script>
+
+
+</body>
+</html>
