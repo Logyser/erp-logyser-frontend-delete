@@ -56,13 +56,43 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // guardar firma (esto es solo mostrar la imagen base64, luego lo enviaremos al backend)
-  btnGuardar.addEventListener('click', () => {
-    const imgBase64 = canvas.toDataURL('image/png');
-    // Mostrar la firma en la sección original
-    const imgFirma = document.getElementById('firmaImagen');
-    if (imgFirma) imgFirma.src = imgBase64;
-    alert("Firma capturada. Próximo paso: enviar al backend.");
-    // Aquí puedes llamar una función para enviar la firma al backend
-    // enviarFirma(imgBase64);
-  });
+btnGuardar.addEventListener('click', async () => {
+  const imgBase64 = canvas.toDataURL('image/png');
+  // Mostrar la firma en la sección original
+  const imgFirma = document.getElementById('firmaImagen');
+  if (imgFirma) imgFirma.src = imgBase64;
+
+  // Obtener el idEntrega de la URL
+  function getParam(name) {
+    const params = new URLSearchParams(window.location.search);
+    for (const [key, value] of params.entries()) {
+      if (key.toLowerCase() === name.toLowerCase()) return value;
+    }
+    return null;
+  }
+  const idEntrega = getParam('idEntrega');
+  if (!idEntrega) {
+    alert('No se detectó el parámetro idEntrega en la URL.');
+    return;
+  }
+
+  // Enviar la firma al backend
+  try {
+    const resp = await fetch('http://localhost:3000/api/actas/upload-firma', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firma: imgBase64, idEntrega })
+    });
+    const data = await resp.json();
+    if (resp.ok) {
+      alert('Firma cargada correctamente.');
+      // Opcional: actualiza la imagen mostrada con la URL pública
+      if (data.url && imgFirma) imgFirma.src = data.url;
+    } else {
+      alert('Error al cargar la firma: ' + (data.error || 'Error desconocido'));
+    }
+  } catch (err) {
+    alert('Error de red al cargar la firma: ' + err.message);
+  }
+});
 });
