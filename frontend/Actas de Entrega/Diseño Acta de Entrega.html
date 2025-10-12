@@ -393,6 +393,62 @@
 
     <!-- Script para insertar el contenido dinámico -->
 <script>
+  document.addEventListener('DOMContentLoaded', async function() {
+  // Helper para obtener parámetros de la URL (soporta mayúsculas/minúsculas)
+  function getParam(name) {
+    const params = new URLSearchParams(window.location.search);
+    for (const [key, value] of params.entries()) {
+      if (key.toLowerCase() === name.toLowerCase()) return value;
+    }
+    return null;
+  }
+
+  const idEntrega = getParam('idEntrega');
+  if (!idEntrega) {
+    alert('Falta el parámetro idEntrega en la URL');
+    return;
+  }
+
+  // Llama al backend para traer los datos
+  try {
+    const resp = await fetch(`/api/actas/detalle?idEntrega=${idEntrega}`);
+    if (!resp.ok) throw new Error('Error consultando el acta');
+    const data = await resp.json();
+
+    // Llenado de campos principales
+    setText('acta', data.Acta_Entrega ? `Acta No. ${data.Acta_Entrega}` : '');
+    setText('nombres', data.Trabajador || '');
+    setText('operacion', data.Operación || '');
+    setText('fechaingreso', data.Fecha_Ingreso ? new Date(data.Fecha_Ingreso).toLocaleDateString('es-CO') : '');
+    setText('identrega', data.IdEntrega || '');
+    setText('categoria', data.Categoria || '');
+    setText('fechaentrega', data.Fecha_Entrega ? new Date(data.Fecha_Entrega).toLocaleString('es-CO') : '');
+    setText('iddotacion', data.IdDotación || '');
+    setText('usuarioTexto', data.Usuario || '');
+
+    // Firma previa (si existe)
+    if (data.Url_Firma && document.getElementById('firmaImagen')) {
+      document.getElementById('firmaImagen').src = data.Url_Firma;
+    }
+
+    // Evidencia (si existe)
+    if (data.Url_Evidencia) {
+      const box = document.getElementById('client-evidence');
+      const img = document.getElementById('evidenciaImagen');
+      if (box && img) {
+        img.src = data.Url_Evidencia;
+        box.hidden = false;
+        img.addEventListener('error', () => box.remove());
+      }
+    }
+
+    // Otros campos opcionales (ajusta según tus datos)
+    // setText('tallas', data.Tallas || '');
+
+  } catch (err) {
+    alert('No se pudo obtener la información del acta: ' + err.message);
+  }
+});
   // helpers
   const $ = (id) => document.getElementById(id);
   const setText = (id, v) => { const el=$(id); if (el) el.textContent = v ?? ''; };
