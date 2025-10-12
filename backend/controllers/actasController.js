@@ -1,6 +1,6 @@
 /**
  * Controlador para actas de entrega: 
- * - Sube firma al bucket y actualiza Url_Firma
+ * - Sube firma al bucket y actualiza Url_Firma usando IdDotación como carpeta
  * - Expone endpoint de consulta de acta por IdEntrega (GET /detalle)
  * 
  * Responsable: Equipo backend Logyser
@@ -55,43 +55,46 @@ router.get('/detalle', async (req, res) => {
 
 /**
  * POST /upload-firma
- * Recibe: { firma, trabajador, idEntrega }
- * Sube la firma y actualiza la columna Url_Firma si no existe ya una firma.
+ * Recibe: { firma, idEntrega }
+ * Sube la firma al bucket en la carpeta del IdDotación y actualiza Url_Firma en la base de datos.
  */
 router.post('/upload-firma', async (req, res) => {
   let connection;
   try {
-    const { firma, trabajador, idEntrega } = req.body;
-    if (!firma || !trabajador || !idEntrega) {
-      return res.status(400).json({ error: 'Faltan datos requeridos (firma, trabajador, idEntrega)' });
+    const { firma, idEntrega } = req.body;
+    if (!firma || !idEntrega) {
+      return res.status(400).json({ error: 'Faltan datos requeridos (firma, idEntrega)' });
     }
 
     connection = await mysql.createConnection(dbConfig);
 
-    // 1. Chequear si ya hay firma
+    // 1. Buscar el IdDotación y si ya hay firma
     const [rows] = await connection.execute(
-      'SELECT Url_Firma FROM Dynamic_Entrega_Dotacion WHERE IdEntrega = ? LIMIT 1',
+      'SELECT IdDotación, Url_Firma FROM Dynamic_Entrega_Dotacion WHERE IdEntrega = ? LIMIT 1',
       [idEntrega]
     );
 
-    if (rows.length > 0 && rows[0].Url_Firma) {
+    if (!rows.length) {
+      await connection.end();
+      return res.status(404).json({ error: 'No se encontró el registro para ese IdEntrega.' });
+    }
+    if (rows[0].Url_Firma) {
       await connection.end();
       return res.status(409).json({ error: 'Acta ya firmada. No se puede volver a firmar.' });
     }
+    const idDotacion = rows[0].IdDotación;
 
-    // Extrae el base64 y convierte a buffer
+    // 2. Guardar la firma en el bucket usando IdDotación como carpeta
     const base64Data = firma.replace(/^data:image\/\w+;base64,/, '');
     const buffer = Buffer.from(base64Data, 'base64');
-    // Ruta: firmas/{numeroDocumento}/{idEntrega}_firma.png
-    const fileName = `firmas/${trabajador}/${idEntrega}_firma.png`;
+    const fileName = `firmas/${idDotacion}/${idEntrega}_firma.png`;
     const file = storage.bucket(bucketName).file(fileName);
 
-    // Sube la firma al bucket
     await file.save(buffer, { contentType: 'image/png', public: true, resumable: false });
     await file.makePublic();
     const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
-    // Actualiza la URL de la firma en la base de datos
+    // 3. Actualizar la URL de la firma en la base de datos
     const [result] = await connection.execute(
       'UPDATE Dynamic_Entrega_Dotacion SET Url_Firma = ? WHERE IdEntrega = ?',
       [publicUrl, idEntrega]
