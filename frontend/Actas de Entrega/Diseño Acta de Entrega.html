@@ -411,7 +411,7 @@
 
   // Llama al backend para traer los datos
   try {
-    const resp = await fetch(`/api/actas/detalle?idEntrega=${idEntrega}`);
+    const resp = await fetch(`http://localhost:3000/api/actas/detalle?idEntrega=${idEntrega}`);
     if (!resp.ok) throw new Error('Error consultando el acta');
     const data = await resp.json();
 
