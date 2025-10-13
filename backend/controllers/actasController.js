@@ -152,63 +152,63 @@ router.post('/generar-acta-pdf', async (req, res) => {
  * Recibe: { firma, idEntrega }
  * Sube la firma al bucket en la carpeta del IdDotación y actualiza Firma_Empleado en la base de datos.
  */
-router.post('/upload-firma', async (req, res) => {
+router.post('/generar-acta-pdf', async (req, res) => {
   let connection;
   try {
-    const { firma, idEntrega } = req.body;
-    if (!firma || !idEntrega) {
-      return res.status(400).json({ error: 'Faltan datos requeridos (firma, idEntrega)' });
+    const { idEntrega } = req.body;
+    console.log('Recibido POST /generar-acta-pdf', { idEntrega });
+    if (!idEntrega) {
+      return res.status(400).json({ error: 'Falta el parámetro idEntrega' });
     }
 
     connection = await mysql.createConnection(dbConfig);
 
-    // 1. Buscar el IdDotación y si ya hay firma
+    // 1. Obtener los datos del acta
     const [rows] = await connection.execute(
-      'SELECT IdDotación, Firma_Empleado FROM Dynamic_Entrega_Dotacion WHERE IdEntrega = ? LIMIT 1',
+      'SELECT * FROM Dynamic_Entrega_Dotacion WHERE IdEntrega = ? LIMIT 1',
       [idEntrega]
     );
-
     if (!rows.length) {
-      await connection.end();
       return res.status(404).json({ error: 'No se encontró el registro para ese IdEntrega.' });
     }
-    if (rows[0].Firma_Empleado) {
-      await connection.end();
-      return res.status(409).json({ error: 'Acta ya firmada. No se puede volver a firmar.' });
-    }
-    const idDotacion = rows[0].IdDotación;
+    const acta = rows[0];
+    const idDotacion = acta.IdDotación;
 
-    // 2. Guardar la firma en el bucket usando IdDotación como carpeta
-    const base64Data = firma.replace(/^data:image\/\w+;base64,/, '');
-    const buffer = Buffer.from(base64Data, 'base64');
-    const fileName = `firmas/${idDotacion}/${idEntrega}_firma.png`;
-    const file = storage.bucket(bucketName).file(fileName);
-    console.log('Recibido idEntrega:', idEntrega);
-    console.log('Longitud de firma (base64):', firma.length);
-    console.log('Base64 inicia:', firma.slice(0, 30));
-    console.log('Buffer length:', buffer.length);
+    // 2. Renderiza el HTML del acta (puedes mejorar la plantilla)
+    // ... (deja igual tu bloque de html) ...
 
-    await file.save(buffer, { contentType: 'image/png', resumable: false });
-    const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
+    // 3. Genera el PDF usando Puppeteer
+    console.log('Abriendo Puppeteer...');
+    const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+    console.log('Puppeteer lanzado, abriendo página...');
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
+    await browser.close();
+    console.log('PDF generado, subiendo a bucket...');
 
-    // 3. Actualizar la URL de la firma en la base de datos (ahora en Firma_Empleado)
-    const [result] = await connection.execute(
-      'UPDATE Dynamic_Entrega_Dotacion SET Firma_Empleado = ? WHERE IdEntrega = ?',
+    // 4. Guarda el PDF en Cloud Storage
+    const bucketPdf = new Storage().bucket('talenthub_central');
+    const pdfFileName = `${idDotacion}/${idDotacion}_ACT_${idEntrega}.pdf`;
+    const file = bucketPdf.file(pdfFileName);
+    await file.save(pdfBuffer, { contentType: 'application/pdf', resumable: false, public: true });
+    console.log('PDF subido, actualizando BD...');
+
+    const publicUrl = `https://storage.googleapis.com/talenthub_central/${pdfFileName}`;
+
+    // 5. Actualiza la columna Url_Acta en la base
+    await connection.execute(
+      'UPDATE Dynamic_Entrega_Dotacion SET Url_Acta = ? WHERE IdEntrega = ?',
       [publicUrl, idEntrega]
     );
+    console.log('Todo OK, respondiendo al cliente');
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'No se encontró el registro para actualizar en Dynamic_Entrega_Dotacion.' });
-    }
-
-    res.json({ url: publicUrl, message: 'Firma cargada y URL registrada en base de datos.' });
+    res.json({ url: publicUrl, message: `PDF generado y almacenado en ${publicUrl}` });
   } catch (err) {
-    console.error('Error subiendo firma o actualizando BD:', err);
-    res.status(500).json({ error: 'Error al subir la firma o actualizar la base de datos.' });
+    console.error('Error generando o subiendo PDF:', err);
+    res.status(500).json({ error: 'Error al generar o subir el PDF.' });
   } finally {
-    if (connection) {
-      await connection.end();
-    }
+    if (connection) await connection.end();
   }
 });
 
