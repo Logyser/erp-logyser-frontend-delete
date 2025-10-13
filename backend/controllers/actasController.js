@@ -136,7 +136,7 @@ router.post('/generar-acta-pdf', async (req, res) => {
     const bucketPdf = new Storage().bucket('talenthub_central');
     const pdfFileName = `${idDotacion}/${idDotacion}_ACT_${idEntrega}.pdf`;
     const file = bucketPdf.file(pdfFileName);
-    await file.save(pdfBuffer, { contentType: 'application/pdf', resumable: false, public: true });
+    await file.save(pdfBuffer, { contentType: 'application/pdf', resumable: false });
     console.log('PDF subido, actualizando BD...');
 
     const publicUrl = `https://storage.googleapis.com/talenthub_central/${pdfFileName}`;
