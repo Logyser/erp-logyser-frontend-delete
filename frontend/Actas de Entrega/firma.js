@@ -79,9 +79,9 @@ btnGuardar.addEventListener('click', async () => {
   // Enviar la firma al backend
   try {
     const resp = await fetch('https://actas-backend-594761951101.us-central1.run.app/api/actas/upload-firma', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ firma: imgBase64, idEntrega })
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ firma: imgBase64, idEntrega })
     });
     const data = await resp.json();
     if (resp.ok) {
