@@ -61,11 +61,16 @@ router.get('/detalle', async (req, res) => {
  */
 
 const puppeteer = require('puppeteer'); // Agrega arriba junto con otros require
-
+/**
+ * POST /upload-firma
+ * Recibe: { firma, idEntrega }
+ * Sube la firma al bucket en la carpeta del IdDotación y actualiza Firma_Empleado en la base de datos.
+ */
 router.post('/generar-acta-pdf', async (req, res) => {
   let connection;
   try {
     const { idEntrega } = req.body;
+    console.log('Recibido POST /generar-acta-pdf', { idEntrega });
     if (!idEntrega) {
       return res.status(400).json({ error: 'Falta el parámetro idEntrega' });
     }
@@ -116,66 +121,6 @@ router.post('/generar-acta-pdf', async (req, res) => {
       </body>
       </html>
     `;
-
-    // 3. Genera el PDF usando Puppeteer
-    const browser = await puppeteer.launch({ args: ['--no-sandbox'] }); // Cloud Run requiere --no-sandbox
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
-    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
-    await browser.close();
-
-    // 4. Guarda el PDF en Cloud Storage
-    const bucketPdf = new Storage().bucket('talenthub_central');
-    const pdfFileName = `${idDotacion}/${idDotacion}_ACT_${idEntrega}.pdf`;
-    const file = bucketPdf.file(pdfFileName);
-    await file.save(pdfBuffer, { contentType: 'application/pdf', resumable: false, public: true });
-
-    const publicUrl = `https://storage.googleapis.com/talenthub_central/${pdfFileName}`;
-
-    // 5. Actualiza la columna Url_Acta en la base
-    await connection.execute(
-      'UPDATE Dynamic_Entrega_Dotacion SET Url_Acta = ? WHERE IdEntrega = ?',
-      [publicUrl, idEntrega]
-    );
-
-    res.json({ url: publicUrl, message: `PDF generado y almacenado en ${publicUrl}` });
-  } catch (err) {
-    console.error('Error generando o subiendo PDF:', err);
-    res.status(500).json({ error: 'Error al generar o subir el PDF.' });
-  } finally {
-    if (connection) await connection.end();
-  }
-});
-
-/**
- * POST /upload-firma
- * Recibe: { firma, idEntrega }
- * Sube la firma al bucket en la carpeta del IdDotación y actualiza Firma_Empleado en la base de datos.
- */
-router.post('/generar-acta-pdf', async (req, res) => {
-  let connection;
-  try {
-    const { idEntrega } = req.body;
-    console.log('Recibido POST /generar-acta-pdf', { idEntrega });
-    if (!idEntrega) {
-      return res.status(400).json({ error: 'Falta el parámetro idEntrega' });
-    }
-
-    connection = await mysql.createConnection(dbConfig);
-
-    // 1. Obtener los datos del acta
-    const [rows] = await connection.execute(
-      'SELECT * FROM Dynamic_Entrega_Dotacion WHERE IdEntrega = ? LIMIT 1',
-      [idEntrega]
-    );
-    if (!rows.length) {
-      return res.status(404).json({ error: 'No se encontró el registro para ese IdEntrega.' });
-    }
-    const acta = rows[0];
-    const idDotacion = acta.IdDotación;
-
-    // 2. Renderiza el HTML del acta (puedes mejorar la plantilla)
-    // ... (deja igual tu bloque de html) ...
 
     // 3. Genera el PDF usando Puppeteer
     console.log('Abriendo Puppeteer...');
