@@ -1,10 +1,10 @@
 /**
- * Controlador para actas de entrega: 
- * - Sube firma al bucket y actualiza Url_Firma usando IdDotación como carpeta
+ * Controlador para actas de entrega:
+ * - Sube firma al bucket y actualiza Firma_Empleado usando IdDotación como carpeta
  * - Expone endpoint de consulta de acta por IdEntrega (GET /detalle)
- * 
+ *
  * Responsable: Equipo backend Logyser
- * Última actualización: 2025-10-12
+ * Última actualización: 2025-10-13
  */
 
 const { Storage } = require('@google-cloud/storage');
@@ -56,7 +56,7 @@ router.get('/detalle', async (req, res) => {
 /**
  * POST /upload-firma
  * Recibe: { firma, idEntrega }
- * Sube la firma al bucket en la carpeta del IdDotación y actualiza Url_Firma en la base de datos.
+ * Sube la firma al bucket en la carpeta del IdDotación y actualiza Firma_Empleado en la base de datos.
  */
 router.post('/upload-firma', async (req, res) => {
   let connection;
@@ -70,7 +70,7 @@ router.post('/upload-firma', async (req, res) => {
 
     // 1. Buscar el IdDotación y si ya hay firma
     const [rows] = await connection.execute(
-      'SELECT IdDotación, Url_Firma FROM Dynamic_Entrega_Dotacion WHERE IdEntrega = ? LIMIT 1',
+      'SELECT IdDotación, Firma_Empleado FROM Dynamic_Entrega_Dotacion WHERE IdEntrega = ? LIMIT 1',
       [idEntrega]
     );
 
@@ -78,7 +78,7 @@ router.post('/upload-firma', async (req, res) => {
       await connection.end();
       return res.status(404).json({ error: 'No se encontró el registro para ese IdEntrega.' });
     }
-    if (rows[0].Url_Firma) {
+    if (rows[0].Firma_Empleado) {
       await connection.end();
       return res.status(409).json({ error: 'Acta ya firmada. No se puede volver a firmar.' });
     }
@@ -95,12 +95,11 @@ router.post('/upload-firma', async (req, res) => {
     console.log('Buffer length:', buffer.length);
 
     await file.save(buffer, { contentType: 'image/png', resumable: false });
-    // No llames a file.makePublic() ni uses { public: true }
     const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
-    // 3. Actualizar la URL de la firma en la base de datos
+    // 3. Actualizar la URL de la firma en la base de datos (ahora en Firma_Empleado)
     const [result] = await connection.execute(
-      'UPDATE Dynamic_Entrega_Dotacion SET Url_Firma = ? WHERE IdEntrega = ?',
+      'UPDATE Dynamic_Entrega_Dotacion SET Firma_Empleado = ? WHERE IdEntrega = ?',
       [publicUrl, idEntrega]
     );
 
