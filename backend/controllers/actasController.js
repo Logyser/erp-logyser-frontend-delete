@@ -89,9 +89,13 @@ router.post('/upload-firma', async (req, res) => {
     const buffer = Buffer.from(base64Data, 'base64');
     const fileName = `firmas/${idDotacion}/${idEntrega}_firma.png`;
     const file = storage.bucket(bucketName).file(fileName);
+    console.log('Recibido idEntrega:', idEntrega);
+    console.log('Longitud de firma (base64):', firma.length);
+    console.log('Base64 inicia:', firma.slice(0, 30));
+    console.log('Buffer length:', buffer.length);
 
-    await file.save(buffer, { contentType: 'image/png', public: true, resumable: false });
-    await file.makePublic();
+    await file.save(buffer, { contentType: 'image/png', resumable: false });
+    // No llames a file.makePublic() ni uses { public: true }
     const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
     // 3. Actualizar la URL de la firma en la base de datos
