@@ -6,7 +6,7 @@
  * Responsable: Equipo backend Logyser
  * Última actualización: 2025-10-13
  */
-
+console.log("### LOGYSER BACKEND BUILD 2025-10-14 02:20 ###");
 const { Storage } = require('@google-cloud/storage');
 const mysql = require('mysql2/promise');
 const express = require('express');
