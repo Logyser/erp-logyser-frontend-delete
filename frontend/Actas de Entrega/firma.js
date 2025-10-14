@@ -91,7 +91,7 @@ btnGuardar.addEventListener('click', async () => {
       alert('Firma cargada correctamente.');
       // Oculta el área de captura de firma
       container.style.display = 'none';
-      // Opcional: actualiza la imagen mostrada con la URL pública
+      // Opcional: actualiza la imagen mostrada con la URL pública - ok
       if (data.url && imgFirma) imgFirma.src = data.url;
     } else {
       alert('Error al cargar la firma: ' + (data.error || 'Error desconocido'));
