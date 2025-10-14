@@ -555,20 +555,20 @@
   });
 
   function renderItems(list){
-    const tbody = $('items');
-    tbody.innerHTML = '';
-    if (!Array.isArray(list) || !list.length) {
-      const tr = document.createElement('tr');
-      const td = document.createElement('td');
-      td.colSpan = 3; td.textContent = 'Sin elementos registrados.';
-      tr.appendChild(td); tbody.appendChild(tr); return;
-    }
-    list.forEach(it => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>{it.Elemento??''}</td><td>{it.Cantidad??''}</td><td>{it.Nota??''}</td>`;
-      tbody.appendChild(tr);
-    });
+  const tbody = $('items');
+  tbody.innerHTML = '';
+  if (!Array.isArray(list) || !list.length) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 3; td.textContent = 'Sin elementos registrados.';
+    tr.appendChild(td); tbody.appendChild(tr); return;
   }
+  list.forEach(it => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${it.Elemento ?? ''}</td><td>${it.Cantidad ?? ''}</td><td>${it.Nota ?? ''}</td>`;
+    tbody.appendChild(tr);
+  });
+}
 
   // imprimir
   function imprimirPagina(){ window.print(); }
