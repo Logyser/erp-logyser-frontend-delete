@@ -205,4 +205,55 @@ const itemsHtml = items.length
   }
 });
 
+/**
+ * POST /upload-firma
+ * Recibe: { firma, idEntrega }
+ * Sube la firma al bucket y actualiza Firma_Empleado en la base de datos.
+ */
+router.post('/upload-firma', async (req, res) => {
+  let connection;
+  try {
+    const { firma, idEntrega } = req.body;
+    if (!firma || !idEntrega) {
+      return res.status(400).json({ error: 'Falta firma o idEntrega' });
+    }
+
+    connection = await mysql.createConnection(dbConfig);
+    // 1. Buscar el acta para obtener IdDotación
+    const [rows] = await connection.execute(
+      'SELECT IdDotación FROM Dynamic_Entrega_Dotacion WHERE IdEntrega = ? LIMIT 1',
+      [idEntrega]
+    );
+    if (!rows.length) {
+      return res.status(404).json({ error: 'No se encontró el registro para ese IdEntrega' });
+    }
+    const idDotacion = rows[0].IdDotación;
+
+    // 2. Subir la firma al bucket
+    // Extrae solo el contenido base64 (sin el prefijo data:image/png;base64,)
+    const matches = firma.match(/^data:image\/png;base64,(.+)$/);
+    if (!matches) {
+      return res.status(400).json({ error: 'Formato de firma inválido' });
+    }
+    const buffer = Buffer.from(matches[1], 'base64');
+    const fileName = `${idDotacion}/firma_${idEntrega}.png`;
+    const file = storage.bucket(bucketName).file(fileName);
+    await file.save(buffer, { contentType: 'image/png', resumable: false });
+
+    const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
+
+    // 3. Actualizar la base de datos
+    await connection.execute(
+      'UPDATE Dynamic_Entrega_Dotacion SET Firma_Empleado = ? WHERE IdEntrega = ?',
+      [publicUrl, idEntrega]
+    );
+
+    res.json({ url: publicUrl, message: 'Firma subida correctamente' });
+  } catch (err) {
+    console.error('Error subiendo la firma:', err);
+    res.status(500).json({ error: 'Error al subir la firma' });
+  } finally {
+    if (connection) await connection.end();
+  }
+});
 module.exports = router;
