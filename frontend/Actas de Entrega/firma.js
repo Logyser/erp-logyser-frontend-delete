@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const canvas = document.createElement('canvas');
   canvas.width = 350;
   canvas.height = 120;
-  canvas.style = "border:1px solid #000b59; background:#fff; border-radius:8px; box-shadow:0 1px 4px #ccc;";
+  canvas.style = "border:1px solid #ecececff; background:#fff; border-radius:8px; ";
   container.appendChild(canvas);
 
   const controls = document.createElement('div');
@@ -30,18 +30,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
   container.appendChild(controls);
 
- // Si ya existe una firma, ocultar el área de captura
-const imgFirma = document.getElementById('firmaImagen');
-if (imgFirma && imgFirma.src && !imgFirma.src.endsWith('/firma.png') && imgFirma.src !== window.location.href) {
-  // Si la firma ya está puesta, ocultar el área de captura
-  container.style.display = 'none';
-}
+  // Si ya existe una firma, ocultar el área de captura
+  const imgFirma = document.getElementById('firmaImagen');
+  if (imgFirma && imgFirma.src && !imgFirma.src.endsWith('/firma.png') && imgFirma.src !== window.location.href) {
+    // Si la firma ya está puesta, ocultar el área de captura
+    container.style.display = 'none';
+  }
 
   // 2. Lógica de dibujo en el canvas
   let dibujando = false;
   let ctx = canvas.getContext('2d');
   ctx.lineWidth = 2;
-  ctx.strokeStyle = "#000b59";
+  ctx.strokeStyle = "#333333ff";
 
   canvas.addEventListener('mousedown', e => { dibujando = true; ctx.beginPath(); });
   canvas.addEventListener('mousemove', e => {
@@ -59,45 +59,54 @@ if (imgFirma && imgFirma.src && !imgFirma.src.endsWith('/firma.png') && imgFirma
   });
 
   // guardar firma (esto es solo mostrar la imagen base64, luego lo enviaremos al backend)
-btnGuardar.addEventListener('click', async () => {
-  const imgBase64 = canvas.toDataURL('image/png');
-  // Mostrar la firma en la sección original
-  const imgFirma = document.getElementById('firmaImagen');
-  if (imgFirma) imgFirma.src = imgBase64;
+  btnGuardar.addEventListener('click', async () => {
+    const imgBase64 = canvas.toDataURL('image/png');
+    // Mostrar la firma en la sección original
+    const imgFirma = document.getElementById('firmaImagen');
+    if (imgFirma) imgFirma.src = imgBase64;
 
-  // Obtener el idEntrega de la URL
-  function getParam(name) {
-    const params = new URLSearchParams(window.location.search);
-    for (const [key, value] of params.entries()) {
-      if (key.toLowerCase() === name.toLowerCase()) return value;
+    // Obtener el idEntrega de la URL
+    function getParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      for (const [key, value] of params.entries()) {
+        if (key.toLowerCase() === name.toLowerCase()) return value;
+      }
+      return null;
     }
-    return null;
-  }
-  const idEntrega = getParam('idEntrega');
-  if (!idEntrega) {
-    alert('No se detectó el parámetro idEntrega en la URL.');
-    return;
-  }
+    const idEntrega = getParam('idEntrega');
+    if (!idEntrega) {
+      alert('No se detectó el parámetro idEntrega en la URL.');
+      return;
+    }
 
-  // Enviar la firma al backend
-  try {
-    const resp = await fetch('https://actas-backend-594761951101.us-central1.run.app/api/actas/upload-firma', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ firma: imgBase64, idEntrega })
-    });
-    const data = await resp.json();
-    if (resp.ok) {
-      alert('Firma cargada correctamente.');
-      // Oculta el área de captura de firma
-      container.style.display = 'none';
-      // Opcional: actualiza la imagen mostrada con la URL pública - ok
-      if (data.url && imgFirma) imgFirma.src = data.url;
-    } else {
-      alert('Error al cargar la firma: ' + (data.error || 'Error desconocido'));
+    // Enviar la firma al backend
+    try {
+      const resp = await fetch('https://actas-backend-594761951101.us-central1.run.app/api/actas/upload-firma', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firma: imgBase64, idEntrega })
+      });
+      const data = await resp.json();
+      if (resp.ok) {
+        alert('Firma cargada correctamente.');
+        // Oculta el área de captura de firma
+        container.style.display = 'none';
+        // Opcional: actualiza la imagen mostrada con la URL pública - ok
+        if (data.url && imgFirma) imgFirma.src = data.url;
+      } else {
+        alert('Error al cargar la firma: ' + (data.error || 'Error desconocido'));
+      }
+    } catch (err) {
+      alert('Error de red al cargar la firma: ' + err.message);
     }
-  } catch (err) {
-    alert('Error de red al cargar la firma: ' + err.message);
+  });
+
+  // Inserta el contenedor debajo de la firma existente
+  const firmaBox = document.querySelector('.signature-box');
+  if (firmaBox) {
+    firmaBox.appendChild(container);
+  } else {
+    // Si no encuentra la caja, lo agrega al final del body
+    document.body.appendChild(container);
   }
-});
 });
