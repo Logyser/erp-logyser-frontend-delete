@@ -86,6 +86,8 @@ btnGuardar.addEventListener('click', async () => {
     const data = await resp.json();
     if (resp.ok) {
       alert('Firma cargada correctamente.');
+      // Oculta el área de captura de firma
+      container.style.display = 'none';
       // Opcional: actualiza la imagen mostrada con la URL pública
       if (data.url && imgFirma) imgFirma.src = data.url;
     } else {

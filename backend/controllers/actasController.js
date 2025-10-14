@@ -79,12 +79,29 @@ router.post('/generar-acta-pdf', async (req, res) => {
 
     // 1. Obtener los datos del acta
     const [rows] = await connection.execute(
-      'SELECT * FROM Dynamic_Entrega_Dotacion WHERE IdEntrega = ? LIMIT 1',
-      [idEntrega]
-    );
-    if (!rows.length) {
-      return res.status(404).json({ error: 'No se encontró el registro para ese IdEntrega.' });
-    }
+  'SELECT * FROM Dynamic_Entrega_Dotacion WHERE IdEntrega = ? LIMIT 1',
+  [idEntrega]
+);
+if (!rows.length) {
+  return res.status(404).json({ error: 'No se encontró el registro para ese IdEntrega' });
+}
+
+const [items] = await connection.execute(
+  'SELECT Elemento, Cantidad, Nota FROM Dynamic_Entrega_Dotacion_Items WHERE IdEntrega = ?',
+  [idEntrega]
+);
+
+const itemsHtml = items.length
+  ? items.map(it =>
+      `<tr><td>${it.Elemento}</td><td>${it.Cantidad}</td><td>${it.Nota || ''}</td></tr>`
+    ).join('')
+  : '<tr><td colspan="3">Sin elementos registrados.</td></tr>';
+
+res.json({
+  ...rows[0],
+  Items: items,
+  ItemsHtml: itemsHtml
+});
     const acta = rows[0];
     const idDotacion = acta.IdDotación;
 
