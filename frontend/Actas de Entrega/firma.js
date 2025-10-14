@@ -30,9 +30,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
   container.appendChild(controls);
 
-  // insertar antes de la sección de firma
-  const refFirma = document.querySelector('.signature-section');
-  if (refFirma) refFirma.parentNode.insertBefore(container, refFirma);
+ // Si ya existe una firma, ocultar el área de captura
+const imgFirma = document.getElementById('firmaImagen');
+if (imgFirma && imgFirma.src && !imgFirma.src.endsWith('/firma.png') && imgFirma.src !== window.location.href) {
+  // Si la firma ya está puesta, ocultar el área de captura
+  container.style.display = 'none';
+}
 
   // 2. Lógica de dibujo en el canvas
   let dibujando = false;

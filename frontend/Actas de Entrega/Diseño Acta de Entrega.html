@@ -411,26 +411,25 @@
 
   // Llama al backend para traer los datos
   try {
-    const resp = await fetch(`https://actas-backend-594761951101.us-central1.run.app/api/actas/detalle?idEntrega=${idEntrega}`);
-    if (!resp.ok) throw new Error('Error consultando el acta');
-    const data = await resp.json();
+  const resp = await fetch(`https://actas-backend-594761951101.us-central1.run.app/api/actas/detalle?idEntrega=${idEntrega}`);
+  if (!resp.ok) throw new Error('Error consultando el acta');
+  const data = await resp.json();
 
-    // Llenado de campos principales
-    setText('acta', data.Acta_Entrega ? `Acta No. ${data.Acta_Entrega}` : '');
-    setText('nombres', data.Trabajador || '');
-    setText('operacion', data.Operación || '');
-    setText('fechaingreso', data.Fecha_Ingreso ? new Date(data.Fecha_Ingreso).toLocaleDateString('es-CO') : '');
-    setText('identrega', data.IdEntrega || '');
-    setText('categoria', data.Categoria || '');
-    setText('fechaentrega', data.Fecha_Entrega ? new Date(data.Fecha_Entrega).toLocaleString('es-CO') : '');
-    setText('iddotacion', data.IdDotación || '');
-    setText('usuarioTexto', data.Usuario || '');
+  // Llenado de campos principales
+  setText('acta', data.Acta_Entrega ? `Acta No. ${data.Acta_Entrega}` : '');
+  setText('nombres', data.Trabajador || '');
+  setText('operacion', data.Operación || '');
+  setText('fechaingreso', data.Fecha_Ingreso ? new Date(data.Fecha_Ingreso).toLocaleDateString('es-CO') : '');
+  setText('identrega', data.IdEntrega || '');
+  setText('categoria', data.Categoria || '');
+  setText('fechaentrega', data.Fecha_Entrega ? new Date(data.Fecha_Entrega).toLocaleString('es-CO') : '');
+  setText('iddotacion', data.IdDotación || '');
+  setText('usuarioTexto', data.Usuario || '');
 
-    // Firma previa (si existe)
-    if (data.Url_Firma && document.getElementById('firmaImagen')) {
-      document.getElementById('firmaImagen').src = data.Url_Firma;
-    }
-
+  // Firma previa (si existe)
+  if (data.Url_Firma && document.getElementById('firmaImagen')) {
+    document.getElementById('firmaImagen').src = data.Url_Firma;
+  }
     // Evidencia (si existe)
     if (data.Url_Evidencia) {
       const box = document.getElementById('client-evidence');
@@ -441,13 +440,16 @@
         img.addEventListener('error', () => box.remove());
       }
     }
-
-    // Otros campos opcionales (ajusta según tus datos)
-    // setText('tallas', data.Tallas || '');
-
-  } catch (err) {
-    alert('No se pudo obtener la información del acta: ' + err.message);
+// ===== Agregado: renderizar los ítems en la tabla =====
+  if (Array.isArray(data.Items)) {
+    renderItems(data.Items);
+  } else if (typeof data.ItemsHtml === 'string') {
+    document.getElementById('items').innerHTML = data.ItemsHtml;
   }
+
+} catch (err) {
+  alert('No se pudo obtener la información del acta: ' + err.message);
+}
 });
   // helpers
   const $ = (id) => document.getElementById(id);
