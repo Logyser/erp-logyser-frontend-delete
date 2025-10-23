@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "eternal-brand-454501-i8",
+  "private_key_id": "ec6b8536588f531e09bce4d28ce6aa27803daaf6",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCW4KuL4UdLUkWN\nxO2vDNlOPe8WlMafNkix0kJQ7MCKvNiJ2es6mVEFGE/H6iA8Q4AANbctLbVrK9I3\nuy6iE2BXo63kpS0tQ2yHUKPObhtBE8QMKnuL3pSCIBsFC0WbxRJZXfKI6jRltdPp\nuYBHzibGDBlZNKoJ4x2L8u3mc7nEfm6IU+vMZ8ozyzUqwZjojyoKdR5GN4A9v5rx\nzHzAxy9pojSTs28we7Y4t0M6Ww9R92XT0Mk0Hbe0Tn6jSt3rocYN0FJ5LxJBhDEj\nMQV7j4k72DVLwOA5i8hzDOIBpjgiaKaALfmhSUIUuyzPn8KFJwjrg/uelJnOzUF1\n9sDn2PwpAgMBAAECggEALDjz7w77v5cArfn/lKRWeTlr/5lh0j6t9fjj2SZblQ6f\nBWCrMsTHW4/xqm30PtWmCem0o/hWyW/RsOYbWAQH5AgkqvTDFhZCFDNNn+7j7CIn\n/0zgY3G845sXcFYKdArCQxFnSjwjWYB++W2WrPU+piPbtiragAVinqd4lWhsFaxp\npMY8SPhQ95B7ElXGqLgQvemWjlb0k+8z1o8900hDOfjXQI3brGjvMAwLnAl1Qkoc\nctnjR4llx+7H9G1LFfSxTtDatFLhbFPapebuYcIhlLrZ11bf4LwCXfPnAeblP4j/\nNn/rcZZpQ6h9/B02xvhrQl7BAqsMtBgFENy7xjAVJQKBgQDTQ2G6XCIptKuNRwE5\nLV9EfDBg40eyPl95BonerByQ8E+0BIiFagOtfMlCASo+XSBqRyE91j9vO7dVtoBx\nOyY+jK7x9gAkRkErzBQTy9uRveDSKF2C9vJurR/UVOWxtzfcxdCGjI07kkwqR1aA\ns7W4/0W05Ai0qGUp5X0XpdeBuwKBgQC208Yo3dNw+Ul+kJesULvnqWXnmCUdNxlX\nkE1CvkQMCGM87q5vZwMe9sQEBV/DfHAdRIBx2lxkoHUmkDRC7qtvyeu3GJy1THJb\n5yhmzxTZpCfxjIeBJFJGpjeedn+v0fqoH7BpUZ1SYTL542oEOzDAsw5687E0vMsL\nJSQ9SGeZawKBgH1V74fhmz8E+fYiFv62BVwbFZSVonaD/J5Pm8HoeDYg7BhPzDLi\nl3X4n2oySL6g/1cuBfGqxw2V7wnB8We8AM+BJVVVbfYXXBjAxXSNMCHB9byYyAmn\numKhAU42Y+NQYKrxDOqWPkAGZnt6wT4v3/L2N4O++c88THBTvyglcrp7AoGAAbI1\nRGvKamHlrKbqwU5+b8fCikN/FKZONeHA1b2uI+5v/UC5nY73GHJxnxftq4KcB6l7\nB5NfCA/1BkaQNY7BSGg3J5uy2Hu9E90xIsMJDnvXYwZKu4f6u20PVwkCZj8sdCLX\nICMBsqH0Nx1E/oUODruahsl7+2FFAPV3QJpLW8ECgYB0B/OXfvpmLUdETFmuMgfS\n5OHFthyDB6W7Af+FjN+G6pHkKS43qt1Txl/8dQ3Lw4QLQgx1u8rlHuvWqx4Cemg4\nrC5NGrHQCqJZB5mMvPZppHUC2kQllIq8XeweSMHIsy+IukGpYAHDYwDg2f1dMyzd\n9rF0Y13zzyenVlba/Wrb1Q==\n-----END PRIVATE KEY-----\n",
+  "client_email": "eternal-brand-454501-i8@appspot.gserviceaccount.com",
+  "client_id": "102430620752134443350",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/eternal-brand-454501-i8%40appspot.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
