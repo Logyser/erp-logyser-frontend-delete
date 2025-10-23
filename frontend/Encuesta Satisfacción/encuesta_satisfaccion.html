@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Encuesta de Satisfacción - Logy&Ser</title>
+  <title>Encuesta de Satisfacción - Log&Ser</title>
   <style>
     :root{
       --accent:#F55400;
@@ -27,7 +27,7 @@
     .likert input{display:none;}
     .likert label{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:transform .12s, box-shadow .12s, border-color .12s;}
     .likert label img{width:44px;height:44px;display:block;}
-    .likert input:checked + label{transform:translateY(-4px);box-shadow:0 8px 16px rgba(15,23,42,0.12);border-color:rgba(0,0,0,0.06)}
+    .likert input:checked + label{transform:translateY(-4px);box-shadow:0 10px 24px rgba(15,23,42,0.20);border-color:rgba(0,0,0,0.30);}
     .controls{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:14px;}
     .btn{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:600;}
     .btn.secondary{background:#e8eef6;color:var(--text);}
@@ -49,9 +49,9 @@
 <body>
   <div class="container">
     <div class="header">
-      <img class="logo" src="https://storage.googleapis.com/encuesta_satisfaccion/Logyser_logo.png" alt="Logy&Ser">
+      <img class="logo" src="https://storage.googleapis.com/encuesta_satisfaccion/logo.png" alt="Log&Ser">
       <div>
-        <div class="title">Encuesta de Satisfacción - Logy&Ser</div>
+        <div class="title">Encuesta de Satisfacción - Log&Ser</div>
         <div class="subtitle">Tu opinión nos ayuda a mejorar — dura ~3 minutos</div>
       </div>
     </div>
@@ -389,7 +389,7 @@
         <div class="section-title">Comentarios y recomendación</div>
 
         <div class="field">
-          <label class="small">26. En una escala de 0 a 10, ¿qué probabilidad hay de que recomiende a un familiar o amigo trabajar en Logy&Ser?</label>
+          <label class="small">26. En una escala de 0 a 10, ¿qué probabilidad hay de que recomiende a un familiar o amigo trabajar en Log&Ser?</label>
           <div class="nps">
             <input id="logyser_recomendar" type="range" min="0" max="10" value="8" oninput="document.getElementById('npsval').textContent=this.value">
             <div style="min-width:44px;text-align:center;font-weight:700" id="npsval">8</div>
@@ -397,7 +397,7 @@
         </div>
 
         <div class="field">
-          <label class="small">27. ¿Qué es lo que más le gusta de trabajar en Logy&Ser? (opcional)</label>
+          <label class="small">27. ¿Qué es lo que más le gusta de trabajar en Log&Ser? (opcional)</label>
           <textarea id="logyser_gusto" placeholder="Escribe aquí..."></textarea>
         </div>
 
@@ -412,7 +412,7 @@
         </div>
 
         <div id="msg" aria-live="polite"></div>
-        <div class="legal">La encuesta es anónima si no introduces datos adicionales. Identificación se usa para evitar duplicados una vez al mes.</div>
+        <div class="legal">La encuesta permite una respuesta por trabajador cada mes. Si ingresas tu identificación comprobaremos automáticamente si aún puedes responder.</div>
       </div>
     </div>
   </div>
