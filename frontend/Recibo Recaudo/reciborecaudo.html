@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=760, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <title>Recibo Provisional</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+
+  <!-- BUILD: 2025-09-07-15 -->
+  <script>
+    // Cache-buster: obliga ?v=BUILD
+    const BUILD = '2025-09-07-15';
+    (function ensureVersionParam(){
+      const url = new URL(location.href);
+      if (url.searchParams.get('v') !== BUILD) {
+        url.searchParams.set('v', BUILD);
+        location.replace(url.toString());
+      }
+    })();
+  </script>
+
+  <style>
+    :root{ --azul:#000b59; --naranja:#F55400; --grisBorde:#ddd; }
+    body{ font-family:Arial,sans-serif; margin:20px; background:#fff; color:#333; }
+    #contenido{ max-width:760px; margin:0 auto; }
+    .logo{ text-align:center; margin-bottom:10px; }
+    .logo img{ max-width:92%; width:330px; height:auto; }
+    .header-section{ text-align:center; margin-bottom:20px; padding:8px 12px; background:var(--azul); border-radius:12px; color:#fff; }
+    .header-section h1{ font-size:24px; margin:0; }
+    .highlight{ color:var(--naranja); font-weight:bold; font-size:clamp(18px,6vw,30px); text-align:center; margin:2px 0; }
+        .client-info{ display:grid !important; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+    .client-info-left,.client-info-right{ padding:8px 10px; border:1px solid var(--grisBorde); border-radius:10px; }
+    .client-info-left p{ margin:2px 0; }
+    .client-info-right{ font-size:9px; line-height:1.25; text-align:right; color:var(--azul); }
+    .provisional-message{ background:#e8eefc; border:1px solid var(--grisBorde); border-radius:4px; padding:4px 6px; text-align:justify; margin-top:8px; font-size:11px; }
+    table{ width:100%; border-collapse:collapse; margin-bottom:18px; background:#fff; border:1px solid var(--grisBorde); table-layout:auto; }
+    th,td{ padding:6px 8px; border:1px solid var(--grisBorde); }
+    th{ background:var(--azul); color:#fff; text-align:center; font-weight:700; }
+    table td:nth-last-child(1), table td:nth-last-child(2){ text-align:right; }
+    table td:nth-child(-n+4){ text-align:center; }
+    .table-container{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    .table-container th {font-size: 0.8rem; /* Encabezados un poco más pequeños */}
+.table-container td {font-size: 0.75rem; /* Celdas */}
+    .break-anywhere{ overflow-wrap:anywhere; word-break:break-word; min-width:0; }
+    .operation-table{ margin-bottom:20px; }
+    .operation-table td{ width:25%; }
+    .operation-table td:first-child, .operation-table td:nth-child(3){ text-align:right; }
+    .operation-table td:nth-child(2), .operation-table td:nth-child(4){ text-align:center; }
+    .totals-section{ display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:start; margin-top:20px; }
+    .message-section{ padding:10px; border-radius:5px; text-align:center; background:#f9f9f9; border:1px solid var(--grisBorde); display:flex; flex-direction:column; justify-content:center; }
+    .totals-table{ table-layout:fixed; }
+    .totals-table td{ padding:8px; text-align:right; }
+    .totals-table tr:last-child td{ background:var(--naranja); color:#fff; font-weight:bold; }
+    .notes-section{ margin-top:20px; font-size:11px; padding:2px; border:1px solid var(--grisBorde); border-radius:5px; text-align:center; }
+    .footer{ margin-top:20px; padding:10px; background:#dce3fd; border-radius:5px; text-align:center; font-size:12px; color:#333; display:flex; flex-wrap:wrap; justify-content:center; gap:12px; }
+    /* Barra de acciones */
+    .actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+      margin:10px 0 14px;
+    }
+    .btn{
+      display:inline-block;
+      padding:10px 14px;
+      border-radius:8px;
+      font-weight:600;
+      text-decoration:none;
+      border:none;
+      cursor:pointer;
+      box-shadow:0 2px 6px rgba(0,0,0,.12);
+      color:#fff;
+    }
+    .btn-print{ background:#F55400; }
+    .btn-wa   { background:#25D366; }
+    .btn-img  { background:#0d6efd; }
+    .btn:hover{ filter:brightness(.95); }
+
+/* Forzar layout de escritorio en móvil cuando exista .force-desktop */
+@media (max-width: 768px) {
+  .force-desktop .totals-section { grid-template-columns: 1fr 1fr; }
+  .force-desktop .footer { flex-direction: row; }
+  .force-desktop body { margin: 20px; } /* vuelve al margen de escritorio */
+  .force-desktop th, .force-desktop td { font-size: 14px; } /* tamaño de PC */
+  .force-desktop .provisional-message { font-size: 15px; line-height: 1.35; }
+}
+
+
+    @media print {
+      @page { size: A4; margin: 5mm; }
+      .no-print { display: none !important; }
+
+      /* Compactar diseño */
+      .print-compact .provisional-message { font-size: 13px; }
+      .print-compact th, .print-compact td { padding: 5px 7px; font-size: 11px; }
+      .print-compact .client-info { gap: 8px; }
+      .print-compact .client-info-left,
+      .print-compact .client-info-right { font-size: 11px; }
+      .print-compact .footer { display: none !important; }
+
+      /* Ocultar bloques para ahorrar espacio */
+      .print-compact .message-section,
+      .print-compact .notes-section { display: none !important; }
+
+      /* Escalado automático */
+      #contenido{
+        transform-origin: top left;
+        transform: scale(var(--print-scale, 1));
+        width: calc(100% / var(--print-scale, 1));
+      }
+
+      .client-info, .totals-section, .header-section,
+      .provisional-message, .operation-table,
+      .notes-section, .footer {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+    }
+
+    .printing .no-print{ visibility:hidden !important; }
+    .screenshot-mode .provisional-message{ font-size: 13px; }
+    .screenshot-mode th, .screenshot-mode td{ padding: 6px 8px; }
+    .screenshot-mode .client-info{ gap: 8px; }
+  </style>
+</head>
+<body>
+
+<div class="actions no-print">
+  <button class="btn btn-print" id="btn-print" type="button">Imprimir</button>
+  <a id="whatsapp-link" class="btn btn-wa" href="#" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+  <button id="save-img" class="btn btn-img" type="button">Descargar imagen</button>
+</div>
+
+<div class="logo">
+  <img src="logo.png" alt="Logo Logyser" onerror="this.src='https://via.placeholder.com/330x80?text=Logyser';">
+</div>
+
+<div id="contenido">
+  <div class="header-section">
+    <h1>RECIBO PROVISIONAL</h1>
+    <p id="fecha"></p>
+  </div>
+
+  <div class="highlight" id="consecutivoRecibo"></div>
+
+    <div class="client-info">
+      <div class="client-info-left">
+        <p><span class="bold">Cliente:</span> <span class="orange-text break-anywhere" id="nombres"></span></p>
+        <p><span class="bold">Nit:</span> <span class="break-anywhere" id="nitCliente"></span></p>
+        <p><span class="bold">Email:</span> <span class="break-anywhere" id="email"></span></p>
+        <p><span class="bold">Teléfono:</span> <span class="break-anywhere" id="telefono"></span></p>
+      </div>
+      <div class="client-info-right">
+        <p>RESPONSABLES DE IVA</p>
+        <p>NO SOMOS GRANDES CONTRIBUYENTES</p>
+        <p>ACTIVIDAD ECONÓMICA: 5224</p>
+        <p>TV 39 A # 70A-51</p>
+        <p>MEDELLÍN</p>
+        <p>ANTIOQUIA</p>
+      </div>
+    </div>
+
+    <div class="provisional-message">
+      <p><strong style="font-size:16px;">Recuerda que:</strong><br>
+        Este documento es un recibo provisional. La factura electrónica será enviada a tu correo. Confirma que tus datos estén correctos. Para realizar modificaciones, informa de inmediato al personal del punto de servicio; de lo contrario, no se aceptará ningún reclamo ni se generarán cambios en la factura.
+      </p>
+    </div>
+
+    <table class="operation-table">
+      <tr>
+        <td><span class="bold">Operación:</span></td>
+        <td><span class="orange-text break-anywhere" id="operacion"></span></td>
+        <td><span class="bold">Proveedor:</span></td>
+        <td class="break-anywhere" id="proveedorTexto"></td>
+      </tr>
+      <tr>
+        <td><span class="bold">Área:</span></td>
+        <td class="break-anywhere" id="areaTexto"></td>
+        <td><span class="bold">Transportadora:</span></td>
+        <td class="break-anywhere" id="transportadoraTexto"></td>
+      </tr>
+    </table>
+
+    <div class="section-title">Detalle de la Operación</div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Actividad</th>
+            <th>Vehículo</th>
+            <th>Placa</th>
+            <th>Pago</th>
+            <th>Cant.</th>
+            <th>Unidad</th>
+            <th>V. Unit</th>
+            <th>Valor</th>
+          </tr>
+        </thead>
+        <tbody id="items"></tbody>
+      </table>
+    </div>
+
+    <div class="totals-section">
+      <div class="message-section">
+        <p class="bold orange-text">¿Necesitas tu factura? ¡No te preocupes!</p>
+        <p>Verifica tus datos y solicita al WhatsApp
+          <a href="https://wa.me/573173645618" class="green-text">3173645618</a>
+          o al correo <a href="mailto:facturacion.electronica@logyser.com">facturacion.electronica@logyser.com</a>
+        </p>
+      </div>
+      <table class="totals-table">
+        <tr><td><span class="bold">Subtotal</span></td><td id="subtotal"></td></tr>
+        <tr><td><span class="bold">Valor IVA</span></td><td id="iva"></td></tr>
+        <tr><td><span class="bold">Rte. Fuente</span></td><td id="valorRetefuente"></td></tr>
+        <tr><td><span class="bold">Rte. IVA</span></td><td id="valorReteIVA"></td></tr>
+        <tr><td><span class="bold">Rte. ICA</span></td><td id="valorReteICA"></td></tr>
+        <tr><td><span class="bold">TOTAL</span></td><td id="totalPago"></td></tr>
+      </table>
+    </div>
+
+    <div class="notes-section">
+      <p>Notas:</p>
+      <p id="observaciones"></p>
+    </div>
+
+    <div class="footer">
+      <span id="idRecibo"></span>
+      <span>|</span>
+      <span>Elaborado por: <span id="usuarioTexto"></span></span>
+      <span>|</span>
+      <span>Versión: <span id="hora"></span> / <span id="version"></span></span>
+      <span>|</span>
+      <span>LogyApp</span>
+    </div>
+  </div>
+
+  <script>
+  // ==== Utilidades ====
+  const Q = new URLSearchParams(location.search);
+  const get = (k, d="") => Q.get(k) ?? d;
+  const $  = id => document.getElementById(id);
+  const setText = (id, val="") => { const el=$(id); if(el) el.textContent = val; };
+  const fmtCOP = v => { const n=Number(v); return isFinite(n)?new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP'}).format(n):(v??""); };
+  const fmt = v => { const n=Number(v); if(!isFinite(n)) return v??""; try{ return new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP'}).format(n);}catch{ return n.toLocaleString('es-CO'); } };
+  function phone57(raw){ const d=String(raw||"").replace(/\D/g,''); if(!d) return ""; return d.startsWith('57')?d:('57'+d); }
+  function getPlacaDeTabla(){ const r=document.querySelector('#items tr'); if(!r) return ""; const td=r.querySelectorAll('td')[2]; return td?td.textContent.trim():""; }
+  function nowBogota(){ const f=new Intl.DateTimeFormat('es-CO',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}); const p=f.formatToParts(new Date()); const m=Object.fromEntries(p.map(x=>[x.type,x.value])); return `${m.day}-${m.month}-${m.year} ${m.hour}:${m.minute}:${m.second}`; }
+
+  // ==== WhatsApp ====
+  function buildWA(){
+    const telefono   = phone57(get('telefono'));
+    const operacion  = get('operacion');
+    const nombres    = get('nombres');
+    const nitCliente = get('nitCliente');
+    const totalPago  = fmtCOP(get('totalPago'));
+    const fecha      = get('fecha') || nowBogota();
+    const recibo     = get('consecutivoRecibo') || get('idRecibo') || "";
+    const placa      = getPlacaDeTabla();
+    const urlRecibo  = location.href;
+
+    const text = [
+      "🟦🟧 *LOGYSER Nit: 900.318.733-1*",
+      "",
+      "Hola, este es el detalle de tu servicio:",
+      "",
+      `*${operacion || "Operación"}*`,
+      `- *Cliente:* _${nombres || "N/A"}_`,
+      `- *Nit:* ${nitCliente || "N/A"}`,
+      (placa ? `- *Placa:* ${placa} 🚚` : ""),
+      `✅ *Total Pago:* *${totalPago || "N/A"}*`,
+      `- *Fecha:* ${fecha}`,
+      `- *Recibo:* ${recibo || "N/A"}`,
+      "",
+      "🧾 Recuerda que puedes solicitar tu factura aquí:",
+      "wa.me/573173645618",
+      "",
+      "🔗 Ver recibo en línea:",
+      urlRecibo
+    ].filter(Boolean).join("\n");
+
+    const to = telefono || "573173645618";
+    return `https://wa.me/${to}/?text=${encodeURIComponent(text)}`;
+  }
+  function setWaHref(){ const a=$('whatsapp-link'); if(a) a.href=buildWA(); }
+  window.refrescarWhatsApp = () => setWaHref();
+
+  // ==== Print con escala ====
+  function applyPrintScale() {
+    const node = document.getElementById('contenido');
+    if (!node) return 1;
+    const MM = 25.4; const marginIn = 12 / MM; const dpi = 96;
+    // A4: 8.27 x 11.69 in
+const usableWpx = (8.27 - 2*marginIn) * dpi;
+const usableHpx = (11.69 - 2*marginIn) * dpi;
+    const rect = node.getBoundingClientRect();
+    const contentW = Math.ceil(rect.width);
+    const contentH = Math.ceil(node.scrollHeight);
+    const scaleW = usableWpx / contentW;
+    const scaleH = usableHpx / contentH;
+    const scale  = Math.min(1, scaleW, scaleH);
+    document.documentElement.style.setProperty('--print-scale', scale.toString());
+    return scale;
+  }
+  window.smartPrint = function(){
+    document.body.classList.add('printing','print-compact');
+    applyPrintScale();
+    setTimeout(() => {
+      window.print();
+      setTimeout(() => {
+        document.body.classList.remove('printing','print-compact');
+        document.documentElement.style.removeProperty('--print-scale');
+      }, 300);
+    }, 50);
+  };
+
+  // ==== Descargar imagen ====
+  async function downloadImage(){
+    const node = document.getElementById('contenido');
+    document.body.classList.add('printing','screenshot-mode'); 
+    await new Promise(r => setTimeout(r, 50));
+    const canvas = await html2canvas(node, { scale:2, backgroundColor:'#fff', useCORS:true });
+    document.body.classList.remove('printing','screenshot-mode');
+    const dataUrl = canvas.toDataURL('image/png');
+    const fileName = `Recibo_${(new URLSearchParams(location.search).get('consecutivoRecibo')) || (new URLSearchParams(location.search).get('idRecibo')) || 'Logyser'}.png`;
+    try {
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], fileName, { type:'image/png' });
+      if (navigator.canShare && navigator.canShare({ files:[file] })) {
+        await navigator.share({ files:[file], title:'Recibo Provisional', text:'Te envío el recibo en imagen.' });
+        return;
+      }
+    } catch(e){ console.debug('Share API no disponible, usamos descarga.', e); }
+    const a = document.createElement('a'); a.href=dataUrl; a.download=fileName; a.click();
+  }
+
+  // ==== Inicialización ====
+  document.addEventListener('DOMContentLoaded', () => {
+    const btnPrint = document.getElementById('btn-print');
+    if (btnPrint) btnPrint.addEventListener('click', smartPrint);
+    const btnImg = document.getElementById('save-img');
+    if (btnImg) btnImg.addEventListener('click', downloadImage);
+
+    setText('fecha', get('fecha') || nowBogota());
+    setText('consecutivoRecibo', get('consecutivoRecibo'));
+    setText('nombres', get('nombres'));
+    setText('nitCliente', get('nitCliente'));
+    setText('telefono', get('telefono'));
+    setText('email', get('email'));
+    setText('operacion', get('operacion'));
+    setText('areaTexto', get('areaTexto'));
+    setText('transportadoraTexto', get('transportadoraTexto'));
+    setText('proveedorTexto', get('proveedorTexto'));
+    setText('observaciones', get('observaciones'));
+    setText('idRecibo', get('idRecibo'));
+    setText('usuarioTexto', get('usuario'));
+    setText('version', get('version') || (typeof BUILD!=='undefined'?BUILD:'')); 
+    setText('hora', get('hora') || nowBogota());
+
+    const itemsEl=$('items');
+    const raw=(get('itemsEnc',null)!==null)?get('itemsEnc'):get('items','');
+    if(itemsEl && raw && raw.trim()){
+      try{
+        itemsEl.insertAdjacentHTML('beforeend', raw);
+        if(!itemsEl.querySelector('tr')){
+          const tmp=document.createElement('tbody'); tmp.innerHTML=raw;
+          const rows=tmp.querySelectorAll('tr'); if(rows.length) rows.forEach(r=>itemsEl.appendChild(r));
+        }
+        if(!itemsEl.querySelector('tr')){ itemsEl.innerHTML=raw; }
+      }catch(e){ itemsEl.textContent=raw; }
+    }
+
+    setText('subtotal', fmt(get('subtotal',0)));
+    setText('iva', fmt(get('iva',0)));
+    setText('valorRetefuente', fmt(get('valorRetefuente',0)));
+    setText('valorReteIVA', fmt(get('valorReteIVA',0)));
+    setText('valorReteICA', fmt(get('valorReteICA',0)));
+    setText('totalPago', fmt(get('totalPago',0)));
+
+    setWaHref();
+  });
+</script>
+</body>
+</html>
