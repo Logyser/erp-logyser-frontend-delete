@@ -4,49 +4,83 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Encuesta de Satisfacción - Log&Ser</title>
-  <style>
-    :root{
-      --accent:#F55400;
-      --bg:#f6f8fb;
-      --card:#ffffff;
-      --text:#122033;
-      --muted:#6b7380;
-    }
-    body{font-family:Inter, system-ui, Arial, sans-serif;background:var(--bg);color:var(--text);margin:0;padding:20px;}
-    .container{max-width:980px;margin:18px auto;padding:20px;}
-    .header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
-    .logo{height:56px;}
-    .title{font-size:20px;font-weight:700;color:var(--text);}
-    .subtitle{color:var(--muted);font-size:13px;margin-top:2px;}
-    .card{background:var(--card);border-radius:12px;padding:18px;margin:12px 0;box-shadow:0 6px 18px rgba(16,24,40,0.06);}
-    .section-title{font-weight:700;color:var(--accent);margin-bottom:10px;font-size:15px;}
-    .question{display:flex;align-items:center;justify-content:space-between;padding:10px 6px;border-bottom:1px solid #eef2f6;}
-    .question:last-child{border-bottom:0;}
-    .q-text{flex:1;margin-right:12px;font-size:14px;}
-    .likert{display:flex;gap:8px;align-items:center}
-    .likert input{display:none;}
-    .likert label{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:transform .12s, box-shadow .12s, border-color .12s;}
-    .likert label img{width:44px;height:44px;display:block;}
-    /* contorno más visible para la opción seleccionada */
-    .likert input:checked + label{transform:translateY(-4px);box-shadow:0 12px 28px rgba(15,23,42,0.28);border-color:rgba(0,0,0,0.45);}
-    .controls{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:14px;}
-    .btn{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:600;}
-    .btn.secondary{background:#e8eef6;color:var(--text);}
-    .field{margin-bottom:10px;}
-    label.small{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
-    input[type="text"]{padding:10px;border-radius:8px;border:1px solid #dde6f0;width:260px;}
-    textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #dde6f0;min-height:90px;}
-    .nps{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-    .legal{font-size:12px;color:var(--muted);margin-top:10px;}
-    .success{padding:10px;background:#e6fbef;border:1px solid #b8f0c8;color:#056a2d;border-radius:8px;margin-top:10px;}
-    .error{padding:10px;background:#fff3f3;border:1px solid #f1b4b4;color:#8b1d1d;border-radius:8px;margin-top:10px;}
-    .small-muted { font-size:12px;color:var(--muted);margin-top:6px; }
-    @media (max-width:720px){
-      .likert label{width:48px;height:48px;}
-      .likert label img{width:36px;height:36px;}
-      input[type="text"]{width:100%;}
-    }
-  </style>
+<style>
+:root{
+  --accent:#F55400;
+  --bg:#f6f8fb;
+  --card:#ffffff;
+  --text:#122033;
+  --muted:#6b7380;
+}
+/* Base */
+body{font-family:Inter, system-ui, Arial, sans-serif;background:var(--bg);color:var(--text);margin:0;padding:16px 12px;}
+.container{max-width:980px;margin:12px auto;padding:12px;}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.logo{height:48px;flex:0 0 auto;}
+.title{font-size:18px;font-weight:700;color:var(--text);}
+.subtitle{color:var(--muted);font-size:13px;margin-top:2px;}
+.card{background:var(--card);border-radius:12px;padding:14px;margin:12px 0;box-shadow:0 6px 18px rgba(16,24,40,0.06);}
+.section-title{font-weight:700;color:var(--accent);margin-bottom:10px;font-size:15px;}
+.question{display:flex;align-items:center;justify-content:space-between;padding:10px 6px;border-bottom:1px solid #eef2f6;}
+.question:last-child{border-bottom:0;}
+.q-text{flex:1;margin-right:12px;font-size:14px;}
+.likert{display:flex;gap:10px;align-items:center;justify-content:flex-end;}
+.likert input{position:absolute;opacity:0;width:1px;height:1px;margin:-1px;border:0;clip:rect(0 0 0 0);overflow:hidden;}
+.likert label{display:inline-flex;align-items:center;justify-content:center;min-width:56px;min-height:56px;border-radius:10px;cursor:pointer;border:2px solid transparent;transition:transform .12s, box-shadow .12s, border-color .12s;padding:6px;background:transparent;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,0,0,0);}
+.likert label img{width:44px;height:44px;display:block;pointer-events:none;}
+/* selection */
+.likert input:checked + label{transform:translateY(-4px);box-shadow:0 12px 28px rgba(15,23,42,0.28);border-color:rgba(0,0,0,0.45);}
+/* focus (keyboard and touch) */
+.likert label:focus{outline:none;}
+.likert label:focus-visible{outline:3px solid rgba(245,84,0,0.18);border-color:var(--accent);border-radius:10px;}
+
+/* Controls & inputs */
+.controls{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:14px;}
+.btn{background:var(--accent);color:#fff;border:0;padding:12px 14px;border-radius:10px;cursor:pointer;font-weight:700;}
+.btn.secondary{background:#e8eef6;color:var(--text);}
+/* Inputs */
+.field{margin-bottom:10px;}
+label.small{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
+input[type="text"]{padding:10px;border-radius:8px;border:1px solid #dde6f0;width:260px;font-size:15px;}
+textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #dde6f0;min-height:90px;font-size:14px;}
+.nps{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.legal{font-size:12px;color:var(--muted);margin-top:10px;}
+.success{padding:10px;background:#e6fbef;border:1px solid #b8f0c8;color:#056a2d;border-radius:8px;margin-top:10px;}
+.error{padding:10px;background:#fff3f3;border:1px solid #f1b4b4;color:#8b1d1d;border-radius:8px;margin-top:10px;}
+.small-muted { font-size:12px;color:var(--muted);margin-top:6px; }
+
+/* Mobile specific improvements */
+@media (max-width:720px){
+  body{padding:10px;}
+  .container{padding:10px;}
+  .header{gap:10px;}
+  .logo{height:44px;}
+  .title{font-size:16px;}
+  .q-text{font-size:15px;}
+  .likert{gap:8px;}
+  .likert label{min-width:64px;min-height:64px;border-radius:12px;padding:8px;}
+  .likert label img{width:48px;height:48px;}
+  .controls{flex-direction:column-reverse;align-items:stretch;}
+  .btn{width:100%;padding:12px;border-radius:10px;}
+  input[type="text"]{width:100%;font-size:16px;}
+  .card{padding:12px;border-radius:12px;}
+  .section-title{font-size:16px;}
+}
+
+/* Small phones */
+@media (max-width:420px){
+  .likert label{min-width:68px;min-height:68px;}
+  .likert label img{width:52px;height:52px;}
+  .title{font-size:15px;}
+  .subtitle{font-size:12px;}
+  input[type="text"]{padding:12px;font-size:16px;}
+  textarea{font-size:15px;}
+}
+
+/* Accessibility: visible focus outline for keyboard users */
+:focus{outline:none;}
+:focus-visible{outline:3px solid rgba(0,0,0,0.08);}
+</style>
 </head>
 <body>
   <div class="container">
@@ -67,24 +101,24 @@
           <input id="trabajador_nombre" type="text" readonly placeholder="Nombre del trabajador" style="flex:1;background:#f3f6fb;border-radius:8px;padding:10px;border:1px solid #e1e6ef;color:#122033;" />
         </div>
         <div id="ident-msg" style="font-size:12px;color:#a00;margin-top:6px;display:none;"></div>
-        <div class="small-muted">Ingresar identificación para validar que la digitaste correctamente. La identificación se usará únicamente para evitar respuestas duplicadas.</div>
+        <div class="small-muted">Ingresar identificación para validar que la digitaste correctamente.</div>
       </div>
 
       <!-- Sección A: Clima laboral y recursos -->
-      <div class="section">
-        <div class="section-title">Clima laboral y recursos</div>
-        <!-- (preguntas 1..6) -->
+      <div class="section card">
+        <div class="section-title">Sección A — Clima laboral y recursos</div>
+
         <div class="question">
           <div class="q-text">1. Hay buen compañerismo entre las personas de mi equipo.</div>
-          <div class="likert" data-name="clima_companeros">
+          <div class="likert">
             <input type="radio" id="clima_companeros_1" name="clima_companeros" value="1">
-            <label for="clima_companeros_1" title="1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totally_enojado.svg" alt="Muy insatisfecho"></label>
+            <label for="clima_companeros_1" title="1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt="Muy en desacuerdo"></label>
 
             <input type="radio" id="clima_companeros_2" name="clima_companeros" value="2">
-            <label for="clima_companeros_2" title="2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt="Insatisfecho"></label>
+            <label for="clima_companeros_2" title="2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt="En desacuerdo"></label>
 
             <input type="radio" id="clima_companeros_3" name="clima_companeros" value="3">
-            <label for="clima_companeros_3" title="3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt="Neutral"></label>
+            <label for="clima_companeros_3" title="3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt="Ni de acuerdo ni en desacuerdo"></label>
 
             <input type="radio" id="clima_companeros_4" name="clima_companeros" value="4">
             <label for="clima_companeros_4" title="4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt="De acuerdo"></label>
@@ -94,15 +128,12 @@
           </div>
         </div>
 
-        <!-- Resto de preguntas (2..6) iguales estructura - ya presentes en tu archivo original -->
-        <!-- ... (mantengo el contenido del archivo original para las preguntas 2..28) ... -->
-
         <div class="question">
           <div class="q-text">2. Me siento respetado por mis compañeros.</div>
           <div class="likert">
-            <input type="radio" id="clima_respetado_1" name="clima_respetado" value="1"><label for="clima_respetado_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totally_enojado.svg" alt=""></label>
+            <input type="radio" id="clima_respetado_1" name="clima_respetado" value="1"><label for="clima_respetado_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
             <input type="radio" id="clima_respetado_2" name="clima_respetado" value="2"><label for="clima_respetado_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
-            <input type="radio" id="clima_respetado_3" name="clima_respetado" value="3"><label for="clima_respetado_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20de%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="clima_respetado_3" name="clima_respetado" value="3"><label for="clima_respetado_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
             <input type="radio" id="clima_respetado_4" name="clima_respetado" value="4"><label for="clima_respetado_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
             <input type="radio" id="clima_respetado_5" name="clima_respetado" value="5"><label for="clima_respetado_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
           </div>
@@ -111,7 +142,7 @@
         <div class="question">
           <div class="q-text">3. Me siento seguro en mi entorno de trabajo.</div>
           <div class="likert">
-            <input type="radio" id="clima_seguro_1" name="clima_seguro" value="1"><label for="clima_seguro_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totally_enojado.svg" alt=""></label>
+            <input type="radio" id="clima_seguro_1" name="clima_seguro" value="1"><label for="clima_seguro_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
             <input type="radio" id="clima_seguro_2" name="clima_seguro" value="2"><label for="clima_seguro_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
             <input type="radio" id="clima_seguro_3" name="clima_seguro" value="3"><label for="clima_seguro_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
             <input type="radio" id="clima_seguro_4" name="clima_seguro" value="4"><label for="clima_seguro_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
@@ -122,7 +153,7 @@
         <div class="question">
           <div class="q-text">4. Existe un ambiente colaborativo y tranquilo.</div>
           <div class="likert">
-            <input type="radio" id="clima_tranquilo_1" name="clima_tranquilo" value="1"><label for="clima_tranquilo_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totally_enojado.svg" alt=""></label>
+            <input type="radio" id="clima_tranquilo_1" name="clima_tranquilo" value="1"><label for="clima_tranquilo_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
             <input type="radio" id="clima_tranquilo_2" name="clima_tranquilo" value="2"><label for="clima_tranquilo_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
             <input type="radio" id="clima_tranquilo_3" name="clima_tranquilo" value="3"><label for="clima_tranquilo_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
             <input type="radio" id="clima_tranquilo_4" name="clima_tranquilo" value="4"><label for="clima_tranquilo_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
@@ -133,7 +164,7 @@
         <div class="question">
           <div class="q-text">5. Cuento con las herramientas y recursos necesarios para realizar mi labor.</div>
           <div class="likert">
-            <input type="radio" id="clima_herramientas_1" name="clima_herramientas" value="1"><label for="clima_herramientas_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totally_enojado.svg" alt=""></label>
+            <input type="radio" id="clima_herramientas_1" name="clima_herramientas" value="1"><label for="clima_herramientas_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
             <input type="radio" id="clima_herramientas_2" name="clima_herramientas" value="2"><label for="clima_herramientas_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
             <input type="radio" id="clima_herramientas_3" name="clima_herramientas" value="3"><label for="clima_herramientas_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
             <input type="radio" id="clima_herramientas_4" name="clima_herramientas" value="4"><label for="clima_herramientas_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
@@ -144,21 +175,247 @@
         <div class="question">
           <div class="q-text">6. Mi carga de trabajo es adecuada.</div>
           <div class="likert">
-            <input type="radio" id="clima_carga_adecuada_1" name="clima_carga_adecuada" value="1"><label for="clima_carga_adecuada_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totally_enojado.svg" alt=""></label>
+            <input type="radio" id="clima_carga_adecuada_1" name="clima_carga_adecuada" value="1"><label for="clima_carga_adecuada_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
             <input type="radio" id="clima_carga_adecuada_2" name="clima_carga_adecuada" value="2"><label for="clima_carga_adecuada_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
-            <input type="radio" id="clima_carga_adecuada_3" name="clima_carga_adecuada" value="3"><label for="clima_carga_adecuada_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20de%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="clima_carga_adecuada_3" name="clima_carga_adecuada" value="3"><label for="clima_carga_adecuada_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
             <input type="radio" id="clima_carga_adecuada_4" name="clima_carga_adecuada" value="4"><label for="clima_carga_adecuada_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
             <input type="radio" id="clima_carga_adecuada_5" name="clima_carga_adecuada" value="5"><label for="clima_carga_adecuada_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
           </div>
         </div>
-
       </div>
 
-      <!-- (El resto de las secciones B..F quedan igual que tu archivo original; por brevedad no las repito aquí, el contenido real debe mantenerse) -->
+      <!-- Sección B: Liderazgo y supervisión -->
+      <div class="section card" style="margin-top:10px;">
+        <div class="section-title">Sección B — Liderazgo y supervisión</div>
+
+        <div class="question">
+          <div class="q-text">7. Mi jefe inmediato me trata con respeto.</div>
+          <div class="likert">
+            <input type="radio" id="jefe_respeta_1" name="jefe_respeta" value="1"><label for="jefe_respeta_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_respeta_2" name="jefe_respeta" value="2"><label for="jefe_respeta_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_respeta_3" name="jefe_respeta" value="3"><label for="jefe_respeta_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_respeta_4" name="jefe_respeta" value="4"><label for="jefe_respeta_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_respeta_5" name="jefe_respeta" value="5"><label for="jefe_respeta_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="q-text">8. Mi jefe reconoce y valora mi trabajo.</div>
+          <div class="likert">
+            <input type="radio" id="jefe_reconoce_1" name="jefe_reconoce" value="1"><label for="jefe_reconoce_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_reconoce_2" name="jefe_reconoce" value="2"><label for="jefe_reconoce_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_reconoce_3" name="jefe_reconoce" value="3"><label for="jefe_reconoce_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_reconoce_4" name="jefe_reconoce" value="4"><label for="jefe_reconoce_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_reconoce_5" name="jefe_reconoce" value="5"><label for="jefe_reconoce_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="q-text">9. Mi jefe escucha mis opiniones y sugerencias.</div>
+          <div class="likert">
+            <input type="radio" id="jefe_escucha_1" name="jefe_escucha" value="1"><label for="jefe_escucha_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_escucha_2" name="jefe_escucha" value="2"><label for="jefe_escucha_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_escucha_3" name="jefe_escucha" value="3"><label for="jefe_escucha_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_escucha_4" name="jefe_escucha" value="4"><label for="jefe_escucha_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_escucha_5" name="jefe_escucha" value="5"><label for="jefe_escucha_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="q-text">10. Recibo apoyo y orientación cuando tengo dificultades.</div>
+          <div class="likert">
+            <input type="radio" id="jefe_apoyo_1" name="jefe_apoyo" value="1"><label for="jefe_apoyo_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_apoyo_2" name="jefe_apoyo" value="2"><label for="jefe_apoyo_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_apoyo_3" name="jefe_apoyo" value="3"><label for="jefe_apoyo_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_apoyo_4" name="jefe_apoyo" value="4"><label for="jefe_apoyo_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_apoyo_5" name="jefe_apoyo" value="5"><label for="jefe_apoyo_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="q-text">11. Mi jefe da ejemplo con su comportamiento y compromiso.</div>
+          <div class="likert">
+            <input type="radio" id="jefe_ejemplo_1" name="jefe_ejemplo" value="1"><label for="jefe_ejemplo_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_ejemplo_2" name="jefe_ejemplo" value="2"><label for="jefe_ejemplo_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_ejemplo_3" name="jefe_ejemplo" value="3"><label for="jefe_ejemplo_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_ejemplo_4" name="jefe_ejemplo" value="4"><label for="jefe_ejemplo_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_ejemplo_5" name="jefe_ejemplo" value="5"><label for="jefe_ejemplo_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="q-text">12. Mi jefe establece objetivos claros y realistas.</div>
+          <div class="likert">
+            <input type="radio" id="jefe_objetivos_1" name="jefe_objetivos" value="1"><label for="jefe_objetivos_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_objetivos_2" name="jefe_objetivos" value="2"><label for="jefe_objetivos_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_objetivos_3" name="jefe_objetivos" value="3"><label for="jefe_objetivos_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_objetivos_4" name="jefe_objetivos" value="4"><label for="jefe_objetivos_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="jefe_objetivos_5" name="jefe_objetivos" value="5"><label for="jefe_objetivos_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección C: Comunicación y feedback -->
+      <div class="card" style="margin-top:10px;">
+        <div class="section-title">Sección C — Comunicación y feedback</div>
+
+        <div class="question">
+          <div class="q-text">13. Me informan oportunamente sobre cambios que afectan mi trabajo.</div>
+          <div class="likert">
+            <input type="radio" id="comunicacion_oportuna_1" name="comunicacion_oportuna" value="1"><label for="comunicacion_oportuna_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_oportuna_2" name="comunicacion_oportuna" value="2"><label for="comunicacion_oportuna_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_oportuna_3" name="comunicacion_oportuna" value="3"><label for="comunicacion_oportuna_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_oportuna_4" name="comunicacion_oportuna" value="4"><label for="comunicacion_oportuna_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_oportuna_5" name="comunicacion_oportuna" value="5"><label for="comunicacion_oportuna_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="q-text">14. Hay buena comunicación acerca de los turnos/cuadrillas.</div>
+          <div class="likert">
+            <input type="radio" id="comunicacion_turnos_1" name="comunicacion_turnos" value="1"><label for="comunicacion_turnos_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_turnos_2" name="comunicacion_turnos" value="2"><label for="comunicacion_turnos_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_turnos_3" name="comunicacion_turnos" value="3"><label for="comunicacion_turnos_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_turnos_4" name="comunicacion_turnos" value="4"><label for="comunicacion_turnos_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_turnos_5" name="comunicacion_turnos" value="5"><label for="comunicacion_turnos_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="q-text">15. Puedo expresar mis ideas sin temor.</div>
+          <div class="likert">
+            <input type="radio" id="comunicacion_ideas_1" name="comunicacion_ideas" value="1"><label for="comunicacion_ideas_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_ideas_2" name="comunicacion_ideas" value="2"><label for="comunicacion_ideas_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_ideas_3" name="comunicacion_ideas" value="3"><label for="comunicacion_ideas_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_ideas_4" name="comunicacion_ideas" value="4"><label for="comunicacion_ideas_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_ideas_5" name="comunicacion_ideas" value="5"><label for="comunicacion_ideas_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="q-text">16. Las instrucciones y procedimientos son claros y comprensibles.</div>
+          <div class="likert">
+            <input type="radio" id="comunicacion_instrucciones_1" name="comunicacion_instrucciones" value="1"><label for="comunicacion_instrucciones_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_instrucciones_2" name="comunicacion_instrucciones" value="2"><label for="comunicacion_instrucciones_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_instrucciones_3" name="comunicacion_instrucciones" value="3"><label for="comunicacion_instrucciones_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_instrucciones_4" name="comunicacion_instrucciones" value="4"><label for="comunicacion_instrucciones_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_instrucciones_5" name="comunicacion_instrucciones" value="5"><label for="comunicacion_instrucciones_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="q-text">17. Los canales de comunicación (reuniones - avisos) son efectivos.</div>
+          <div class="likert">
+            <input type="radio" id="comunicacion_canales_1" name="comunicacion_canales" value="1"><label for="comunicacion_canales_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_canales_2" name="comunicacion_canales" value="2"><label for="comunicacion_canales_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_canales_3" name="comunicacion_canales" value="3"><label for="comunicacion_canales_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_canales_4" name="comunicacion_canales" value="4"><label for="comunicacion_canales_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="comunicacion_canales_5" name="comunicacion_canales" value="5"><label for="comunicacion_canales_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección D: Motivación, pertenencia y desarrollo -->
+      <div class="card" style="margin-top:10px;">
+        <div class="section-title">Sección D — Motivación, pertenencia y desarrollo</div>
+
+        <div class="question">
+          <div class="q-text">18. Me siento motivado para venir a trabajar.</div>
+          <div class="likert">
+            <input type="radio" id="motivacion_trabajar_diario_1" name="motivacion_trabajar_diario" value="1"><label for="motivacion_trabajar_diario_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_trabajar_diario_2" name="motivacion_trabajar_diario" value="2"><label for="motivacion_trabajar_diario_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_trabajar_diario_3" name="motivacion_trabajar_diario" value="3"><label for="motivacion_trabajar_diario_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_trabajar_diario_4" name="motivacion_trabajar_diario" value="4"><label for="motivacion_trabajar_diario_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_trabajar_diario_5" name="motivacion_trabajar_diario" value="5"><label for="motivacion_trabajar_diario_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="q-text">19. Log&Ser se preocupa por el bienestar de sus empleados.</div>
+          <div class="likert">
+            <input type="radio" id="motivacion_logyser_1" name="motivacion_logyser" value="1"><label for="motivacion_logyser_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_logyser_2" name="motivacion_logyser" value="2"><label for="motivacion_logyser_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_logyser_3" name="motivacion_logyser" value="3"><label for="motivacion_logyser_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_logyser_4" name="motivacion_logyser" value="4"><label for="motivacion_logyser_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_logyser_5" name="motivacion_logyser" value="5"><label for="motivacion_logyser_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="q-text">20. Siento orgullo de pertenecer a Log&Ser.</div>
+          <div class="likert">
+            <input type="radio" id="motivacion_orgullo_1" name="motivacion_orgullo" value="1"><label for="motivacion_orgullo_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_orgullo_2" name="motivacion_orgullo" value="2"><label for="motivacion_orgullo_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_orgullo_3" name="motivacion_orgullo" value="3"><label for="motivacion_orgullo_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_orgullo_4" name="motivacion_orgullo" value="4"><label for="motivacion_orgullo_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_orgullo_5" name="motivacion_orgullo" value="5"><label for="motivacion_orgullo_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="q-text">21. Me gustaría continuar trabajando en la empresa a largo plazo.</div>
+          <div class="likert">
+            <input type="radio" id="motivacion_continuar_1" name="motivacion_continuar" value="1"><label for="motivacion_continuar_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_continuar_2" name="motivacion_continuar" value="2"><label for="motivacion_continuar_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_continuar_3" name="motivacion_continuar" value="3"><label for="motivacion_continuar_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_continuar_4" name="motivacion_continuar" value="4"><label for="motivacion_continuar_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_continuar_5" name="motivacion_continuar" value="5"><label for="motivacion_continuar_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="q-text">22. Tengo oportunidades de formación y desarrollo.</div>
+          <div class="likert">
+            <input type="radio" id="motivacion_formacion_1" name="motivacion_formacion" value="1"><label for="motivacion_formacion_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_formacion_2" name="motivacion_formacion" value="2"><label for="motivacion_formacion_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_formacion_3" name="motivacion_formacion" value="3"><label for="motivacion_formacion_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_formacion_4" name="motivacion_formacion" value="4"><label for="motivacion_formacion_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="motivacion_formacion_5" name="motivacion_formacion" value="5"><label for="motivacion_formacion_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección E: Compensación y beneficios -->
+      <div class="card" style="margin-top:10px;">
+        <div class="section-title">Sección E — Compensación y beneficios</div>
+
+        <div class="question">
+          <div class="q-text">23. Mi salario es justo para las funciones que realizo.</div>
+          <div class="likert">
+            <input type="radio" id="compensacion_justa_1" name="compensacion_justa" value="1"><label for="compensacion_justa_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="compensacion_justa_2" name="compensacion_justa" value="2"><label for="compensacion_justa_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="compensacion_justa_3" name="compensacion_justa" value="3"><label for="compensacion_justa_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="compensacion_justa_4" name="compensacion_justa" value="4"><label for="compensacion_justa_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="compensacion_justa_5" name="compensacion_justa" value="5"><label for="compensacion_justa_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="q-text">24. Recibo pagos y beneficios a tiempo.</div>
+          <div class="likert">
+            <input type="radio" id="compensacion_puntual_1" name="compensacion_puntual" value="1"><label for="compensacion_puntual_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="compensacion_puntual_2" name="compensacion_puntual" value="2"><label for="compensacion_puntual_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="compensacion_puntual_3" name="compensacion_puntual" value="3"><label for="compensacion_puntual_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="compensacion_puntual_4" name="compensacion_puntual" value="4"><label for="compensacion_puntual_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="compensacion_puntual_5" name="compensacion_puntual" value="5"><label for="compensacion_puntual_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <div class="q-text">25. El reconocimiento por mi desempeño (no solo económico) es suficiente.</div>
+          <div class="likert">
+            <input type="radio" id="compensacion_reconocimiento_1" name="compensacion_reconocimiento" value="1"><label for="compensacion_reconocimiento_1"><img src="https://storage.googleapis.com/encuesta_satisfaccion/totalmente%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="compensacion_reconocimiento_2" name="compensacion_reconocimiento" value="2"><label for="compensacion_reconocimiento_2"><img src="https://storage.googleapis.com/encuesta_satisfaccion/desacuerdo.svg" alt=""></label>
+            <input type="radio" id="compensacion_reconocimiento_3" name="compensacion_reconocimiento" value="3"><label for="compensacion_reconocimiento_3"><img src="https://storage.googleapis.com/encuesta_satisfaccion/ni%20de%20acuerdo%20ni%20desacuerdo.svg" alt=""></label>
+            <input type="radio" id="compensacion_reconocimiento_4" name="compensacion_reconocimiento" value="4"><label for="compensacion_reconocimiento_4"><img src="https://storage.googleapis.com/encuesta_satisfaccion/De%20acuerdo.svg" alt=""></label>
+            <input type="radio" id="compensacion_reconocimiento_5" name="compensacion_reconocimiento" value="5"><label for="compensacion_reconocimiento_5"><img src="https://storage.googleapis.com/encuesta_satisfaccion/Totalmente%20Deacuerdo.svg" alt=""></label>
+          </div>
+        </div>
+      </div>
 
       <!-- Sección F: Comentarios y recomendación (NPS) -->
       <div class="card" style="margin-top:10px;">
-        <div class="section-title">Comentarios y recomendación</div>
+        <div class="section-title">Sección F — Comentarios y recomendación</div>
 
         <div class="field">
           <label class="small">26. En una escala de 0 a 10, ¿qué probabilidad hay de que recomiende a un familiar o amigo trabajar en Log&Ser?</label>
@@ -191,186 +448,223 @@
 
 <script>
 /*
-  Cambios principales:
-  - API_BASE: apunta al backend que corre en localhost:3000.
-  - lookup: obtiene nombre del trabajador desde `${API_BASE}/api/encuestas/lookup`.
-  - pre-check: tes de enviar, consulta `${API_BASE}/api/encuestas/check?identificacion=...` para evitar duplicados.
-  - submit: POST a `${API_BASE}/api/encuestas/submit`.
-  Nota: necesita que el backend implemente las rutas /api/encuestas/lookup y /api/encuestas/check.
+  Frontend del formulario:
+  - API_BASE apunta al backend local (cambia si el backend corre en otro host/puerto).
+  - Requiere los endpoints:
+      GET  /api/encuestas/lookup?identificacion=...
+      GET  /api/encuestas/check?identificacion=...
+      POST /api/encuestas/submit
 */
 const API_BASE = 'http://localhost:3000';
 
-  // Debounce helper
-  function debounce(fn, wait) {
-    let t;
-    return (...args) => {
-      clearTimeout(t);
-      t = setTimeout(() => fn(...args), wait);
-    };
-  }
+// Debounce helper
+function debounce(fn, wait) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), wait);
+  };
+}
 
-  async function fetchTrabajador(identificacion) {
-    const msgEl = document.getElementById('ident-msg');
-    const nombreEl = document.getElementById('trabajador_nombre');
-    if (!identificacion) {
+async function fetchTrabajador(identificacion) {
+  const msgEl = document.getElementById('ident-msg');
+  const nombreEl = document.getElementById('trabajador_nombre');
+  if (!identificacion) {
+    nombreEl.value = '';
+    msgEl.style.display = 'none';
+    return;
+  }
+  try {
+    const url = `${API_BASE}/api/encuestas/lookup?identificacion=${encodeURIComponent(identificacion)}`;
+    const res = await fetch(url, { method: 'GET' });
+    if (!res.ok) {
       nombreEl.value = '';
-      msgEl.style.display = 'none';
+      msgEl.textContent = 'Error al verificar identificación';
+      msgEl.style.color = '#a00';
+      msgEl.style.display = 'block';
       return;
     }
-    try {
-      const url = `${API_BASE}/api/encuestas/lookup?identificacion=${encodeURIComponent(identificacion)}`;
-      const res = await fetch(url, { method: 'GET' });
-      if (!res.ok) {
-        nombreEl.value = '';
-        msgEl.textContent = 'Error al verificar identificación';
-        msgEl.style.color = '#a00';
-        msgEl.style.display = 'block';
-        return;
-      }
-      const j = await res.json();
-      if (j && j.trabajador) {
-        nombreEl.value = j.trabajador;
-        msgEl.style.display = 'none';
-      } else {
-        nombreEl.value = '';
-        msgEl.textContent = 'No se encontró trabajador para esa identificación';
-        msgEl.style.color = '#a00';
-        msgEl.style.display = 'block';
-      }
-    } catch (err) {
+    const j = await res.json();
+    if (j && j.trabajador) {
+      nombreEl.value = j.trabajador;
+      msgEl.style.display = 'none';
+    } else {
       nombreEl.value = '';
-      msgEl.textContent = 'Error de conexión';
+      msgEl.textContent = 'No se encontró trabajador para esa identificación';
       msgEl.style.color = '#a00';
       msgEl.style.display = 'block';
     }
+  } catch (err) {
+    nombreEl.value = '';
+    msgEl.textContent = 'Error de conexión';
+    msgEl.style.color = '#a00';
+    msgEl.style.display = 'block';
+  }
+}
+
+// Llamada con debounce (500ms)
+const debouncedFetch = debounce((e) => {
+  const id = (e.target.value || '').trim();
+  fetchTrabajador(id);
+}, 500);
+
+// Conecta al input
+const identInput = document.getElementById('identificacion');
+if (identInput) {
+  identInput.addEventListener('input', debouncedFetch);
+  identInput.addEventListener('blur', (e) => fetchTrabajador((e.target.value || '').trim()));
+}
+
+// Helpers
+function setMsg(html, type='success'){ const el=document.getElementById('msg'); el.innerHTML = `<div class="${type==='success'?'success':'error'}">${html}</div>`; }
+
+// Reset
+document.getElementById('btnReset').addEventListener('click', () => {
+  document.querySelectorAll('input[type="radio"]').forEach(i=>i.checked=false);
+  document.getElementById('logyser_gusto').value='';
+  document.getElementById('logyser_mejorar').value='';
+  document.getElementById('trabajador_nombre').value='';
+  setMsg('');
+});
+
+// Pre-check if identification already responded this month
+async function puedeResponder(identificacion){
+  try {
+    const url = `${API_BASE}/api/encuestas/check?identificacion=${encodeURIComponent(identificacion)}`;
+    const r = await fetch(url);
+    if (!r.ok) {
+      return { ok:false };
+    }
+    const j = await r.json();
+    return { ok:true, exists: !!j.exists, message: j.message || null };
+  } catch(err){
+    return { ok:false, error: err.message };
+  }
+}
+
+// Submit
+document.getElementById('btnSubmit').addEventListener('click', async () => {
+  const identificacion = (document.getElementById('identificacion').value || '').trim();
+  if (!identificacion) { setMsg('Por favor ingresa tu identificación.','error'); return; }
+
+  // verificar antes si ya respondió este mes
+  setMsg('Verificando si ya respondió este mes...');
+  const check = await puedeResponder(identificacion);
+  if (check.ok && check.exists) {
+    setMsg('Ya existe una respuesta registrada este mes para esa identificación.','error');
+    return;
+  }
+  if (!check.ok) {
+    const continuar = confirm('No se pudo comprobar si ya respondiste. ¿Deseas intentar enviar de todas formas?');
+    if (!continuar) { setMsg('Envió cancelado.','error'); return; }
   }
 
-  // Llamada con debounce (500ms)
-  const debouncedFetch = debounce((e) => {
-    const id = (e.target.value || '').trim();
-    fetchTrabajador(id);
-  }, 500);
+  // Armar payload con todos los campos esperados por la BD
+  const payload = {
+    identificacion,
+    clima_companeros: getVal('clima_companeros'),
+    clima_respetado: getVal('clima_respetado'),
+    clima_seguro: getVal('clima_seguro'),
+    clima_tranquilo: getVal('clima_tranquilo'),
+    clima_herramientas: getVal('clima_herramientas'),
+    clima_carga_adecuada: getVal('clima_carga_adecuada'),
+    jefe_respeta: getVal('jefe_respeta'),
+    jefe_reconoce: getVal('jefe_reconoce'),
+    jefe_escucha: getVal('jefe_escucha'),
+    jefe_apoyo: getVal('jefe_apoyo'),
+    jefe_ejemplo: getVal('jefe_ejemplo'),
+    jefe_objetivos: getVal('jefe_objetivos'),
+    comunicacion_oportuna: getVal('comunicacion_oportuna'),
+    comunicacion_turnos: getVal('comunicacion_turnos'),
+    comunicacion_ideas: getVal('comunicacion_ideas'),
+    comunicacion_instrucciones: getVal('comunicacion_instrucciones'),
+    comunicacion_canales: getVal('comunicacion_canales'),
+    motivacion_trabajar_diario: getVal('motivacion_trabajar_diario'),
+    motivacion_logyser: getVal('motivacion_logyser'),
+    motivacion_orgullo: getVal('motivacion_orgullo'),
+    motivacion_continuar: getVal('motivacion_continuar'),
+    motivacion_formacion: getVal('motivacion_formacion'),
+    compensacion_justa: getVal('compensacion_justa'),
+    compensacion_puntual: getVal('compensacion_puntual'),
+    compensacion_reconocimiento: getVal('compensacion_reconocimiento'),
+    logyser_recomendar: Number(document.getElementById('logyser_recomendar').value || 0),
+    logyser_gusto: document.getElementById('logyser_gusto').value || null,
+    logyser_mejorar: document.getElementById('logyser_mejorar').value || null
+  };
 
-  // Conecta al input
-  const identInput = document.getElementById('identificacion');
-  if (identInput) {
-    identInput.addEventListener('input', debouncedFetch);
-    // también buscar al perder foco (por si pegan texto)
-    identInput.addEventListener('blur', (e) => fetchTrabajador((e.target.value || '').trim()));
-  }
-
-  // Helpers
-  const bucketBase = 'https://storage.googleapis.com/encuesta_satisfaccion/';
-  function setMsg(html, type='success'){ const el=document.getElementById('msg'); el.innerHTML = `<div class="${type==='success'?'success':'error'}">${html}</div>`; }
-
-  // Reset
-  document.getElementById('btnReset').addEventListener('click', () => {
-    document.querySelectorAll('input[type="radio"]').forEach(i=>i.checked=false);
-    document.getElementById('logyser_gusto').value='';
-    document.getElementById('logyser_mejorar').value='';
-    document.getElementById('trabajador_nombre').value='';
-    setMsg('');
-  });
-
-  // Pre-check if identification already responded this month
-  async function puedeResponder(identificacion){
-    try {
-      const url = `${API_BASE}/api/encuestas/check?identificacion=${encodeURIComponent(identificacion)}`;
-      const r = await fetch(url);
-      if (!r.ok) {
-        // si el backend retorna error, asumimos que NO podemos confirmar, devolvemos ok:false
-        return { ok:false };
-      }
-      const j = await r.json();
-      return { ok:true, exists: !!j.exists, message: j.message || null };
-    } catch(err){
-      return { ok:false, error: err.message };
-    }
-  }
-
-  // Submit
-  document.getElementById('btnSubmit').addEventListener('click', async () => {
-    const identificacion = (document.getElementById('identificacion').value || '').trim();
-    if (!identificacion) { setMsg('Por favor ingresa tu identificación.','error'); return; }
-
-    // verificar antes si ya respondió este mes
-    setMsg('Verificando si ya respondió este mes...');
-    const check = await puedeResponder(identificacion);
-    if (check.ok && check.exists) {
-      setMsg('Ya existe una respuesta registrada este mes para esa identificación.','error');
-      return;
-    }
-    if (!check.ok) {
-      // Si no pudimos confirmar (error del servicio), avisar al usuario y preguntar si desea continuar
-      const continuar = confirm('No se pudo comprobar si ya respondiste. ¿Deseas intentar enviar de todas formas?');
-      if (!continuar) { setMsg('Envió cancelado.','error'); return; }
-    }
-
-    // Armar payload con todos los campos esperados por la BD
-    const payload = {
-      identificacion,
-      // preguntas likert: si no se responde, enviamos null
-      clima_companeros: getVal('clima_companeros'),
-      clima_respetado: getVal('clima_respetado'),
-      clima_seguro: getVal('clima_seguro'),
-      clima_tranquilo: getVal('clima_tranquilo'),
-      clima_herramientas: getVal('clima_herramientas'),
-      clima_carga_adecuada: getVal('clima_carga_adecuada'),
-      jefe_respeta: getVal('jefe_respeta'),
-      jefe_reconoce: getVal('jefe_reconoce'),
-      jefe_escucha: getVal('jefe_escucha'),
-      jefe_apoyo: getVal('jefe_apoyo'),
-      jefe_ejemplo: getVal('jefe_ejemplo'),
-      jefe_objetivos: getVal('jefe_objetivos'),
-      comunicacion_oportuna: getVal('comunicacion_oportuna'),
-      comunicacion_turnos: getVal('comunicacion_turnos'),
-      comunicacion_ideas: getVal('comunicacion_ideas'),
-      comunicacion_instrucciones: getVal('comunicacion_instrucciones'),
-      comunicacion_canales: getVal('comunicacion_canales'),
-      motivacion_trabajar_diario: getVal('motivacion_trabajar_diario'),
-      motivacion_logyser: getVal('motivacion_logyser'),
-      motivacion_orgullo: getVal('motivacion_orgullo'),
-      motivacion_continuar: getVal('motivacion_continuar'),
-      motivacion_formacion: getVal('motivacion_formacion'),
-      compensacion_justa: getVal('compensacion_justa'),
-      compensacion_puntual: getVal('compensacion_puntual'),
-      compensacion_reconocimiento: getVal('compensacion_reconocimiento'),
-      logyser_recomendar: Number(document.getElementById('logyser_recomendar').value || 0),
-      logyser_gusto: document.getElementById('logyser_gusto').value || null,
-      logyser_mejorar: document.getElementById('logyser_mejorar').value || null
-    };
-
-    // Enviar al backend usando API_BASE
-    try {
-      setMsg('Enviando encuesta, por favor espera...');
+  // Enviar al backend usando API_BASE
+  try {
+    setMsg('Enviando encuesta, por favor espera...');
+    document.getElementById('btnSubmit').disabled = true;
+    const resp = await fetch(`${API_BASE}/api/encuestas/submit`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const j = await resp.json().catch(()=>({}));
+    if (resp.ok) {
+      setMsg('Gracias — tu respuesta fue registrada correctamente.');
       document.getElementById('btnSubmit').disabled = true;
-      const resp = await fetch(`${API_BASE}/api/encuestas/submit`, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify(payload)
-      });
-      const j = await resp.json().catch(()=>({}));
-      if (resp.ok) {
-        setMsg('Gracias — tu respuesta fue registrada correctamente.');
-        // opcional: desactivar botón para evitar reenvíos
-        document.getElementById('btnSubmit').disabled = true;
-      } else if (resp.status === 409) {
-        setMsg(j.error || 'Ya existe una respuesta este mes para esa identificación.','error');
-        document.getElementById('btnSubmit').disabled = false;
-      } else {
-        setMsg(j.error || 'Ocurrió un error al enviar la encuesta','error');
-        document.getElementById('btnSubmit').disabled = false;
-      }
-    } catch (err) {
-      setMsg('Error de conexión: ' + err.message,'error');
+    } else if (resp.status === 409) {
+      setMsg(j.error || 'Ya existe una respuesta este mes para esa identificación.','error');
+      document.getElementById('btnSubmit').disabled = false;
+    } else {
+      setMsg(j.error || 'Ocurrió un error al enviar la encuesta','error');
       document.getElementById('btnSubmit').disabled = false;
     }
-  });
-
-  function getVal(name){
-    const el = document.querySelector(`input[name="${name}"]:checked`);
-    return el ? Number(el.value) : null;
+  } catch (err) {
+    setMsg('Error de conexión: ' + err.message,'error');
+    document.getElementById('btnSubmit').disabled = false;
   }
+});
+
+function getVal(name){
+  const el = document.querySelector(`input[name="${name}"]:checked`);
+  return el ? Number(el.value) : null;
+}
+(function enhanceLikertAccessibility(){
+  document.querySelectorAll('.likert').forEach((grp, gi) => {
+    grp.setAttribute('role','radiogroup');
+    // attempt to label group using nearby question text
+    const q = grp.closest('.question')?.querySelector('.q-text');
+    if (q) grp.setAttribute('aria-label', q.textContent.trim());
+
+    const radios = Array.from(grp.querySelectorAll('input[type="radio"]'));
+    radios.forEach((r, i) => {
+      const lbl = grp.querySelector(`label[for="${r.id}"]`);
+      if (!lbl) return;
+      lbl.setAttribute('role','radio');
+      lbl.setAttribute('tabindex', r.checked ? '0' : '-1');
+      lbl.setAttribute('aria-checked', r.checked ? 'true' : 'false');
+      // ensure clicking label checks radio (already default), add keyboard focus
+      lbl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); r.click(); lbl.focus(); }
+      });
+      // sync aria when radio changes
+      r.addEventListener('change', () => {
+        grp.querySelectorAll('label[role="radio"]').forEach(l => { l.setAttribute('aria-checked','false'); l.setAttribute('tabindex','-1'); });
+        lbl.setAttribute('aria-checked','true');
+        lbl.setAttribute('tabindex','0');
+      });
+    });
+
+    // keyboard navigation inside the group (arrows)
+    grp.addEventListener('keydown', (e) => {
+      const keys = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
+      if (!keys.includes(e.key)) return;
+      e.preventDefault();
+      const checkedIndex = radios.findIndex(r => r.checked);
+      let next = checkedIndex;
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = Math.max(0, checkedIndex - 1);
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = Math.min(radios.length - 1, (checkedIndex === -1 ? 0 : checkedIndex + 1));
+      if (next !== checkedIndex && radios[next]) {
+        radios[next].click();
+        const nextLabel = grp.querySelector(`label[for="${radios[next].id}"]`);
+        if (nextLabel) nextLabel.focus();
+      }
+    });
+  });
+})();
 </script>
 </body>
 </html>
