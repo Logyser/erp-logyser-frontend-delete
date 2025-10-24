@@ -58,9 +58,14 @@
 
     <div class="card">
       <div class="field">
-        <label class="small">Identificación (solo número)</label>
-        <input id="identificacion" type="text" inputmode="numeric" placeholder="Ej: 12345678" />
-      </div>
+  <label class="small">Identificación (solo número)</label>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <input id="identificacion" type="text" inputmode="numeric" placeholder="Ej: 12345678" style="flex:0 0 260px;" />
+    <!-- Nombre del trabajador (autocompletado, solo visual) -->
+    <input id="trabajador_nombre" type="text" readonly placeholder="Nombre del trabajador" style="flex:1;background:#f3f6fb;border-radius:8px;padding:10px;border:1px solid #e1e6ef;color:#122033;" />
+  </div>
+  <div id="ident-msg" style="font-size:12px;color:#a00;margin-top:6px;display:none;"></div>
+</div>
 
       <!-- Sección A: Clima laboral y recursos -->
       <div class="section">
@@ -418,6 +423,69 @@
   </div>
 
 <script>
+
+  // Debounce helper
+  function debounce(fn, wait) {
+    let t;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn(...args), wait);
+    };
+  }
+
+  async function fetchTrabajador(identificacion) {
+    const msgEl = document.getElementById('ident-msg');
+    const nombreEl = document.getElementById('trabajador_nombre');
+    if (!identificacion) {
+      nombreEl.value = '';
+      msgEl.style.display = 'none';
+      return;
+    }
+    try {
+      // Si tu frontend se sirve en distinto puerto/origen usa la URL completa:
+      // const url = 'http://localhost:3000/api/encuestas/lookup?identificacion=' + encodeURIComponent(identificacion);
+      const url = `/api/encuestas/lookup?identificacion=${encodeURIComponent(identificacion)}`;
+      const res = await fetch(url, { method: 'GET' });
+      if (!res.ok) {
+        // en caso de error, limpiar y mostrar mensaje leve
+        nombreEl.value = '';
+        msgEl.textContent = 'Error al verificar identificación';
+        msgEl.style.color = '#a00';
+        msgEl.style.display = 'block';
+        return;
+      }
+      const j = await res.json();
+      if (j && j.trabajador) {
+        nombreEl.value = j.trabajador;
+        msgEl.style.display = 'none';
+      } else {
+        nombreEl.value = '';
+        msgEl.textContent = 'No se encontró trabajador para esa identificación';
+        msgEl.style.color = '#a00';
+        msgEl.style.display = 'block';
+      }
+    } catch (err) {
+      nombreEl.value = '';
+      msgEl.textContent = 'Error de conexión';
+      msgEl.style.color = '#a00';
+      msgEl.style.display = 'block';
+    }
+  }
+
+  // Llamada con debounce (500ms)
+  const debouncedFetch = debounce((e) => {
+    const id = (e.target.value || '').trim();
+    fetchTrabajador(id);
+  }, 500);
+
+  // Conecta al input
+  const identInput = document.getElementById('identificacion');
+  if (identInput) {
+    identInput.addEventListener('input', debouncedFetch);
+    // también buscar al perder foco (por si pegan texto)
+    identInput.addEventListener('blur', (e) => fetchTrabajador((e.target.value || '').trim()));
+  }
+
   // Helpers
   const bucketBase = 'https://storage.googleapis.com/encuesta_satisfaccion/';
   function setMsg(html, type='success'){ const el=document.getElementById('msg'); el.innerHTML = `<div class="${type==='success'?'success':'error'}">${html}</div>`; }
