@@ -531,6 +531,27 @@
       margin-top: -5px;
       margin-bottom: 8px;
     }
+    .delete-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2200;
+    }
+    .delete-modal-backdrop.visible { display: flex; }
+    .delete-modal-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px;
+      max-width: 420px;
+      width: calc(100% - 40px);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.2);
+    }
+    .delete-modal-card p { margin: 0 0 12px; color: #222; }
+    .delete-modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:8px; }
+    .delete-modal-actions .btn { min-width: 88px; }
   </style>
 </head>
 <body>
@@ -2624,14 +2645,101 @@ async function rellenarFormulario(a) {
 
       if (btnUploadPhoto) btnUploadPhoto.addEventListener("click", uploadPhoto);
 
+      // Reemplazo del listener btnRemovePhoto: uso de modal propio
       if (btnRemovePhoto) {
+        const modalBackdrop = document.getElementById("deletePhotoModalBackdrop");
+        const modalCancel = document.getElementById("deleteModalCancel");
+        const modalConfirm = document.getElementById("deleteModalConfirm");
+
+        // Mostrar modal
         btnRemovePhoto.addEventListener("click", () => {
-          // Si quieres eliminar también en GCS, necesitarás endpoint DELETE — aquí solo eliminamos localmente
-          if (!confirm("¿Eliminar la foto localmente? (si ya existe en el bucket, el archivo no se borrará automáticamente)")) return;
-          clearPhotoLocal();
-          // limpiar input file
-          photoInput.value = "";
+          if (!modalBackdrop) {
+            // fallback a confirm nativo si el modal no existe por alguna razón
+            if (!confirm("¿Está seguro de eliminar esta foto?")) return;
+            clearPhotoLocal();
+            if (photoInput) photoInput.value = "";
+            return;
+          }
+
+          // mostrar modal
+          modalBackdrop.classList.add("visible");
+          modalBackdrop.setAttribute("aria-hidden", "false");
+
+          // foco al boton confirmar para accesibilidad
+          if (modalConfirm) modalConfirm.focus();
         });
+
+        // Cancelar
+        if (modalCancel) {
+          modalCancel.addEventListener("click", () => {
+            if (!modalBackdrop) return;
+            modalBackdrop.classList.remove("visible");
+            modalBackdrop.setAttribute("aria-hidden", "true");
+            // devolver foco al btnRemovePhoto
+            btnRemovePhoto.focus();
+          });
+        }
+
+        // Confirmar eliminación (solo limpia local por ahora)
+        if (modalConfirm) {
+          modalConfirm.addEventListener("click", async () => {
+            try {
+              // ocultar modal inmediatamente
+              if (modalBackdrop) {
+                modalBackdrop.classList.remove("visible");
+                modalBackdrop.setAttribute("aria-hidden", "true");
+              }
+
+              // acción local: limpiar preview y hidden inputs
+              clearPhotoLocal();
+              if (photoInput) photoInput.value = "";
+
+              // OPCIONAL: si quieres que al confirmar se llame al backend para eliminar la referencia / archivo
+              // descomenta y ajusta la ruta /api/hv/delete-photo si la implementas en server.js.
+              /*
+              try {
+                const identificacionVal = (document.getElementById("identificacion")?.value || sessionStorage.getItem("id_ingreso") || "").trim();
+                const gcsPath = document.getElementById("hidden_foto_gcs_path")?.value || "";
+                await fetch("/api/hv/delete-photo", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ identificacion: identificacionVal, foto_gcs_path: gcsPath })
+                });
+              } catch (errDel) {
+                console.warn("Advertencia: no se pudo llamar al endpoint delete-photo:", errDel);
+              }
+              */
+
+              // feedback al usuario opcional
+              // alert("Foto eliminada localmente.");
+            } catch (err) {
+              console.error("Error al confirmar eliminación de foto:", err);
+            } finally {
+              // devolver foco
+              btnRemovePhoto.focus();
+            }
+          });
+        }
+
+        // Cerrar modal con Esc
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && modalBackdrop && modalBackdrop.classList.contains("visible")) {
+            modalBackdrop.classList.remove("visible");
+            modalBackdrop.setAttribute("aria-hidden", "true");
+            btnRemovePhoto.focus();
+          }
+        });
+
+        // Cerrar si se hace click fuera del card
+        if (modalBackdrop) {
+          modalBackdrop.addEventListener("click", (e) => {
+            if (e.target === modalBackdrop) {
+              modalBackdrop.classList.remove("visible");
+              modalBackdrop.setAttribute("aria-hidden", "true");
+              btnRemovePhoto.focus();
+            }
+          });
+        }
       }
 
       // Integración con rellenarFormulario: si aspirante tiene foto_public_url, mostrarla
@@ -3048,5 +3156,18 @@ document.addEventListener("tipos-cargados", prellenarDatosPersonales);
       }, 200);
     });
 </script>
+<!-- Confirm modal para eliminación de foto -->
+<div id="deletePhotoModalBackdrop" class="delete-modal-backdrop" aria-hidden="true" role="dialog" aria-labelledby="deletePhotoTitle" aria-modal="true">
+  <div class="delete-modal-card" role="document">
+    <p id="deletePhotoTitle" style="font-weight:600;">¿Está seguro de eliminar esta foto?</p>
+    <p style="margin-top:4px; color:#666; font-size:0.95rem;">
+      Esta acción eliminará la foto de la vista. Si quieres también eliminarla del servidor debes usar la opción de eliminar del perfil.
+    </p>
+    <div class="delete-modal-actions" style="margin-top:12px;">
+      <button id="deleteModalCancel" class="btn btn-secondary">Cancelar</button>
+      <button id="deleteModalConfirm" class="btn btn-primary">Eliminar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
