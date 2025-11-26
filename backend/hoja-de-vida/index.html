@@ -698,6 +698,10 @@
                 data-required="true"
               />
             </div>
+            <div id="ingreso-summary" class="field-help" style="margin-top:8px; display:none;">
+              Ingreso: <strong id="ingreso-summary-text"></strong>
+              <button type="button" class="btn btn-secondary" id="edit-ingreso" style="margin-left:8px;">Editar</button>
+            </div>
 
             <div class="field">
               <label for="primer_nombre">
@@ -2095,6 +2099,13 @@ async function rellenarFormulario(a) {
         // Guardar valores solo cuando VALIDÓ y va a pasar al paso 1
         sessionStorage.setItem("tipo_ingreso", tipoDocumentoIngreso.value.trim());
         sessionStorage.setItem("id_ingreso", identificacionIngreso.value.trim());
+        // Intentar sincronizar la etiqueta de ingreso en la UI (si la función ya está definida)
+        if (typeof updateIngresoLabel === "function") {
+          try { updateIngresoLabel(); } catch (err) { console.error("updateIngresoLabel error:", err); }
+        } else {
+          // marcar para ejecución posterior si aún no existe
+          window._pendingUpdateIngreso = true;
+        }
       }
 
       if (!validateStep(currentStep)) return;
@@ -2740,34 +2751,115 @@ document.addEventListener("tipos-cargados", prellenarDatosPersonales);
 
 <script>
   // ⭐ Cargar tipos de identificación dinámicos para el Paso 0 ⭐
-async function cargarTiposPaso0() {
-  try {
-    const res = await fetch("/api/config/tipo-identificacion");
-    const tipos = await res.json();
+  async function cargarTiposPaso0() {
+    try {
+      const res = await fetch("/api/config/tipo-identificacion");
+      const tipos = await res.json();
 
-    const select = document.getElementById("tipo_documento_ingreso");
-    select.innerHTML = `<option value="">Selecciona...</option>`;
+      const select = document.getElementById("tipo_documento_ingreso");
+      select.innerHTML = `<option value="">Selecciona...</option>`;
 
-    tipos.forEach(t => {
-      select.innerHTML += `
-        <option value="${t.descripcion}">${t.descripcion}</option>
-      `;
-    });
+      tipos.forEach(t => {
+        select.innerHTML += `
+          <option value="${t.descripcion}">${t.descripcion}</option>
+        `;
+      });
 
-  } catch (err) {
-    console.error("Error cargando tipos de identificación para Paso 0:", err);
+    } catch (err) {
+      console.error("Error cargando tipos de identificación para Paso 0:", err);
+    }
   }
-}
+  // Sincroniza visualmente el ingreso (tipo + identificación) en Paso 2
+    function updateIngresoLabel() {
+      try {
+        const tipo = sessionStorage.getItem("tipo_ingreso") || "";
+        const id = sessionStorage.getItem("id_ingreso") || "";
+        const wrap = document.getElementById("ingreso-summary");
+        const text = document.getElementById("ingreso-summary-text");
+        if (!wrap || !text) return;
+
+        if (tipo || id) {
+          text.textContent = `${tipo}${tipo && id ? " - " : ""}${id}`;
+          wrap.style.display = "block";
+
+          // Marcar campo visible como no editable en Paso 2
+          const tipoMain = document.getElementById("tipo_documento");
+          const identMain = document.getElementById("identificacion");
+          if (tipoMain) tipoMain.setAttribute("disabled", true);
+          if (identMain) identMain.setAttribute("readonly", true);
+
+          // Asegurar hidden inputs para envío (si no existen, crearlos)
+          const formEl = document.getElementById("hv-form");
+          if (formEl) {
+            let hidTipo = document.getElementById("hidden_tipo_documento");
+            if (!hidTipo) {
+              hidTipo = document.createElement("input");
+              hidTipo.type = "hidden";
+              hidTipo.id = "hidden_tipo_documento";
+              hidTipo.name = "tipo_documento";
+              formEl.appendChild(hidTipo);
+            }
+            hidTipo.value = tipo || "";
+
+            let hidId = document.getElementById("hidden_identificacion");
+            if (!hidId) {
+              hidId = document.createElement("input");
+              hidId.type = "hidden";
+              hidId.id = "hidden_identificacion";
+              hidId.name = "identificacion";
+              formEl.appendChild(hidId);
+            }
+            hidId.value = id || "";
+          }
+        } else {
+          wrap.style.display = "none";
+        }
+      } catch (err) {
+        console.error("updateIngresoLabel error:", err);
+      }
+    }
+
+    // Si validarIngreso se ejecutó antes de que la función exista, la ejecutamos ahora
+    if (window._pendingUpdateIngreso) {
+      try { updateIngresoLabel(); } catch (err) { console.error(err); }
+      window._pendingUpdateIngreso = false;
+    }
+
+    // Editar ingreso: limpiar y volver al paso 0
+    const editBtn = document.getElementById("edit-ingreso");
+    if (editBtn) {
+      editBtn.addEventListener("click", () => {
+        sessionStorage.removeItem("tipo_ingreso");
+        sessionStorage.removeItem("id_ingreso");
+
+        // Quitar hidden inputs si existen
+        const hidTipo = document.getElementById("hidden_tipo_documento");
+        if (hidTipo) hidTipo.remove();
+        const hidId = document.getElementById("hidden_identificacion");
+        if (hidId) hidId.remove();
+
+        // Re-habilitar campos en paso 2
+        const tipoMain = document.getElementById("tipo_documento");
+        const identMain = document.getElementById("identificacion");
+        if (tipoMain) { tipoMain.removeAttribute("disabled"); tipoMain.value = ""; }
+        if (identMain) { identMain.removeAttribute("readonly"); identMain.value = ""; }
+
+        // Ocultar summary y volver a paso 0
+        const wrap = document.getElementById("ingreso-summary");
+        if (wrap) wrap.style.display = "none";
+        showStep(0);
+      });
+    }
   // Cuando el DOM esté listo cargamos ambos pasos
-  document.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener("DOMContentLoaded", () => {
+      inicializarSelects();
+      cargarTiposPaso0();
 
-    // 1) Cargar selects del paso 2 (desde app.js)
-    inicializarSelects();
-
-    // 2) Cargar selects del paso 0 (dinámico desde MySQL)
-    cargarTiposPaso0();
-
-  });
+      // Asegurar que la etiqueta de ingreso se actualice al cargar la página
+      setTimeout(() => {
+        if (typeof updateIngresoLabel === "function") updateIngresoLabel();
+      }, 200);
+    });
 </script>
 </body>
 </html>
