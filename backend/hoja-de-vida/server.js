@@ -235,82 +235,166 @@ app.post("/api/hv/registrar", async (req, res) => {
   try {
     await conn.beginTransaction();
 
-    // 1) Insertar aspirante (tabla maestra)
-    const [aspiranteResult] = await conn.query(
-      `
-      INSERT INTO Dynamic_hv_aspirante (
-        tipo_documento,
-        identificacion,
-        primer_nombre,
-        segundo_nombre,
-        primer_apellido,
-        segundo_apellido,
-        fecha_nacimiento,
-        edad,
-        departamento_expedicion,
-        ciudad_expedicion,
-        fecha_expedicion,
-        estado_civil,
-        direccion_barrio,
-        departamento,
-        ciudad,
-        telefono,
-        correo_electronico,
-        eps,
-        afp,
-        rh,
-        talla_pantalon,
-        camisa_talla,
-        zapatos_talla,
-        origen_registro,
-        medio_reclutamiento,
-        recomendador_aspirante,
-        fecha_registro
-      )
-      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, NOW())
-      `,
-      [
-        tipo_documento || null,
-        identificacion || null,
-        primer_nombre || null,
-        segundo_nombre || null,
-        primer_apellido || null,
-        segundo_apellido || null,
-        fecha_nacimiento || null,
-        edad || null,
-        departamento_expedicion || null,
-        ciudad_expedicion || null,
-        fecha_expedicion || null,
-        estado_civil || null,
-        direccion_barrio || null,
-        departamento_residencia || null,
-        ciudad_residencia || null,
-        telefono || null,
-        correo_electronico || null,
-        eps || null,
-        afp || null,
-        rh || null,
-        talla_pantalon || null,
-        camisa_talla || null,
-        zapatos_talla || null,
-        origen_registro || "WEB",
-        medio_reclutamiento || null,
-        recomendador_aspirante || null
-      ]
-    );
+    // Verificar si ya existe aspirante con esta identificación
+    let idAspirante = null;
+    if (identificacion) {
+      const [existingRows] = await conn.query(
+        `SELECT id_aspirante FROM Dynamic_hv_aspirante WHERE identificacion = ? LIMIT 1`,
+        [identificacion]
+      );
+      if (existingRows && existingRows.length > 0) {
+        idAspirante = existingRows[0].id_aspirante;
+      }
+    }
 
-    // Obtener el ID real que generó MySQL (porque no es AUTO_INCREMENT)
-const [rowId] = await conn.query(
-  `SELECT id_aspirante 
-   FROM Dynamic_hv_aspirante 
-   WHERE identificacion = ? 
-   ORDER BY fecha_registro DESC 
-   LIMIT 1`,
-  [identificacion]
-);
+    if (idAspirante) {
+      // --- Caso: ya existe -> hacemos UPDATE y reinsertamos hijos ---
+      await conn.query(
+        `
+        UPDATE Dynamic_hv_aspirante SET
+          tipo_documento = ?,
+          primer_nombre = ?,
+          segundo_nombre = ?,
+          primer_apellido = ?,
+          segundo_apellido = ?,
+          fecha_nacimiento = ?,
+          edad = ?,
+          departamento_expedicion = ?,
+          ciudad_expedicion = ?,
+          fecha_expedicion = ?,
+          estado_civil = ?,
+          direccion_barrio = ?,
+          departamento = ?,       -- se usa la columna 'departamento' para departamento_residencia
+          ciudad = ?,            -- se usa la columna 'ciudad' para ciudad_residencia
+          telefono = ?,
+          correo_electronico = ?,
+          eps = ?,
+          afp = ?,
+          rh = ?,
+          talla_pantalon = ?,
+          camisa_talla = ?,
+          zapatos_talla = ?,
+          origen_registro = ?,
+          medio_reclutamiento = ?,
+          recomendador_aspirante = ?,
+          fecha_registro = NOW()
+        WHERE id_aspirante = ?
+        `,
+        [
+          tipo_documento || null,
+          primer_nombre || null,
+          segundo_nombre || null,
+          primer_apellido || null,
+          segundo_apellido || null,
+          fecha_nacimiento || null,
+          edad || null,
+          departamento_expedicion || null,
+          ciudad_expedicion || null,
+          fecha_expedicion || null,
+          estado_civil || null,
+          direccion_barrio || null,
+          departamento_residencia || null,
+          ciudad_residencia || null,
+          telefono || null,
+          correo_electronico || null,
+          eps || null,
+          afp || null,
+          rh || null,
+          talla_pantalon || null,
+          camisa_talla || null,
+          zapatos_talla || null,
+          origen_registro || "WEB",
+          medio_reclutamiento || null,
+          recomendador_aspirante || null,
+          idAspirante
+        ]
+      );
 
-const idAspirante = rowId[0].id_aspirante;
+      // Borrar datos hijos existentes para ese aspirante (los volveremos a insertar)
+      await conn.query(`DELETE FROM Dynamic_hv_educacion WHERE id_aspirante = ?`, [idAspirante]);
+      await conn.query(`DELETE FROM Dynamic_hv_experiencia_laboral WHERE id_aspirante = ?`, [idAspirante]);
+      await conn.query(`DELETE FROM Dynamic_hv_familiares WHERE id_aspirante = ?`, [idAspirante]);
+      await conn.query(`DELETE FROM Dynamic_hv_referencias WHERE id_aspirante = ?`, [idAspirante]);
+      await conn.query(`DELETE FROM Dynamic_hv_contacto_emergencia WHERE id_aspirante = ?`, [idAspirante]);
+      await conn.query(`DELETE FROM Dynamic_hv_metas_personales WHERE id_aspirante = ?`, [idAspirante]);
+      await conn.query(`DELETE FROM Dynamic_hv_seguridad WHERE id_aspirante = ?`, [idAspirante]);
 
+    } else {
+      // --- Caso: no existe -> insertar nuevo aspirante ---
+      const [aspiranteResult] = await conn.query(
+        `
+        INSERT INTO Dynamic_hv_aspirante (
+          tipo_documento,
+          identificacion,
+          primer_nombre,
+          segundo_nombre,
+          primer_apellido,
+          segundo_apellido,
+          fecha_nacimiento,
+          edad,
+          departamento_expedicion,
+          ciudad_expedicion,
+          fecha_expedicion,
+          estado_civil,
+          direccion_barrio,
+          departamento,
+          ciudad,
+          telefono,
+          correo_electronico,
+          eps,
+          afp,
+          rh,
+          talla_pantalon,
+          camisa_talla,
+          zapatos_talla,
+          origen_registro,
+          medio_reclutamiento,
+          recomendador_aspirante,
+          fecha_registro
+        )
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, NOW())
+        `,
+        [
+          tipo_documento || null,
+          identificacion || null,
+          primer_nombre || null,
+          segundo_nombre || null,
+          primer_apellido || null,
+          segundo_apellido || null,
+          fecha_nacimiento || null,
+          edad || null,
+          departamento_expedicion || null,
+          ciudad_expedicion || null,
+          fecha_expedicion || null,
+          estado_civil || null,
+          direccion_barrio || null,
+          departamento_residencia || null,
+          ciudad_residencia || null,
+          telefono || null,
+          correo_electronico || null,
+          eps || null,
+          afp || null,
+          rh || null,
+          talla_pantalon || null,
+          camisa_talla || null,
+          zapatos_talla || null,
+          origen_registro || "WEB",
+          medio_reclutamiento || null,
+          recomendador_aspirante || null
+        ]
+      );
+
+      // Obtener id mediante la identificación (garantiza compatibilidad con estructura actual)
+      const [rowId] = await conn.query(
+        `SELECT id_aspirante FROM Dynamic_hv_aspirante WHERE identificacion = ? ORDER BY fecha_registro DESC LIMIT 1`,
+        [identificacion]
+      );
+      idAspirante = rowId && rowId[0] ? rowId[0].id_aspirante : null;
+    }
+
+    if (!idAspirante) {
+      throw new Error("No se pudo obtener id_aspirante después de insert/update");
+    }
 
     // 2) Educación (Dynamic_hv_educacion)
     for (const edu of educacion) {
@@ -416,7 +500,6 @@ const idAspirante = rowId[0].id_aspirante;
         ocupacion
       )
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-
         `,
        [
       idAspirante,
@@ -428,7 +511,6 @@ const idAspirante = rowId[0].id_aspirante;
       ref.telefono || null,
       ref.ocupacion || null
     ]
-
       );
     }
 
@@ -457,27 +539,26 @@ const idAspirante = rowId[0].id_aspirante;
       );
     }
 
-// 7) Metas personales (Dynamic_hv_metas_personales)
-if (metas_personales) {
-  await conn.query(
-    `
-    INSERT INTO Dynamic_hv_metas_personales (
-      id_aspirante,
-      meta_corto_plazo,
-      meta_mediano_plazo,
-      meta_largo_plazo
-    )
-    VALUES (?, ?, ?, ?)
-    `,
-    [
-      idAspirante,
-      metas_personales.corto_plazo || null,
-      metas_personales.mediano_plazo || null,
-      metas_personales.largo_plazo || null
-    ]
-  );
-}
-
+    // 7) Metas personales (Dynamic_hv_metas_personales)
+    if (metas_personales) {
+      await conn.query(
+        `
+        INSERT INTO Dynamic_hv_metas_personales (
+          id_aspirante,
+          meta_corto_plazo,
+          meta_mediano_plazo,
+          meta_largo_plazo
+        )
+        VALUES (?, ?, ?, ?)
+        `,
+        [
+          idAspirante,
+          metas_personales.corto_plazo || null,
+          metas_personales.mediano_plazo || null,
+          metas_personales.largo_plazo || null
+        ]
+      );
+    }
 
     // 8) Seguridad / cuestionario personal (Dynamic_hv_seguridad)
     if (seguridad) {
