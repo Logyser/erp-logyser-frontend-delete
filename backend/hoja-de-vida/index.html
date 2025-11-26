@@ -1687,7 +1687,45 @@
         famList.innerHTML += crearCardFamiliar(index, item);
       });
     }
+    
+      // Inicializar primer registro por defecto para Educación, Experiencia y Familiares
+  // (Pegar justo después de `function renderFamiliares() { ... }` y antes del resto del código)
+  if (Array.isArray(educacionData) && educacionData.length === 0) {
+    educacionData.push({
+      institucion: "",
+      programa: "",
+      modalidad: "",
+      ano: "",
+      finalizado: "1"
+    });
+    renderEducacion();
+  }
 
+  if (Array.isArray(expData) && expData.length === 0) {
+    expData.push({
+      empresa: "",
+      cargo: "",
+      tiempo_laborado: "",
+      salario: "",
+      motivo_retiro: "",
+      causa_motivo_retiro: "",
+      funciones: "",
+      observaciones: ""
+    });
+    renderExp();
+  }
+
+  if (Array.isArray(familiaresData) && familiaresData.length === 0) {
+    familiaresData.push({
+      nombre_completo: "",
+      parentesco: "",
+      edad: "",
+      ocupacion: "",
+      conviven_juntos: "1"
+    });
+    renderFamiliares();
+  }
+    
     btnAddFam.addEventListener("click", () => {
       recopilarFamiliares();
       familiaresData.push({
@@ -2270,23 +2308,45 @@ function prellenarDatosPersonales() {
   // Lo que se guardó en el paso 0
   const tipo = sessionStorage.getItem("tipo_ingreso");   // ya es la DESCRIPCIÓN
   const id   = sessionStorage.getItem("id_ingreso");
+  const form = document.getElementById("hv-form");
+
+  // Helper para crear/actualizar hidden inputs
+  function ensureHidden(name, idEl, value) {
+    let hid = document.getElementById(idEl);
+    if (!hid) {
+      hid = document.createElement("input");
+      hid.type = "hidden";
+      hid.id = idEl;
+      hid.name = name;
+      form.appendChild(hid);
+    }
+    hid.value = value || "";
+  }
 
   // === Tipo de documento (Paso 2) ===
   if (tipo) {
     const selectTipo = document.getElementById("tipo_documento");
-    selectTipo.value = tipo;              // coincide con las opciones que carga app.js
-    selectTipo.setAttribute("disabled", true);
+    if (selectTipo) {
+      selectTipo.value = tipo;              // coincide con las opciones que carga app.js
+      // Para que el usuario no lo cambie, lo dejamos disabled (select no soporta readonly).
+      // Pero añadimos un hidden con el mismo name para que se envíe en el submit.
+      selectTipo.setAttribute("disabled", true);
+      ensureHidden("tipo_documento", "hidden_tipo_documento", tipo);
+    }
   }
 
   // === Número de identificación (Paso 2) ===
   if (id) {
     const inputId = document.getElementById("identificacion");
-    inputId.value = id;
-    inputId.setAttribute("disabled", true);
+    if (inputId) {
+      inputId.value = id;
+      // Para inputs podemos usar readonly (se incluye en el submit). Si por UX prefieres disabled,
+      // el hidden garantiza que el backend reciba el valor.
+      inputId.setAttribute("readonly", true);
+      ensureHidden("identificacion", "hidden_identificacion", id);
+    }
   }
 }
-
-
   </script>
 
   <!-- Selects dinámicos (tipo doc, dptos, ciudades, EPS, AFP) -->
