@@ -273,39 +273,38 @@ app.post("/api/hv/upload-photo", upload.single("photo"), async (req, res) => {
     });
 
         stream.on("finish", async () => {
+      // --- Dentro de stream.on("finish", async () => { ... }) reemplazar la generación/guardado de URL por:
       try {
-        // Construir la URL pública: usaremos Signed URL (lectura) en lugar de makePublic()
-        // Duración por defecto: 7 días (configurable)
         const expiresMs = parseInt(process.env.SIGNED_URL_EXPIRES_MS || String(7 * 24 * 60 * 60 * 1000), 10);
         const expiresAt = Date.now() + expiresMs;
 
-        // Generar signed URL (lectura)
-        let signedUrl;
+        // Intentar crear signed URL
+        let signedUrl = null;
         try {
-          const [url] = await blob.getSignedUrl({
-            action: "read",
-            expires: expiresAt
-          });
+          const [url] = await blob.getSignedUrl({ action: "read", expires: expiresAt });
           signedUrl = url;
         } catch (errSigned) {
-          console.warn("getSignedUrl falló:", errSigned.message || errSigned);
-          // No romper: si no se puede generar signed URL devolvemos la ruta (gcs path)
+          console.warn("getSignedUrl falló:", errSigned && errSigned.message ? errSigned.message : errSigned);
           signedUrl = null;
         }
 
-        const publicUrl = signedUrl || `gs://${GCS_BUCKET}/${destName}`;
+        // Fallback: construir una URL pública sin encodeURIComponent en la ruta completa.
+        // Usamos la forma https://storage.googleapis.com/<bucket>/<object-name>
+        const publicUrlFallback = `https://storage.googleapis.com/${GCS_BUCKET}/${destName}`;
 
-        // Guardar en DB: update por identificacion (si existe aspirante)
+        const urlToStore = signedUrl || publicUrlFallback;
+
+        // Guardar referencia en DB (si no hay signedUrl guardamos la URL pública)
         await pool.query(
           `UPDATE Dynamic_hv_aspirante SET foto_gcs_path = ?, foto_public_url = ? WHERE identificacion = ?`,
-          [destName, signedUrl || null, identificacion]
+          [destName, signedUrl || publicUrlFallback, identificacion]
         );
 
         return res.json({
           ok: true,
           foto_gcs_path: destName,
-          foto_public_url: signedUrl || null,
-          message: signedUrl ? "Signed URL generada" : "Archivo subido; no se pudo generar signed URL"
+          foto_public_url: urlToStore,
+          message: signedUrl ? "Signed URL generada" : "Archivo subido; fallback a URL pública"
         });
       } catch (err) {
         console.error("Error post-upload:", err);
