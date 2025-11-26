@@ -1,0 +1,542 @@
+// ==========================================================
+//  Backend de configuración HV - Logyser
+//  Node.js + Express + MySQL (mysql2/promise)
+//  Listo para Cloud Run
+// ==========================================================
+
+import express from "express";
+import cors from "cors";
+import mysql from "mysql2/promise";
+
+import path from "path";
+import { fileURLToPath } from "url";
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// === Servir frontend ===
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
+// ==========================================
+//  CONEXIÓN A MYSQL
+// ==========================================
+
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || '34.162.109.112',
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASS || 'Logyser2025',
+  database: "Desplegables",
+  port: 3307,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+});
+
+// Helper para consultas
+async function query(sql, params = []) {
+  const [rows] = await pool.query(sql, params);
+  return rows;
+}
+
+// ==========================================
+//  ENDPOINT: Tipo de Identificación
+// ==========================================
+
+app.get("/api/config/tipo-identificacion", async (req, res) => {
+  try {
+    const rows = await query(`
+      SELECT \`Descripción\` AS descripcion
+      FROM Config_Tipo_Identificación
+      ORDER BY \`Descripción\`
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error("Error tipo identificación:", error);
+    res.status(500).json({ error: "Error cargando tipos de identificación" });
+  }
+});
+
+// ==========================================
+//  ENDPOINT: Departamentos (solo Colombia)
+// ==========================================
+
+app.get("/api/config/departamentos", async (req, res) => {
+  try {
+    const rows = await query(`
+      SELECT \`Departamento\` AS departamento
+      FROM Config_Departamentos
+      WHERE \`País\` = 'Colombia'
+      ORDER BY \`Departamento\`
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error("Error departamentos:", error);
+    res.status(500).json({ error: "Error cargando departamentos" });
+  }
+});
+
+// ==========================================
+//  ENDPOINT: Ciudades por departamento
+// ==========================================
+
+app.get("/api/config/ciudades", async (req, res) => {
+  const departamento = req.query.departamento;
+
+  if (!departamento) {
+    return res.status(400).json({ error: "Falta el parámetro 'departamento'" });
+  }
+
+  try {
+    const rows = await query(`
+      SELECT \`Ciudad\` AS ciudad
+      FROM Config_Ciudades
+      WHERE \`Departamento\` = ? AND \`Pais\` = 'Colombia'
+      ORDER BY \`Ciudad\`
+    `, [departamento]);
+
+    res.json(rows);
+  } catch (error) {
+    console.error("Error ciudades:", error);
+    res.status(500).json({ error: "Error cargando ciudades" });
+  }
+});
+
+// ==========================================
+//  ENDPOINT: EPS
+// ==========================================
+
+app.get("/api/config/eps", async (req, res) => {
+  try {
+    const rows = await query(`
+      SELECT \`EPS\` AS eps
+      FROM Config_EPS
+      ORDER BY \`EPS\`
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error("Error EPS:", error);
+    res.status(500).json({ error: "Error cargando EPS" });
+  }
+});
+
+// ==========================================
+//  ENDPOINT: Fondo de Pensión
+// ==========================================
+
+app.get("/api/config/pension", async (req, res) => {
+  try {
+    const rows = await query(`
+      SELECT \`Fondo de Pensión\` AS pension
+      FROM Config_Pensión
+      ORDER BY \`Fondo de Pensión\`
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error("Error pensión:", error);
+    res.status(500).json({ error: "Error cargando fondos de pensión" });
+  }
+});
+
+
+app.use(express.static(__dirname));
+// ==========================================
+//  INICIO SERVIDOR
+// ==========================================
+
+const PORT = process.env.PORT || 8080;
+// ======================================================
+//  CONSULTAR ASPIRANTE POR IDENTIFICACIÓN (para evitar duplicados)
+//  GET /api/aspirante?identificacion=123
+// ======================================================
+app.get("/api/aspirante", async (req, res) => {
+  const identificacion = req.query.identificacion;
+
+  if (!identificacion) {
+    return res.status(400).json({ error: "Falta la identificación" });
+  }
+
+  try {
+    const rows = await query(
+      `SELECT * FROM Dynamic_hv_aspirante WHERE identificacion = ?`,
+      [identificacion]
+    );
+
+    if (rows.length === 0) {
+      return res.json({ existe: false });
+    }
+
+    return res.json({
+      existe: true,
+      aspirante: rows[0],
+    });
+  } catch (error) {
+    console.error("Error consultando aspirante:", error);
+    res.status(500).json({ error: "Error consultando datos del aspirante" });
+  }
+});
+app.listen(PORT, () => {
+  console.log(`✔ Servidor corriendo en http://localhost:${PORT}`);
+});
+
+// ======================================================
+//  REGISTRO COMPLETO DE HOJA DE VIDA
+//  POST /api/hv/registrar
+// ======================================================
+app.post("/api/hv/registrar", async (req, res) => {
+  const body = req.body;
+
+  // Desestructuramos lo que envía el front
+  const datosAspirante = body || {};
+
+  const {
+    // Datos personales (Dynamic_hv_aspirante)
+    tipo_documento,
+    identificacion,
+    primer_nombre,
+    segundo_nombre,
+    primer_apellido,
+    segundo_apellido,
+    fecha_nacimiento,
+    edad,
+    departamento_expedicion,
+    ciudad_expedicion,
+    fecha_expedicion,
+    estado_civil,
+    direccion_barrio,
+    departamento_residencia,
+    ciudad_residencia,
+    telefono,
+    correo_electronico,
+    eps,
+    afp,
+    rh,
+    talla_pantalon,
+    camisa_talla,
+    zapatos_talla,
+    origen_registro,
+    medio_reclutamiento,
+    recomendador_aspirante,
+
+    // Bloques relacionados
+    educacion = [],
+    experiencia_laboral = [],
+    familiares = [],
+    referencias = [],
+    contacto_emergencia = {},
+    metas_personales = {},
+    seguridad = {}
+  } = datosAspirante;
+
+  const conn = await pool.getConnection();
+
+  try {
+    await conn.beginTransaction();
+
+    // 1) Insertar aspirante (tabla maestra)
+    const [aspiranteResult] = await conn.query(
+      `
+      INSERT INTO Dynamic_hv_aspirante (
+        tipo_documento,
+        identificacion,
+        primer_nombre,
+        segundo_nombre,
+        primer_apellido,
+        segundo_apellido,
+        fecha_nacimiento,
+        edad,
+        departamento_expedicion,
+        ciudad_expedicion,
+        fecha_expedicion,
+        estado_civil,
+        direccion_barrio,
+        departamento,
+        ciudad,
+        telefono,
+        correo_electronico,
+        eps,
+        afp,
+        rh,
+        talla_pantalon,
+        camisa_talla,
+        zapatos_talla,
+        origen_registro,
+        medio_reclutamiento,
+        recomendador_aspirante,
+        fecha_registro
+      )
+      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, NOW())
+      `,
+      [
+        tipo_documento || null,
+        identificacion || null,
+        primer_nombre || null,
+        segundo_nombre || null,
+        primer_apellido || null,
+        segundo_apellido || null,
+        fecha_nacimiento || null,
+        edad || null,
+        departamento_expedicion || null,
+        ciudad_expedicion || null,
+        fecha_expedicion || null,
+        estado_civil || null,
+        direccion_barrio || null,
+        departamento_residencia || null,
+        ciudad_residencia || null,
+        telefono || null,
+        correo_electronico || null,
+        eps || null,
+        afp || null,
+        rh || null,
+        talla_pantalon || null,
+        camisa_talla || null,
+        zapatos_talla || null,
+        origen_registro || "WEB",
+        medio_reclutamiento || null,
+        recomendador_aspirante || null
+      ]
+    );
+
+    // Obtener el ID real que generó MySQL (porque no es AUTO_INCREMENT)
+const [rowId] = await conn.query(
+  `SELECT id_aspirante 
+   FROM Dynamic_hv_aspirante 
+   WHERE identificacion = ? 
+   ORDER BY fecha_registro DESC 
+   LIMIT 1`,
+  [identificacion]
+);
+
+const idAspirante = rowId[0].id_aspirante;
+
+
+    // 2) Educación (Dynamic_hv_educacion)
+    for (const edu of educacion) {
+      if (!edu.institucion && !edu.programa) continue;
+
+      await conn.query(
+        `
+        INSERT INTO Dynamic_hv_educacion (
+          id_aspirante,
+          institucion,
+          programa,
+          modalidad,
+          ano,
+          finalizado
+        )
+        VALUES (?,?,?,?,?,?)
+        `,
+        [
+          idAspirante,
+          edu.institucion || null,
+          edu.programa || null,
+          edu.modalidad || null,
+          edu.ano || null,
+          edu.finalizado || null
+        ]
+      );
+    }
+
+    // 3) Experiencia laboral (Dynamic_hv_experiencia_laboral)
+    for (const exp of experiencia_laboral) {
+      if (!exp.empresa && !exp.cargo) continue;
+
+      await conn.query(
+        `
+        INSERT INTO Dynamic_hv_experiencia_laboral (
+          id_aspirante,
+          empresa,
+          cargo,
+          tiempo_laborado,
+          salario,
+          motivo_retiro,
+          causa_motivo_retiro,
+          funciones,
+          observaciones
+        )
+        VALUES (?,?,?,?,?,?,?,?,?)
+        `,
+        [
+          idAspirante,
+          exp.empresa || null,
+          exp.cargo || null,
+          exp.tiempo_laborado || null,
+          exp.salario || null,
+          exp.motivo_retiro || null,
+          exp.causa_motivo_retiro || null,
+          exp.funciones || null,
+          exp.observaciones || null
+        ]
+      );
+    }
+
+    // 4) Familiares (Dynamic_hv_familiares)
+    for (const fam of familiares) {
+      if (!fam.nombre_completo) continue;
+
+      await conn.query(
+        `
+        INSERT INTO Dynamic_hv_familiares (
+          id_aspirante,
+          nombre_completo,
+          parentesco,
+          edad,
+          ocupacion,
+          conviven_juntos
+        )
+        VALUES (?,?,?,?,?,?)
+        `,
+        [
+          idAspirante,
+          fam.nombre_completo || null,
+          fam.parentesco || null,
+          fam.edad || null,
+          fam.ocupacion || null,
+          fam.conviven_juntos || null
+        ]
+      );
+    }
+
+    // 5) Referencias (Dynamic_hv_referencias)
+    for (const ref of referencias) {
+      if (!ref.tipo_referencia) continue;
+
+      await conn.query(
+        `
+        INSERT INTO Dynamic_hv_referencias (
+        id_aspirante,
+        tipo_referencia,
+        empresa,
+        jefe_inmediato,
+        cargo_jefe,
+        nombre_completo,
+        telefono,
+        ocupacion
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+
+        `,
+       [
+      idAspirante,
+      ref.tipo_referencia,
+      ref.empresa || null,
+      ref.jefe_inmediato || null,
+      ref.cargo_jefe || null,
+      ref.nombre_completo || null,
+      ref.telefono || null,
+      ref.ocupacion || null
+    ]
+
+      );
+    }
+
+    // 6) Contacto de emergencia (Dynamic_hv_contacto_emergencia)
+    if (contacto_emergencia && contacto_emergencia.nombre_completo) {
+      await conn.query(
+        `
+        INSERT INTO Dynamic_hv_contacto_emergencia (
+          id_aspirante,
+          nombre_completo,
+          parentesco,
+          telefono,
+          correo_electronico,
+          direccion
+        )
+        VALUES (?,?,?,?,?,?)
+        `,
+        [
+          idAspirante,
+          contacto_emergencia.nombre_completo || null,
+          contacto_emergencia.parentesco || null,
+          contacto_emergencia.telefono || null,
+          contacto_emergencia.correo_electronico || null,
+          contacto_emergencia.direccion || null
+        ]
+      );
+    }
+
+// 7) Metas personales (Dynamic_hv_metas_personales)
+if (metas_personales) {
+  await conn.query(
+    `
+    INSERT INTO Dynamic_hv_metas_personales (
+      id_aspirante,
+      meta_corto_plazo,
+      meta_mediano_plazo,
+      meta_largo_plazo
+    )
+    VALUES (?, ?, ?, ?)
+    `,
+    [
+      idAspirante,
+      metas_personales.corto_plazo || null,
+      metas_personales.mediano_plazo || null,
+      metas_personales.largo_plazo || null
+    ]
+  );
+}
+
+
+    // 8) Seguridad / cuestionario personal (Dynamic_hv_seguridad)
+    if (seguridad) {
+      await conn.query(
+        `
+        INSERT INTO Dynamic_hv_seguridad (
+          id_aspirante,
+          llamados_atencion,
+          accidente_laboral,
+          enfermedad_importante,
+          consume_alcohol,
+          frecuencia_alcohol,
+          familiar_en_empresa,
+          detalle_familiar_empresa,
+          info_falsa,
+          acepta_poligrafo,
+          observaciones,
+          califica_para_cargo,
+          fortalezas,
+          aspectos_mejorar,
+          resolucion_problemas
+        )
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        `,
+        [
+          idAspirante,
+          seguridad.llamados_atencion || null,
+          seguridad.accidente_laboral || null,
+          seguridad.enfermedad_importante || null,
+          seguridad.consume_alcohol || null,
+          seguridad.frecuencia_alcohol || null,
+          seguridad.familiar_en_empresa || null,
+          seguridad.detalle_familiar_empresa || null,
+          seguridad.info_falsa || null,
+          seguridad.acepta_poligrafo || null,
+          seguridad.observaciones || null,
+          seguridad.califica_para_cargo || null,
+          seguridad.fortalezas || null,
+          seguridad.aspectos_mejorar || null,
+          seguridad.resolucion_problemas || null
+        ]
+      );
+    }
+
+    await conn.commit();
+
+    res.json({
+      ok: true,
+      message: "Hoja de vida registrada correctamente",
+      id_aspirante: idAspirante
+    });
+  } catch (error) {
+    console.error("Error registrando HV:", error);
+    await conn.rollback();
+    res.status(500).json({
+      ok: false,
+      error: "Error registrando hoja de vida"
+    });
+  } finally {
+    conn.release();
+  }
+});
