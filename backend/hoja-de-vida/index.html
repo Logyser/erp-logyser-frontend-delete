@@ -1468,43 +1468,59 @@
 
     function crearCardEducacion(index, data = {}) {
       return `
-      <div class="educ-card" data-index="${index}">
-      <div class="educ-grid">
-        <div class="field">
-          <label>Institución</label>
-          <input type="text" class="educ-institucion" value="${data.institucion || ""}">
-        </div>
-        <div class="field">
-          <label>Programa</label>
-          <input type="text" class="educ-programa" value="${data.programa || ""}">
-        </div>
+        <div class="educ-card" data-index="${index}">
+          <div class="educ-grid">
+            <div class="field">
+              <label>Institución</label>
+              <input type="text" class="educ-institucion" value="${data.institucion || ""}">
+            </div>
+            <div class="field">
+              <label>Programa</label>
+              <input type="text" class="educ-programa" value="${data.programa || ""}">
+            </div>
 
-        <div class="field">
-          <label>Modalidad</label>
-          <select class="educ-modalidad">
-            <option value="">Selecciona</option>
-            <option value="presencial" ${data.modalidad === "presencial" ? "selected" : ""}>Presencial</option>
-            <option value="virtual" ${data.modalidad === "virtual" ? "selected" : ""}>Virtual</option>
-            <option value="distancia" ${data.modalidad === "distancia" ? "selected" : ""}>A distancia</option>
-          </select>
-        </div>
+            <div class="field">
+              <label>Nivel de escolaridad</label>
+              <select class="educ-nivel">
+                <option value="">Selecciona</option>
+                <option value="bachiller" ${data.nivel_escolaridad === "bachiller" ? "selected" : ""}>Bachiller</option>
+                <option value="tecnico" ${data.nivel_escolaridad === "tecnico" ? "selected" : ""}>Técnico</option>
+                <option value="tecnologo" ${data.nivel_escolaridad === "tecnologo" ? "selected" : ""}>Tecnólogo</option>
+                <option value="tecnico_superior" ${data.nivel_escolaridad === "tecnico_superior" ? "selected" : ""}>Técnico Superior</option>
+                <option value="profesional" ${data.nivel_escolaridad === "profesional" ? "selected" : ""}>Profesional</option>
+                <option value="especializacion" ${data.nivel_escolaridad === "especializacion" ? "selected" : ""}>Especialización</option>
+                <option value="maestria" ${data.nivel_escolaridad === "maestria" ? "selected" : ""}>Maestría</option>
+                <option value="doctorado" ${data.nivel_escolaridad === "doctorado" ? "selected" : ""}>Doctorado</option>
+                <option value="otro" ${data.nivel_escolaridad === "otro" ? "selected" : ""}>Otro</option>
+              </select>
+            </div>
 
-        <div class="field">
-          <label>Año</label>
-          <input type="number" class="educ-ano" min="1950" max="2050" value="${data.ano || ""}">
-        </div>
+            <div class="field">
+              <label>Modalidad</label>
+              <select class="educ-modalidad">
+                <option value="">Selecciona</option>
+                <option value="presencial" ${data.modalidad === "presencial" ? "selected" : ""}>Presencial</option>
+                <option value="virtual" ${data.modalidad === "virtual" ? "selected" : ""}>Virtual</option>
+                <option value="distancia" ${data.modalidad === "distancia" ? "selected" : ""}>A distancia</option>
+              </select>
+            </div>
 
-        <div class="field">
-          <label>Finalizado</label>
-          <select class="educ-finalizado">
-            <option value="1" ${String(data.finalizado) === "1" ? "selected" : ""}>Sí</option>
-            <option value="0" ${String(data.finalizado) === "0" ? "selected" : ""}>No</option>
-            <option value="2" ${String(data.finalizado) === "2" ? "selected" : ""}>En curso</option>
-          </select>
+            <div class="field">
+              <label>Año</label>
+              <input type="number" class="educ-ano" min="1950" max="2050" value="${data.ano || ""}">
+            </div>
+
+            <div class="field">
+              <label>Finalizado</label>
+              <select class="educ-finalizado">
+                <option value="1" ${String(data.finalizado) === "1" ? "selected" : ""}>Sí</option>
+                <option value="0" ${String(data.finalizado) === "0" ? "selected" : ""}>No</option>
+                <option value="2" ${String(data.finalizado) === "2" ? "selected" : ""}>En curso</option>
+              </select>
+            </div>
+          </div>
+          <span class="educ-remove" onclick="eliminarEducacion(${index})">🗑️ Eliminar</span>
         </div>
-      </div>
-      <span class="educ-remove" onclick="eliminarEducacion(${index})">🗑️ Eliminar</span>
-      </div>
       `;
     }
 
@@ -1537,14 +1553,20 @@
     function recopilarEducacion() {
       const cards = document.querySelectorAll(".educ-card");
 
-      educacionData = Array.from(cards).map(card => ({
-        institucion: card.querySelector(".educ-institucion").value.trim(),
-        programa: card.querySelector(".educ-programa").value.trim(),
-        nivel_escolaridad: card.querySelector(".educ-nivel").value.trim(),
-        modalidad: card.querySelector(".educ-modalidad").value.trim(),
-        ano: card.querySelector(".educ-ano").value.trim(),
-        finalizado: card.querySelector(".educ-finalizado").value.trim()
-      }));
+      educacionData = Array.from(cards).map(card => {
+        const nivelEl = card.querySelector(".educ-nivel");
+        const modalidadEl = card.querySelector(".educ-modalidad");
+        const finalizadoEl = card.querySelector(".educ-finalizado");
+
+        return {
+          institucion: (card.querySelector(".educ-institucion")?.value || "").trim(),
+          programa: (card.querySelector(".educ-programa")?.value || "").trim(),
+          nivel_escolaridad: (nivelEl?.value || "").trim(),
+          modalidad: (modalidadEl?.value || "").trim(),
+          ano: (card.querySelector(".educ-ano")?.value || "").trim(),
+          finalizado: (finalizadoEl?.value || "").trim()
+        };
+      });
 
       return educacionData;
     }
@@ -1883,18 +1905,34 @@ async function rellenarFormulario(a) {
     }
 
     // --- Arrays relacionales y otros campos ya manejados anteriormente ---
-    // Educación
+        // Educación
     const educ = Array.isArray(a.educacion) ? a.educacion : (a.educacion || []);
+
     if (educ.length > 0) {
       educacionData = educ.map(e => ({
-      institucion: e.institucion || "",
-      programa: e.programa || "",
-      nivel_escolaridad: e.nivel_escolaridad || "",
-      modalidad: e.modalidad || "",
-      ano: e.ano || "",
-      // Aceptar valores '1' (Sí), '0' (No) o '2' (En curso). Convertir a string por consistencia.
-      finalizado: (typeof e.finalizado !== "undefined" && e.finalizado !== null) ? String(e.finalizado) : "1"
-    }));
+        institucion: e.institucion || "",
+        programa: e.programa || "",
+        nivel_escolaridad: e.nivel_escolaridad || "",
+        modalidad: e.modalidad || "",
+        ano: e.ano || "",
+        // Aceptar valores '1' (Sí), '0' (No) o '2' (En curso). Convertir a string por consistencia.
+        finalizado: (typeof e.finalizado !== "undefined" && e.finalizado !== null) ? String(e.finalizado) : "1"
+      }));
+    } else {
+      // Si no hay registros del servidor, mantener al menos una card vacía para la UX
+      if (!educacionData || educacionData.length === 0) {
+        educacionData = [{
+          institucion: "",
+          programa: "",
+          nivel_escolaridad: "",
+          modalidad: "",
+          ano: "",
+          finalizado: "1"
+        }];
+      }
+    }
+
+    // Renderizar una sola vez después de haber preparado educacionData
     renderEducacion();
 
     // Experiencia

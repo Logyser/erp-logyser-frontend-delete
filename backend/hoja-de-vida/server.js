@@ -174,8 +174,10 @@ app.get("/api/aspirante", async (req, res) => {
     const id = aspirante.id_aspirante;
 
     // 2) Traer relaciones
-    const educacion = await query(
-      `SELECT institucion, programa, modalidad, ano, finalizado FROM Dynamic_hv_educacion WHERE id_aspirante = ? ORDER BY fecha_registro`,
+        const educacion = await query(
+      `SELECT institucion, programa, nivel_escolaridad, modalidad, ano, finalizado
+       FROM Dynamic_hv_educacion
+       WHERE id_aspirante = ? ORDER BY fecha_registro`,
       [id]
     );
 
@@ -454,16 +456,18 @@ app.post("/api/hv/registrar", async (req, res) => {
           id_aspirante,
           institucion,
           programa,
+          nivel_escolaridad,
           modalidad,
           ano,
           finalizado
         )
-        VALUES (?,?,?,?,?,?)
+        VALUES (?,?,?,?,?,?,?)
         `,
         [
           idAspirante,
           edu.institucion || null,
           edu.programa || null,
+          edu.nivel_escolaridad || null,
           edu.modalidad || null,
           edu.ano || null,
           edu.finalizado || null
