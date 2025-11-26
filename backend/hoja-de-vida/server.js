@@ -151,6 +151,7 @@ const PORT = process.env.PORT || 8080;
 //  CONSULTAR ASPIRANTE POR IDENTIFICACIÓN (para evitar duplicados)
 //  GET /api/aspirante?identificacion=123
 // ======================================================
+// Reemplazar la ruta GET /api/aspirante por este handler (devuelve aspirante + relaciones)
 app.get("/api/aspirante", async (req, res) => {
   const identificacion = req.query.identificacion;
 
@@ -159,8 +160,9 @@ app.get("/api/aspirante", async (req, res) => {
   }
 
   try {
+    // 1) Buscar aspirante
     const rows = await query(
-      `SELECT * FROM Dynamic_hv_aspirante WHERE identificacion = ?`,
+      `SELECT * FROM Dynamic_hv_aspirante WHERE identificacion = ? LIMIT 1`,
       [identificacion]
     );
 
@@ -168,17 +170,63 @@ app.get("/api/aspirante", async (req, res) => {
       return res.json({ existe: false });
     }
 
+    const aspirante = rows[0];
+    const id = aspirante.id_aspirante;
+
+    // 2) Traer relaciones
+    const educacion = await query(
+      `SELECT institucion, programa, modalidad, ano, finalizado FROM Dynamic_hv_educacion WHERE id_aspirante = ? ORDER BY fecha_registro`,
+      [id]
+    );
+
+    const experiencia = await query(
+      `SELECT empresa, cargo, tiempo_laborado, salario, motivo_retiro, causa_motivo_retiro, funciones, observaciones FROM Dynamic_hv_experiencia_laboral WHERE id_aspirante = ? ORDER BY fecha_registro`,
+      [id]
+    );
+
+    const familiares = await query(
+      `SELECT nombre_completo, parentesco, edad, ocupacion, conviven_juntos FROM Dynamic_hv_familiares WHERE id_aspirante = ? ORDER BY fecha_registro`,
+      [id]
+    );
+
+    const referencias = await query(
+      `SELECT tipo_referencia, nombre_completo, telefono, ocupacion, empresa, jefe_inmediato, cargo_jefe FROM Dynamic_hv_referencias WHERE id_aspirante = ? ORDER BY fecha_registro`,
+      [id]
+    );
+
+    const contactoRows = await query(
+      `SELECT nombre_completo, parentesco, telefono, correo_electronico, direccion FROM Dynamic_hv_contacto_emergencia WHERE id_aspirante = ? LIMIT 1`,
+      [id]
+    );
+    const contacto_emergencia = contactoRows[0] || null;
+
+    const metasRows = await query(
+      `SELECT meta_corto_plazo, meta_mediano_plazo, meta_largo_plazo FROM Dynamic_hv_metas_personales WHERE id_aspirante = ? LIMIT 1`,
+      [id]
+    );
+    const metas_personales = metasRows[0] || null;
+
+    const seguridadRows = await query(
+      `SELECT llamados_atencion, detalle_llamados, accidente_laboral, detalle_accidente, enfermedad_importante, detalle_enfermedad, consume_alcohol, frecuencia_alcohol, familiar_en_empresa, detalle_familiar_empresa, info_falsa, acepta_poligrafo, observaciones, califica_para_cargo, fortalezas, aspectos_mejorar, resolucion_problemas FROM Dynamic_hv_seguridad WHERE id_aspirante = ? LIMIT 1`,
+      [id]
+    );
+    const seguridad = seguridadRows[0] || null;
+
     return res.json({
       existe: true,
-      aspirante: rows[0],
+      aspirante,
+      educacion,
+      experiencia_laboral: experiencia,
+      familiares,
+      referencias,
+      contacto_emergencia,
+      metas_personales,
+      seguridad
     });
   } catch (error) {
     console.error("Error consultando aspirante:", error);
     res.status(500).json({ error: "Error consultando datos del aspirante" });
   }
-});
-app.listen(PORT, () => {
-  console.log(`✔ Servidor corriendo en http://localhost:${PORT}`);
 });
 
 // ======================================================
