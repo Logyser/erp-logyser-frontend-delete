@@ -1782,78 +1782,93 @@
 
     // ======== Función para PRELLENAR datos ========
     // Reemplazar la función rellenarFormulario existente por esta:
+    // Reemplaza la función existente por esta versión más robusta y con logs:
 function rellenarFormulario(a) {
-  if (!a) return;
+  try {
+    console.log("rellenarFormulario - payload:", a);
 
-  const set = (id, value) => {
-    const el = document.getElementById(id);
-    if (el && value != null) el.value = value;
-  };
+    if (!a) return;
 
-  // Campos del aspirante (no sobreescribimos tipo/identificación si prefieres mantener lo ingresado en paso 0)
-  // Si quieres sobrescribir el paso 0 también, quita las condiciones.
-  set("primer_nombre", a.primer_nombre || a.aspirante?.primer_nombre);
-  set("segundo_nombre", a.segundo_nombre || a.aspirante?.segundo_nombre);
-  set("primer_apellido", a.primer_apellido || a.aspirante?.primer_apellido);
-  set("segundo_apellido", a.segundo_apellido || a.aspirante?.segundo_apellido);
-  set("correo_electronico", a.correo_electronico || a.aspirante?.correo_electronico);
-  set("telefono", a.telefono || a.aspirante?.telefono);
-  set("direccion_barrio", a.direccion_barrio || a.aspirante?.direccion_barrio);
-  set("estado_civil", a.estado_civil || a.aspirante?.estado_civil);
-  set("eps", a.eps || a.aspirante?.eps);
-  set("afp", a.afp || a.aspirante?.afp);
-  set("rh", a.rh || a.aspirante?.rh);
-  set("talla_pantalon", a.talla_pantalon || a.aspirante?.talla_pantalon);
-  set("camisa_talla", a.camisa_talla || a.aspirante?.camisa_talla);
-  set("zapatos_talla", a.zapatos_talla || a.aspirante?.zapatos_talla);
-  set("fecha_nacimiento", a.fecha_nacimiento || a.aspirante?.fecha_nacimiento);
-  set("fecha_expedicion", a.fecha_expedicion || a.aspirante?.fecha_expedicion);
-  set("departamento_expedicion", a.departamento_expedicion || a.aspirante?.departamento_expedicion);
-  set("ciudad_expedicion", a.ciudad_expedicion || a.aspirante?.ciudad_expedicion);
-  set("departamento_residencia", a.departamento_residencia || a.aspirante?.departamento);
-  set("ciudad_residencia", a.ciudad_residencia || a.aspirante?.ciudad);
+    // aspirante puede estar en a.aspirante (forma que devuelve el backend) o directamente en 'a'
+    const aspirante = a.aspirante || a;
 
-  // Si el backend devolvió arrays de relaciones, poblarlos en memoria y renderizar
-  // Educación
-  if (Array.isArray(a.educacion) && a.educacion.length > 0) {
-    educacionData = a.educacion.map(e => ({
-      institucion: e.institucion || "",
-      programa: e.programa || "",
-      modalidad: e.modalidad || "",
-      ano: e.ano || "",
-      finalizado: e.finalizado != null ? String(e.finalizado) : "1"
-    }));
-    renderEducacion();
-  } else {
-    // Si no hay registros, mantener al menos una card vacía para UX
-    if (!Array.isArray(educacionData) || educacionData.length === 0) {
-      educacionData = [{
+    const set = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.value = value != null ? value : "";
+      }
+    };
+
+    // --- Campos personales (usar la fila aspirante si existe) ---
+    if (aspirante) {
+      set("primer_nombre", aspirante.primer_nombre || "");
+      set("segundo_nombre", aspirante.segundo_nombre || "");
+      set("primer_apellido", aspirante.primer_apellido || "");
+      set("segundo_apellido", aspirante.segundo_apellido || "");
+      set("correo_electronico", aspirante.correo_electronico || "");
+      set("telefono", aspirante.telefono || "");
+      set("direccion_barrio", aspirante.direccion_barrio || "");
+      set("estado_civil", aspirante.estado_civil || "");
+      set("eps", aspirante.eps || "");
+      set("afp", aspirante.afp || "");
+      set("rh", aspirante.rh || "");
+      set("talla_pantalon", aspirante.talla_pantalon || "");
+      set("camisa_talla", aspirante.camisa_talla || "");
+      set("zapatos_talla", aspirante.zapatos_talla || "");
+      set("fecha_nacimiento", aspirante.fecha_nacimiento || "");
+      set("fecha_expedicion", aspirante.fecha_expedicion || "");
+      set("departamento_expedicion", aspirante.departamento_expedicion || "");
+      set("ciudad_expedicion", aspirante.ciudad_expedicion || "");
+      // En la BD la columna de residencia se llama 'departamento' / 'ciudad' en la tabla aspirante
+      set("departamento_residencia", aspirante.departamento || "");
+      set("ciudad_residencia", aspirante.ciudad || "");
+      // Tipo de documento e identificación sólo si están vacíos (se manejan por sessionStorage/prellenado)
+      const identEl = document.getElementById("identificacion");
+      if (identEl && !identEl.value && aspirante.identificacion) identEl.value = aspirante.identificacion;
+      const tipoEl = document.getElementById("tipo_documento");
+      if (tipoEl && !tipoEl.value && aspirante.tipo_documento) tipoEl.value = aspirante.tipo_documento;
+    }
+
+    // --- Relacionales (arrays) ---
+    const educ = Array.isArray(a.educacion) ? a.educacion : (Array.isArray(a.educacion) ? a.educacion : (a.educacion || []));
+    const exp = Array.isArray(a.experiencia_laboral) ? a.experiencia_laboral : (a.experiencia_laboral || []);
+    const fam = Array.isArray(a.familiares) ? a.familiares : (a.familiares || []);
+
+    // Educación
+    if (educ && educ.length > 0) {
+      educacionData = educ.map(e => ({
+        institucion: e.institucion || "",
+        programa: e.programa || "",
+        modalidad: e.modalidad || "",
+        ano: e.ano || "",
+        finalizado: (typeof e.finalizado !== "undefined" && e.finalizado !== null) ? String(e.finalizado) : "1"
+      }));
+    } else {
+      // mantener al menos una card vacía para UX
+      educacionData = educacionData && educacionData.length > 0 ? educacionData : [{
         institucion: "",
         programa: "",
         modalidad: "",
         ano: "",
         finalizado: "1"
       }];
-      renderEducacion();
     }
-  }
+    renderEducacion();
 
-  // Experiencia
-  if (Array.isArray(a.experiencia_laboral) && a.experiencia_laboral.length > 0) {
-    expData = a.experiencia_laboral.map(x => ({
-      empresa: x.empresa || "",
-      cargo: x.cargo || "",
-      tiempo_laborado: x.tiempo_laborado || "",
-      salario: x.salario || "",
-      motivo_retiro: x.motivo_retiro || "",
-      causa_motivo_retiro: x.causa_motivo_retiro || "",
-      funciones: x.funciones || "",
-      observaciones: x.observaciones || ""
-    }));
-    renderExp();
-  } else {
-    if (!Array.isArray(expData) || expData.length === 0) {
-      expData = [{
+    // Experiencia
+    if (exp && exp.length > 0) {
+      expData = exp.map(x => ({
+        empresa: x.empresa || "",
+        cargo: x.cargo || "",
+        tiempo_laborado: x.tiempo_laborado || "",
+        salario: x.salario || "",
+        motivo_retiro: x.motivo_retiro || "",
+        causa_motivo_retiro: x.causa_motivo_retiro || "",
+        funciones: x.funciones || "",
+        observaciones: x.observaciones || ""
+      }));
+    } else {
+      expData = expData && expData.length > 0 ? expData : [{
         empresa: "",
         cargo: "",
         tiempo_laborado: "",
@@ -1863,120 +1878,109 @@ function rellenarFormulario(a) {
         funciones: "",
         observaciones: ""
       }];
-      renderExp();
     }
-  }
+    renderExp();
 
-  // Familiares
-  if (Array.isArray(a.familiares) && a.familiares.length > 0) {
-    familiaresData = a.familiares.map(f => ({
-      nombre_completo: f.nombre_completo || "",
-      parentesco: f.parentesco || "",
-      edad: f.edad || "",
-      ocupacion: f.ocupacion || "",
-      conviven_juntos: f.conviven_juntos != null ? String(f.conviven_juntos) : "1"
-    }));
-    renderFamiliares();
-  } else {
-    if (!Array.isArray(familiaresData) || familiaresData.length === 0) {
-      familiaresData = [{
+    // Familiares
+    if (fam && fam.length > 0) {
+      familiaresData = fam.map(f => ({
+        nombre_completo: f.nombre_completo || "",
+        parentesco: f.parentesco || "",
+        edad: f.edad || "",
+        ocupacion: f.ocupacion || "",
+        conviven_juntos: (typeof f.conviven_juntos !== "undefined" && f.conviven_juntos !== null) ? String(f.conviven_juntos) : "1"
+      }));
+    } else {
+      familiaresData = familiaresData && familiaresData.length > 0 ? familiaresData : [{
         nombre_completo: "",
         parentesco: "",
         edad: "",
         ocupacion: "",
         conviven_juntos: "1"
       }];
-      renderFamiliares();
     }
-  }
+    renderFamiliares();
 
-  // Referencias: backend devuelve un array con tipo_referencia
-  if (Array.isArray(a.referencias) && a.referencias.length > 0) {
-    a.referencias.forEach(r => {
-      const tipo = (r.tipo_referencia || "").toLowerCase();
-      if (tipo === "laboral" || tipo === "laboral") {
-        set("ref_lab_empresa", r.empresa || "");
-        set("ref_lab_jefe", r.jefe_inmediato || "");
-        set("ref_lab_cargo", r.cargo_jefe || "");
-        set("ref_lab_tel", r.telefono || "");
-      } else if (tipo === "familiar") {
-        set("ref_fam_nombre", r.nombre_completo || "");
-        set("ref_fam_parentesco", r.parentesco || r.relacion || "");
-        set("ref_fam_tel", r.telefono || "");
-        set("ref_fam_ocupacion", r.ocupacion || "");
-      } else if (tipo === "personal") {
-        set("ref_per_nombre", r.nombre_completo || "");
-        set("ref_per_relacion", r.relacion || "");
-        set("ref_per_tel", r.telefono || "");
-        set("ref_per_ocupacion", r.ocupacion || "");
+    // Referencias
+    const refs = Array.isArray(a.referencias) ? a.referencias : (a.referencias || []);
+    if (refs && refs.length > 0) {
+      refs.forEach(r => {
+        const tipo = (r.tipo_referencia || "").toLowerCase();
+        if (tipo === "laboral" || tipo === "laboral") {
+          set("ref_lab_empresa", r.empresa || "");
+          set("ref_lab_jefe", r.jefe_inmediato || "");
+          set("ref_lab_cargo", r.cargo_jefe || "");
+          set("ref_lab_tel", r.telefono || "");
+        } else if (tipo === "familiar") {
+          set("ref_fam_nombre", r.nombre_completo || "");
+          set("ref_fam_parentesco", r.parentesco || r.relacion || "");
+          set("ref_fam_tel", r.telefono || "");
+          set("ref_fam_ocupacion", r.ocupacion || "");
+        } else if (tipo === "personal") {
+          set("ref_per_nombre", r.nombre_completo || "");
+          set("ref_per_relacion", r.relacion || "");
+          set("ref_per_tel", r.telefono || "");
+          set("ref_per_ocupacion", r.ocupacion || "");
+        }
+      });
+    }
+
+    // Contacto de emergencia
+    if (a.contacto_emergencia) {
+      set("emer_nombre", a.contacto_emergencia.nombre_completo || "");
+      set("emer_parentesco", a.contacto_emergencia.parentesco || "");
+      set("emer_telefono", a.contacto_emergencia.telefono || "");
+      set("emer_correo", a.contacto_emergencia.correo_electronico || "");
+      set("emer_direccion", a.contacto_emergencia.direccion || "");
+    }
+
+    // Metas personales
+    if (a.metas_personales) {
+      set("meta_corto", a.metas_personales.meta_corto_plazo || "");
+      set("meta_mediano", a.metas_personales.meta_mediano_plazo || "");
+      set("meta_largo", a.metas_personales.meta_largo_plazo || "");
+    }
+
+    // Seguridad / cuestionario
+    if (a.seguridad) {
+      const s = a.seguridad;
+      if (typeof s.llamados_atencion !== "undefined") {
+        document.getElementById("seg_llamados").value = String(s.llamados_atencion || 0);
+        if (s.llamados_atencion == 1) document.getElementById("detalle_llamados_wrap").classList.remove("hidden");
+        set("seg_detalle_llamados", s.detalle_llamados || "");
       }
-    });
-  }
+      if (typeof s.accidente_laboral !== "undefined") {
+        document.getElementById("seg_accidente").value = String(s.accidente_laboral || 0);
+        if (s.accidente_laboral == 1) document.getElementById("detalle_accidente_wrap").classList.remove("hidden");
+        set("seg_detalle_accidente", s.detalle_accidente || "");
+      }
+      if (typeof s.enfermedad_importante !== "undefined") {
+        document.getElementById("seg_enfermedad").value = String(s.enfermedad_importante || 0);
+        if (s.enfermedad_importante == 1) document.getElementById("detalle_enfermedad_wrap").classList.remove("hidden");
+        set("seg_detalle_enfermedad", s.detalle_enfermedad || "");
+      }
+      if (typeof s.consume_alcohol !== "undefined") {
+        document.getElementById("seg_alcohol").value = String(s.consume_alcohol || 0);
+        if (s.consume_alcohol == 1) document.getElementById("detalle_alcohol_wrap").classList.remove("hidden");
+        set("seg_frecuencia", s.frecuencia_alcohol || "");
+      }
+      if (typeof s.familiar_en_empresa !== "undefined") {
+        document.getElementById("seg_familiar").value = String(s.familiar_en_empresa || 0);
+        if (s.familiar_en_empresa == 1) document.getElementById("detalle_familiar_wrap").classList.remove("hidden");
+        set("seg_familiar_nombre", s.detalle_familiar_empresa || "");
+      }
+      set("seg_observaciones", s.observaciones || "");
+      set("seg_califica", s.califica_para_cargo || "");
+      set("seg_fortal", s.fortalezas || "");
+      set("seg_mejorar", s.aspectos_mejorar || "");
+      set("seg_resolucion", s.resolucion_problemas || "");
+      if (typeof s.info_falsa !== "undefined") document.getElementById("seg_falsa").value = String(s.info_falsa || 0);
+      if (typeof s.acepta_poligrafo !== "undefined") document.getElementById("seg_poligrafo").value = String(s.acepta_poligrafo || 0);
+    }
 
-  // Contacto de emergencia
-  if (a.contacto_emergencia) {
-    set("emer_nombre", a.contacto_emergencia.nombre_completo || "");
-    set("emer_parentesco", a.contacto_emergencia.parentesco || "");
-    set("emer_telefono", a.contacto_emergencia.telefono || "");
-    set("emer_correo", a.contacto_emergencia.correo_electronico || "");
-    set("emer_direccion", a.contacto_emergencia.direccion || "");
-  }
-
-  // Metas personales
-  if (a.metas_personales) {
-    set("meta_corto", a.metas_personales.meta_corto_plazo || "");
-    set("meta_mediano", a.metas_personales.meta_mediano_plazo || "");
-    set("meta_largo", a.metas_personales.meta_largo_plazo || "");
-  }
-
-  // Seguridad / cuestionario
-  if (a.seguridad) {
-    // selects: usar string "1" or "0"
-    const s = a.seguridad;
-    if (typeof s.llamados_atencion !== "undefined") {
-      document.getElementById("seg_llamados").value = String(s.llamados_atencion || 0);
-      if (s.llamados_atencion == 1) document.getElementById("detalle_llamados_wrap").classList.remove("hidden");
-      set("seg_detalle_llamados", s.detalle_llamados || "");
-    }
-    if (typeof s.accidente_laboral !== "undefined") {
-      document.getElementById("seg_accidente").value = String(s.accidente_laboral || 0);
-      if (s.accidente_laboral == 1) document.getElementById("detalle_accidente_wrap").classList.remove("hidden");
-      set("seg_detalle_accidente", s.detalle_accidente || "");
-    }
-    if (typeof s.enfermedad_importante !== "undefined") {
-      document.getElementById("seg_enfermedad").value = String(s.enfermedad_importante || 0);
-      if (s.enfermedad_importante == 1) document.getElementById("detalle_enfermedad_wrap").classList.remove("hidden");
-      set("seg_detalle_enfermedad", s.detalle_enfermedad || "");
-    }
-    if (typeof s.consume_alcohol !== "undefined") {
-      document.getElementById("seg_alcohol").value = String(s.consume_alcohol || 0);
-      if (s.consume_alcohol == 1) document.getElementById("detalle_alcohol_wrap").classList.remove("hidden");
-      set("seg_frecuencia", s.frecuencia_alcohol || "");
-    }
-    if (typeof s.familiar_en_empresa !== "undefined") {
-      document.getElementById("seg_familiar").value = String(s.familiar_en_empresa || 0);
-      if (s.familiar_en_empresa == 1) document.getElementById("detalle_familiar_wrap").classList.remove("hidden");
-      set("seg_familiar_nombre", s.detalle_familiar_empresa || "");
-    }
-    // otros campos
-    set("seg_observaciones", s.observaciones || "");
-    set("seg_califica", s.califica_para_cargo || "");
-    set("seg_fortal", s.fortalezas || "");
-    set("seg_mejorar", s.aspectos_mejorar || "");
-    set("seg_resolucion", s.resolucion_problemas || "");
-    // info_falsa y acepta_poligrafo
-    if (typeof s.info_falsa !== "undefined") document.getElementById("seg_falsa").value = String(s.info_falsa || 0);
-    if (typeof s.acepta_poligrafo !== "undefined") document.getElementById("seg_poligrafo").value = String(s.acepta_poligrafo || 0);
-  }
-
-  // Si el backend devolvió el objeto aspirante (fila), sincronizar tipo/identificación si están vacíos en el formulario
-  if (a.aspirante) {
-    if (!document.getElementById("identificacion").value && a.aspirante.identificacion) {
-      document.getElementById("identificacion").value = a.aspirante.identificacion;
-    }
-    if (!document.getElementById("tipo_documento").value && a.aspirante.tipo_documento) {
-      document.getElementById("tipo_documento").value = a.aspirante.tipo_documento;
-    }
+    console.log("rellenarFormulario - finished. educacionData, expData, familiaresData lengths:", educacionData.length, expData.length, familiaresData.length);
+  } catch (err) {
+    console.error("Error en rellenarFormulario:", err);
   }
 }
     // Medio de reclutamiento → mostrar campo recomendador

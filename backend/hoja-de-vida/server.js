@@ -668,4 +668,28 @@ app.post("/api/hv/registrar", async (req, res) => {
   } finally {
     conn.release();
   }
+
+}
+// --- Inicio del servidor ---
+const PORT = process.env.PORT || 8080;
+
+app.listen(PORT, () => {
+  console.log(`HV server listening on port ${PORT}`);
 });
+
+// Graceful shutdown: cerrar pool de conexiones antes de salir
+async function shutdown() {
+  console.log("Shutting down server...");
+  try {
+    await pool.end();
+    console.log("DB pool closed.");
+  } catch (err) {
+    console.error("Error closing DB pool:", err);
+  }
+  process.exit(0);
+}
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
+
+);
