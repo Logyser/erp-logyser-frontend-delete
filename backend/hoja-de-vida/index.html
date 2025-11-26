@@ -1340,55 +1340,53 @@
 
     // ========= PASO 0: Validación de ingreso =========
     async function validarIngreso() {
-      const tipo = tipoDocumentoIngreso.value.trim();
-      const id = identificacionIngreso.value.trim();
+  const tipo = tipoDocumentoIngreso.value.trim();
+  const id = identificacionIngreso.value.trim();
 
+  if (!tipo || !id) {
+    ingresoMsg.textContent = "Debes completar ambos campos.";
+    ingresoMsg.style.color = "var(--error)";
+    return false;
+  }
 
-      if (!tipo || !id) {
-        ingresoMsg.textContent = "Debes completar ambos campos.";
-        ingresoMsg.style.color = "var(--error)";
-        return false;
-      }
+  try {
+    const resp = await fetch(`/api/aspirante?identificacion=${id}`);
+    const data = await resp.json();
 
-      try {
-        console.log("OBJETO identificaciónIngreso:", identificacionIngreso);
-        console.log("VALOR identificaciónIngreso:", identificacionIngreso ? identificacionIngreso.value : "NO EXISTE");
-        console.log("ID ENVIADO:", id);
-        const resp = await fetch(`/api/aspirante?identificacion=${id}`);
-        const data = await resp.json();
+    if (data.existe) {
+      ingresoMsg.style.color = "green";
+      ingresoMsg.textContent = "✔ Registro encontrado. Cargando datos...";
 
-        if (data.existe) {
-          ingresoMsg.style.color = "green";
-          ingresoMsg.textContent = "✔ Registro encontrado. Cargando datos...";
+      // <-- CAMBIO: pasar todo `data` para que `rellenarFormulario`
+      // reciba `data.educacion`, `data.experiencia_laboral`, etc.
+      rellenarFormulario(data);
 
-          rellenarFormulario(data.aspirante);
+      // Sincronizar identificación y tipo de documento con el paso 2
+      if (identificacionInput) identificacionInput.value = id;
+      const tipoDocMain = document.getElementById("tipo_documento");
+      if (tipoDocMain) tipoDocMain.value = tipo;
 
-          // Sincronizar identificación y tipo de documento con el paso 2
-          if (identificacionInput) identificacionInput.value = id;
-          const tipoDocMain = document.getElementById("tipo_documento");
-          if (tipoDocMain) tipoDocMain.value = tipo;
+      setTimeout(() => {
+        showStep(1);
+      }, 300);
 
-          setTimeout(() => {
-            showStep(1);
-          }, 300);
+      return true;
+    } else {
+      ingresoMsg.style.color = "#444";
+      ingresoMsg.textContent = "ℹ No encontramos un registro previo. Continúa con el formulario.";
 
-          return true;
-        } else {
-          ingresoMsg.style.color = "#444";
-          ingresoMsg.textContent = "ℹ No encontramos un registro previo. Continúa con el formulario.";
-
-          setTimeout(() => {
-            showStep(1);
-          }, 300);
-          return true;
-        }
-      } catch (err) {
-        ingresoMsg.style.color = "var(--error)";
-        ingresoMsg.textContent = "⚠ Error consultando el servidor.";
-        console.error(err);
-        return false;
-      }
+      setTimeout(() => {
+        showStep(1);
+      }, 300);
+      return true;
     }
+  } catch (err) {
+    ingresoMsg.style.color = "var(--error)";
+    ingresoMsg.textContent = "⚠ Error consultando el servidor.";
+    console.error(err);
+    return false;
+  }
+}
 
     identificacionIngreso.addEventListener("blur", validarIngreso);
     tipoDocumentoIngreso.addEventListener("change", () => {
