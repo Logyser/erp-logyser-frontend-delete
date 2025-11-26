@@ -1831,6 +1831,9 @@ async function rellenarFormulario(a) {
       set("zapatos_talla", aspirante.zapatos_talla || "");
       // Fecha de nacimiento: el input date acepta 'YYYY-MM-DD' si viene así desde DB
       set("fecha_nacimiento", aspirante.fecha_nacimiento ? aspirante.fecha_nacimiento.split("T")[0] || aspirante.fecha_nacimiento : "");
+      if (typeof fechaNacimientoInput !== "undefined" && fechaNacimientoInput) {
+        edadInput.value = calcularEdadDesdeFecha(fechaNacimientoInput.value);
+      }
       set("fecha_expedicion", aspirante.fecha_expedicion ? aspirante.fecha_expedicion.split("T")[0] || aspirante.fecha_expedicion : "");
     }
 
@@ -2014,14 +2017,28 @@ async function rellenarFormulario(a) {
         campoRecomendador.classList.add("hidden");
       }
     });
-
+    function calcularEdadDesdeFecha(value) {
+      if (!value) return "";
+      // asegurar formato YYYY-MM-DD
+      const parts = value.split("T")[0].split("-");
+      if (parts.length < 3) return "";
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      const birth = new Date(year, month, day);
+      const today = new Date();
+      let age = today.getFullYear() - birth.getFullYear();
+      const m = today.getMonth() - birth.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+        age--;
+      }
+      return age >= 0 ? String(age) : "";
+    }
     // Edad automática
     fechaNacimientoInput.addEventListener("change", () => {
-      const value = fechaNacimientoInput.value;
-      if (!value) {
-        edadInput.value = "";
-        return;
-      }
+        const value = fechaNacimientoInput.value;
+        edadInput.value = calcularEdadDesdeFecha(value);
+      });
       const birthDate = new Date(value);
       const today = new Date();
       let age = today.getFullYear() - birthDate.getFullYear();
