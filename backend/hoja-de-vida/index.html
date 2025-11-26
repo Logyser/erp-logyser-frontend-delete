@@ -702,7 +702,23 @@
               Ingreso: <strong id="ingreso-summary-text"></strong>
               <button type="button" class="btn btn-secondary" id="edit-ingreso" style="margin-left:8px;">Editar</button>
             </div>
+            <!-- Inserta este bloque en Paso 2 (Datos personales) — recomiendo colocarlo justo después de #ingreso-summary -->
+            <div class="field" id="photo-field" style="margin-top:10px;">
+              <label>Foto de perfil</label>
+              <div style="display:flex; align-items:center; gap:12px; margin-top:6px;">
+                <img id="photo-img" src="" alt="Foto de perfil" style="width:96px; height:96px; object-fit:cover; border-radius:8px; border:1px solid var(--border); display:none;" />
+                <div id="photo-placeholder" style="color:var(--muted);">No hay foto cargada</div>
+              </div>
 
+              <input type="file" id="photo_input" accept="image/png, image/jpeg" style="margin-top:8px;" />
+              <div class="help-text">Formatos aceptados: JPG / PNG. Máx 5 MB.</div>
+
+              <div style="margin-top:8px; display:flex; gap:8px;">
+                <button type="button" id="btn-upload-photo" class="btn btn-secondary">Subir foto</button>
+                <button type="button" id="btn-remove-photo" class="btn btn-secondary hidden">Eliminar</button>
+                <span id="photo-status" style="align-self:center; color:var(--muted); font-size:0.9rem;"></span>
+              </div>
+            </div>
             <div class="field">
               <label for="primer_nombre">
                 Primer nombre <span class="required">*</span>
@@ -1859,6 +1875,9 @@ async function rellenarFormulario(a) {
         edadInput.value = calcularEdadDesdeFecha(fechaNacimientoInput.value);
       }
       set("fecha_expedicion", aspirante.fecha_expedicion ? aspirante.fecha_expedicion.split("T")[0] || aspirante.fecha_expedicion : "");
+      // dentro de rellenarFormulario, tras set(...) de campos personales
+      // Mostrar foto existente (si la hay)
+      rellenarFotoDesdeAspirante(aspirante);
     }
 
     // --- Departamentos y ciudades (hay que poblar ciudades después de asignar departamento) ---
@@ -2470,7 +2489,168 @@ async function rellenarFormulario(a) {
         bloqueMetas +
         bloqueSeguridad;
     }
+    // ======= Foto de perfil: preview, upload y manejo =======
+      const photoInput = document.getElementById("photo_input");
+      const btnUploadPhoto = document.getElementById("btn-upload-photo");
+      const btnRemovePhoto = document.getElementById("btn-remove-photo");
+      const photoImg = document.getElementById("photo-img");
+      const photoPlaceholder = document.getElementById("photo-placeholder");
+      const photoStatus = document.getElementById("photo-status");
 
+      // Helper: asegurar hidden inputs foto_gcs_path y foto_public_url en el form
+      function ensureFotoHiddenInputs() {
+        const formEl = document.getElementById("hv-form");
+        if (!formEl) return {};
+        let hidPath = document.getElementById("hidden_foto_gcs_path");
+        if (!hidPath) {
+          hidPath = document.createElement("input");
+          hidPath.type = "hidden";
+          hidPath.id = "hidden_foto_gcs_path";
+          hidPath.name = "foto_gcs_path";
+          formEl.appendChild(hidPath);
+        }
+        let hidUrl = document.getElementById("hidden_foto_public_url");
+        if (!hidUrl) {
+          hidUrl = document.createElement("input");
+          hidUrl.type = "hidden";
+          hidUrl.id = "hidden_foto_public_url";
+          hidUrl.name = "foto_public_url";
+          formEl.appendChild(hidUrl);
+        }
+        return { hidPath, hidUrl };
+      }
+
+      // Mostrar preview (url puede ser dataURL o public URL)
+      function setPhotoPreview(url, gcsPath = "") {
+        const { hidPath, hidUrl } = ensureFotoHiddenInputs();
+        if (url) {
+          photoImg.src = url;
+          photoImg.style.display = "block";
+          photoPlaceholder.style.display = "none";
+          btnRemovePhoto.classList.remove("hidden");
+          if (hidPath) hidPath.value = gcsPath || "";
+          if (hidUrl) hidUrl.value = url || "";
+        } else {
+          photoImg.src = "";
+          photoImg.style.display = "none";
+          photoPlaceholder.style.display = "block";
+          btnRemovePhoto.classList.add("hidden");
+          if (hidPath) hidPath.value = "";
+          if (hidUrl) hidUrl.value = "";
+        }
+      }
+
+      // Limpiar preview y hidden inputs localmente (no borra en GCS)
+      function clearPhotoLocal() {
+        setPhotoPreview("", "");
+        photoStatus.textContent = "";
+      }
+
+      // Preview inmediato al seleccionar archivo (sin subir aún)
+      if (photoInput) {
+        photoInput.addEventListener("change", () => {
+          const f = photoInput.files && photoInput.files[0];
+          if (!f) return;
+          // Validaciones cliente
+          if (!f.type.startsWith("image/")) {
+            alert("Sólo se aceptan imágenes (jpg/png).");
+            photoInput.value = "";
+            return;
+          }
+          const maxBytes = 5 * 1024 * 1024; // 5 MB
+          if (f.size > maxBytes) {
+            alert("La imagen excede el límite de 5 MB.");
+            photoInput.value = "";
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            setPhotoPreview(ev.target.result, ""); // preview local (dataURL); gcsPath vacío hasta subir
+          };
+          reader.readAsDataURL(f);
+        });
+      }
+
+      // Upload: enviar a /api/hv/upload-photo (multipart/form-data)
+      // Requiere que server.js tenga el endpoint y permisos GCS (ya lo implementaste)
+      async function uploadPhoto() {
+        const file = photoInput.files && photoInput.files[0];
+        // Identificación: preferir el campo visible de Paso 2, si vacío usar el ingreso en sessionStorage
+        let identificacionVal = (document.getElementById("identificacion")?.value || "").trim();
+        if (!identificacionVal) {
+          identificacionVal = sessionStorage.getItem("id_ingreso") || "";
+        }
+        if (!identificacionVal) {
+          alert("Primero ingresa número de identificación (Paso 0).");
+          return;
+        }
+        if (!file) {
+          alert("Selecciona un archivo antes de subir.");
+          return;
+        }
+
+        try {
+          // UI feedback
+          btnUploadPhoto.disabled = true;
+          photoStatus.textContent = "Subiendo...";
+          const form = new FormData();
+          form.append("identificacion", identificacionVal);
+          form.append("photo", file);
+
+          const resp = await fetch("/api/hv/upload-photo", {
+            method: "POST",
+            body: form
+          });
+
+          const result = await resp.json();
+          if (!resp.ok) {
+            const msg = result && result.error ? result.error : "Error subiendo la foto";
+            throw new Error(msg);
+          }
+
+          // result debe contener foto_gcs_path y foto_public_url
+          const { foto_gcs_path, foto_public_url } = result;
+          // Actualizar preview y hidden inputs con la URL pública
+          setPhotoPreview(foto_public_url || "", foto_gcs_path || "");
+          photoStatus.textContent = "Subida correctamente.";
+        } catch (err) {
+          console.error("uploadPhoto error:", err);
+          alert("Error subiendo la foto: " + (err.message || err));
+          photoStatus.textContent = "Error al subir.";
+        } finally {
+          btnUploadPhoto.disabled = false;
+        }
+      }
+
+      if (btnUploadPhoto) btnUploadPhoto.addEventListener("click", uploadPhoto);
+
+      if (btnRemovePhoto) {
+        btnRemovePhoto.addEventListener("click", () => {
+          // Si quieres eliminar también en GCS, necesitarás endpoint DELETE — aquí solo eliminamos localmente
+          if (!confirm("¿Eliminar la foto localmente? (si ya existe en el bucket, el archivo no se borrará automáticamente)")) return;
+          clearPhotoLocal();
+          // limpiar input file
+          photoInput.value = "";
+        });
+      }
+
+      // Integración con rellenarFormulario: si aspirante tiene foto_public_url, mostrarla
+      // Busca el lugar dentro rellenarFormulario donde se setean los campos personales (ya existe)
+      function rellenarFotoDesdeAspirante(aspirante) {
+        try {
+          if (!aspirante) return;
+          const url = aspirante.foto_public_url || aspirante.foto_url || null;
+          const gcsPath = aspirante.foto_gcs_path || null;
+          if (url) {
+            setPhotoPreview(url, gcsPath || "");
+          } else {
+            // si no tiene foto, limpiar preview
+            clearPhotoLocal();
+          }
+        } catch (err) {
+          console.error("rellenarFotoDesdeAspirante error:", err);
+        }
+      }
     // RESET: dejar el formulario como al inicio para ingresar otra cédula
       function resetFormToInitialState() {
         try {
@@ -2551,6 +2731,13 @@ async function rellenarFormulario(a) {
 
           // 9) Volver al paso 0
           showStep(0);
+
+          // Limpiar preview y hidden foto al resetear
+          clearPhotoLocal();
+          const hidFotoPath = document.getElementById("hidden_foto_gcs_path");
+          if (hidFotoPath) hidFotoPath.remove();
+          const hidFotoUrl = document.getElementById("hidden_foto_public_url");
+          if (hidFotoUrl) hidFotoUrl.remove();
 
           // 10) (opcional) volver a inicializar selects si necesitas recargar opciones dinámicas
           //    Por defecto no lo hacemos porque app.js ya cargó los selects. Si observas

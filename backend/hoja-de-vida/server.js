@@ -3,6 +3,8 @@
 //  Node.js + Express + MySQL (mysql2/promise)
 //  Listo para Cloud Run
 // ==========================================================
+import multer from "multer";
+import { Storage } from "@google-cloud/storage";
 
 import express from "express";
 import cors from "cors";
@@ -40,7 +42,16 @@ async function query(sql, params = []) {
   const [rows] = await pool.query(sql, params);
   return rows;
 }
+// Multer: almacenar en memoria para subir directamente a GCS
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 } // límite 5MB (ajusta si quieres)
+});
 
+// Google Cloud Storage
+const GCS_BUCKET = process.env.GCS_BUCKET || "hojas_vida_logyser";
+const storageGcs = new Storage(); // usará credenciales por env/Workload Identity en GCP
+const bucket = storageGcs.bucket(GCS_BUCKET);
 // ==========================================
 //  ENDPOINT: Tipo de Identificación
 // ==========================================
@@ -230,6 +241,71 @@ app.get("/api/aspirante", async (req, res) => {
     res.status(500).json({ error: "Error consultando datos del aspirante" });
   }
 });
+// Endpoint: subir foto de perfil al bucket GCS
+// Recibe multipart/form-data con campos: identificacion (string) + photo (file)
+app.post("/api/hv/upload-photo", upload.single("photo"), async (req, res) => {
+  try {
+    const identificacion = req.body.identificacion;
+    const file = req.file;
+
+    if (!identificacion) {
+      return res.status(400).json({ ok: false, error: "Falta identificacion en el body" });
+    }
+    if (!file) {
+      return res.status(400).json({ ok: false, error: "Falta archivo 'photo' en el form-data" });
+    }
+
+    // Normalizar nombre de archivo y construir objeto con prefijo identificacion/
+    const safeName = file.originalname.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_\-\.]/g, "");
+    const destName = `${identificacion}/${Date.now()}_${safeName}`;
+
+    const blob = bucket.file(destName);
+    const stream = blob.createWriteStream({
+      resumable: false,
+      metadata: {
+        contentType: file.mimetype
+      }
+    });
+
+    stream.on("error", (err) => {
+      console.error("GCS upload error:", err);
+      return res.status(500).json({ ok: false, error: "Error subiendo archivo a storage" });
+    });
+
+    stream.on("finish", async () => {
+      try {
+        // Opcional: hacer público (requiere permisos). Si prefieres signed URLs, genera uno aquí en su lugar.
+        await blob.makePublic().catch(err => {
+          // si falla makePublic por permisos, lo ignoramos y devolvemos path (se puede generar signedUrl en ese caso)
+          console.warn("makePublic falló (permiso?)", err.message || err);
+        });
+
+        const publicUrl = `https://storage.googleapis.com/${GCS_BUCKET}/${encodeURIComponent(destName)}`;
+
+        // Guardar en DB: update por identificacion (si existe aspirante)
+        await pool.query(
+          `UPDATE Dynamic_hv_aspirante SET foto_gcs_path = ?, foto_public_url = ? WHERE identificacion = ?`,
+          [destName, publicUrl, identificacion]
+        );
+
+        return res.json({
+          ok: true,
+          foto_gcs_path: destName,
+          foto_public_url: publicUrl
+        });
+      } catch (err) {
+        console.error("Error post-upload:", err);
+        return res.status(500).json({ ok: false, error: "Error guardando referencia en DB" });
+      }
+    });
+
+    // Iniciar escritura
+    stream.end(file.buffer);
+  } catch (err) {
+    console.error("Error upload-photo:", err);
+    return res.status(500).json({ ok: false, error: "Error en endpoint upload-photo" });
+  }
+});
 
 // ======================================================
 //  REGISTRO COMPLETO DE HOJA DE VIDA
@@ -324,6 +400,8 @@ app.post("/api/hv/registrar", async (req, res) => {
           talla_pantalon = ?,
           camisa_talla = ?,
           zapatos_talla = ?,
+          foto_gcs_path = ?,
+          foto_public_url = ?,
           origen_registro = ?,
           medio_reclutamiento = ?,
           recomendador_aspirante = ?,
@@ -353,6 +431,8 @@ app.post("/api/hv/registrar", async (req, res) => {
           talla_pantalon || null,
           camisa_talla || null,
           zapatos_talla || null,
+          datosAspirante.foto_gcs_path || null,
+          datosAspirante.foto_public_url || null,
           origen_registro || "WEB",
           medio_reclutamiento || null,
           recomendador_aspirante || null,
@@ -397,12 +477,14 @@ app.post("/api/hv/registrar", async (req, res) => {
           talla_pantalon,
           camisa_talla,
           zapatos_talla,
+          foto_gcs_path,
+          foto_public_url,
           origen_registro,
           medio_reclutamiento,
           recomendador_aspirante,
           fecha_registro
         )
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, NOW())
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, NOW())
         `,
         [
           tipo_documento || null,
@@ -428,6 +510,8 @@ app.post("/api/hv/registrar", async (req, res) => {
           talla_pantalon || null,
           camisa_talla || null,
           zapatos_talla || null,
+          datosAspirante.foto_gcs_path || null,
+          datosAspirante.foto_public_url || null,
           origen_registro || "WEB",
           medio_reclutamiento || null,
           recomendador_aspirante || null
