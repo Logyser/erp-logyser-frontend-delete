@@ -2460,96 +2460,230 @@ async function rellenarFormulario(a) {
         bloqueSeguridad;
     }
 
+    // RESET: dejar el formulario como al inicio para ingresar otra cédula
+      function resetFormToInitialState() {
+        try {
+          // 1) Limpiar sessionStorage del ingreso previo
+          sessionStorage.removeItem("tipo_ingreso");
+          sessionStorage.removeItem("id_ingreso");
+
+          // 2) Quitar hidden inputs generados por prellenarDatosPersonales (si existen)
+          const hidTipo = document.getElementById("hidden_tipo_documento");
+          if (hidTipo) hidTipo.remove();
+          const hidId = document.getElementById("hidden_identificacion");
+          if (hidId) hidId.remove();
+
+          // 3) Re-habilitar / limpiar campos principales (Paso 2)
+          const tipoMain = document.getElementById("tipo_documento");
+          if (tipoMain) {
+            tipoMain.removeAttribute("disabled");
+            tipoMain.value = "";
+          }
+          const identMain = document.getElementById("identificacion");
+          if (identMain) {
+            identMain.removeAttribute("readonly");
+            identMain.value = "";
+          }
+
+          // 4) Limpiar inputs del Paso 0 (ingreso)
+          const tipoIngreso = document.getElementById("tipo_documento_ingreso");
+          if (tipoIngreso) tipoIngreso.value = "";
+          const identIngreso = document.getElementById("identificacion_ingreso");
+          if (identIngreso) {
+            identIngreso.value = "";
+            identIngreso.focus();
+          }
+
+          // 5) Reset general del formulario (resetea la mayoría de inputs/selects)
+          if (form) form.reset();
+
+          // 6) Reestablecer selects dependientes a su estado "selecciona..."
+          const ciudadExp = document.getElementById("ciudad_expedicion");
+          const ciudadRes = document.getElementById("ciudad_residencia");
+          if (ciudadExp) ciudadExp.innerHTML = `<option value="">Selecciona...</option>`;
+          if (ciudadRes) ciudadRes.innerHTML = `<option value="">Selecciona...</option>`;
+
+          // 7) Reset de arrays dinámicos y render
+          educacionData = [{
+            institucion: "",
+            programa: "",
+            nivel_escolaridad: "",
+            modalidad: "",
+            ano: "",
+            finalizado: "1"
+          }];
+          expData = [{
+            empresa: "",
+            cargo: "",
+            tiempo_laborado: "",
+            salario: "",
+            motivo_retiro: "",
+            funciones: ""
+          }];
+          familiaresData = [{
+            nombre_completo: "",
+            parentesco: "",
+            edad: "",
+            ocupacion: "",
+            conviven_juntos: "1"
+          }];
+
+          renderEducacion();
+          renderExp();
+          renderFamiliares();
+
+          // 8) Limpiar referencia/emer/metas/seguridad visibles (form.reset suele cubrirlo,
+          //    pero forzamos valores por si quedaron en estado diferente)
+          document.getElementById("ingreso-msg").textContent = "";
+          const preview = document.getElementById("preview-container");
+          if (preview) preview.innerHTML = "";
+
+          // 9) Volver al paso 0
+          showStep(0);
+
+          // 10) (opcional) volver a inicializar selects si necesitas recargar opciones dinámicas
+          //    Por defecto no lo hacemos porque app.js ya cargó los selects. Si observas
+          //    inconsistencia, descomenta la línea siguiente:
+          // inicializarSelects();
+
+          console.log("Formulario reseteado y listo para nuevo ingreso.");
+        } catch (err) {
+          console.error("Error al resetear formulario:", err);
+        }
+      }
+
     // Submit final
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const formData = new FormData(form);
-      const data = {};
+      // Evitar doble envío
+      if (form.dataset.submitting === "1") return;
+      form.dataset.submitting = "1";
 
-      formData.forEach((value, key) => {
-        data[key] = value;
-      });
+      // Guardar texto original del botón para restaurar luego
+      const originalSubmitHtml = btnSubmit.innerHTML;
 
-      data.educacion = recopilarEducacion();
-      data.experiencia_laboral = recopilarExp();
-      data.familiares = recopilarFamiliares();
-
-      data.referencias = [
-        {
-          tipo_referencia: "laboral",
-          empresa: ref_lab_empresa.value.trim(),
-          jefe_inmediato: ref_lab_jefe.value.trim(),
-          cargo_jefe: ref_lab_cargo.value.trim(),
-          telefono: ref_lab_tel.value.trim(),
-        },
-        {
-          tipo_referencia: "familiar",
-          nombre_completo: ref_fam_nombre.value.trim(),
-          parentesco: ref_fam_parentesco.value.trim(),
-          telefono: ref_fam_tel.value.trim(),
-          ocupacion: ref_fam_ocupacion.value.trim(),
-        },
-        {
-          tipo_referencia: "personal",
-          nombre_completo: ref_per_nombre.value.trim(),
-          relacion: ref_per_relacion.value.trim(),
-          telefono: ref_per_tel.value.trim(),
-          ocupacion: ref_per_ocupacion.value.trim(),
-        }
-      ];
-
-      data.contacto_emergencia = {
-        nombre_completo: emer_nombre.value.trim(),
-        parentesco: emer_parentesco.value.trim(),
-        telefono: emer_telefono.value.trim(),
-        correo_electronico: emer_correo.value.trim(),
-        direccion: emer_direccion.value.trim()
-      };
-
-      data.metas_personales = {
-        corto_plazo: meta_corto.value.trim(),
-        mediano_plazo: meta_mediano.value.trim(),
-        largo_plazo: meta_largo.value.trim(),
-      };
-
-      data.seguridad = {
-        llamados_atencion: seg_llamados.value,
-        detalle_llamados: seg_detalle_llamados ? seg_detalle_llamados.value.trim() : "",
-        accidente_laboral: seg_accidente.value,
-        detalle_accidente: seg_detalle_accidente ? seg_detalle_accidente.value.trim() : "",
-        enfermedad_importante: seg_enfermedad.value,
-        detalle_enfermedad: seg_detalle_enfermedad ? seg_detalle_enfermedad.value.trim() : "",
-        consume_alcohol: seg_alcohol.value,
-        frecuencia_alcohol: seg_frecuencia.value.trim(),
-        familiar_en_empresa: seg_familiar.value,
-        detalle_familiar_empresa: seg_familiar_nombre.value.trim(),
-        info_falsa: seg_falsa.value,
-        acepta_poligrafo: seg_poligrafo.value,
-        observaciones: seg_observaciones.value.trim(),
-        califica_para_cargo: seg_califica.value.trim(),
-        fortalezas: seg_fortal.value.trim(),
-        aspectos_mejorar: seg_mejorar.value.trim(),
-        resolucion_problemas: seg_resolucion.value.trim()
-      };
+      // Bloquear UI
+      btnSubmit.disabled = true;
+      btnNext.disabled = true;
+      btnPrev.disabled = true;
+      // Mostrar feedback mínimo (puedes reemplazar por un spinner si quieres)
+      btnSubmit.innerHTML = "Enviando...";
 
       try {
+        // Preparar payload como antes
+        const formData = new FormData(form);
+        const data = {};
+        formData.forEach((value, key) => {
+          data[key] = value;
+        });
+
+        data.educacion = recopilarEducacion();
+        data.experiencia_laboral = recopilarExp();
+        data.familiares = recopilarFamiliares();
+
+        data.referencias = [
+          {
+            tipo_referencia: "laboral",
+            empresa: ref_lab_empresa.value.trim(),
+            jefe_inmediato: ref_lab_jefe.value.trim(),
+            cargo_jefe: ref_lab_cargo.value.trim(),
+            telefono: ref_lab_tel.value.trim(),
+          },
+          {
+            tipo_referencia: "familiar",
+            nombre_completo: ref_fam_nombre.value.trim(),
+            parentesco: ref_fam_parentesco.value.trim(),
+            telefono: ref_fam_tel.value.trim(),
+            ocupacion: ref_fam_ocupacion.value.trim(),
+          },
+          {
+            tipo_referencia: "personal",
+            nombre_completo: ref_per_nombre.value.trim(),
+            relacion: ref_per_relacion.value.trim(),
+            telefono: ref_per_tel.value.trim(),
+            ocupacion: ref_per_ocupacion.value.trim(),
+          }
+        ];
+
+        data.contacto_emergencia = {
+          nombre_completo: emer_nombre.value.trim(),
+          parentesco: emer_parentesco.value.trim(),
+          telefono: emer_telefono.value.trim(),
+          correo_electronico: emer_correo.value.trim(),
+          direccion: emer_direccion.value.trim()
+        };
+
+        data.metas_personales = {
+          corto_plazo: meta_corto.value.trim(),
+          mediano_plazo: meta_mediano.value.trim(),
+          largo_plazo: meta_largo.value.trim(),
+        };
+
+        data.seguridad = {
+          llamados_atencion: seg_llamados.value,
+          detalle_llamados: seg_detalle_llamados ? seg_detalle_llamados.value.trim() : "",
+          accidente_laboral: seg_accidente.value,
+          detalle_accidente: seg_detalle_accidente ? seg_detalle_accidente.value.trim() : "",
+          enfermedad_importante: seg_enfermedad.value,
+          detalle_enfermedad: seg_detalle_enfermedad ? seg_detalle_enfermedad.value.trim() : "",
+          consume_alcohol: seg_alcohol.value,
+          frecuencia_alcohol: seg_frecuencia.value.trim(),
+          familiar_en_empresa: seg_familiar.value,
+          detalle_familiar_empresa: seg_familiar_nombre.value.trim(),
+          info_falsa: seg_falsa.value,
+          acepta_poligrafo: seg_poligrafo.value,
+          observaciones: seg_observaciones.value.trim(),
+          califica_para_cargo: seg_califica.value.trim(),
+          fortalezas: seg_fortal.value.trim(),
+          aspectos_mejorar: seg_mejorar.value.trim(),
+          resolucion_problemas: seg_resolucion.value.trim()
+        };
+
+        // Timeout: 30 segundos (ajusta si prefieres otro valor)
+        const controller = new AbortController();
+        const timeoutMs = 30000;
+        const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
         const resp = await fetch("/api/hv/registrar", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
+          body: JSON.stringify(data),
+          signal: controller.signal
         });
+
+        clearTimeout(timeout);
 
         const result = await resp.json();
 
         if (resp.ok && result.ok) {
           alert("✔ Hoja de vida registrada correctamente.\nID: " + result.id_aspirante);
+          // volver al inicio y limpiar (función que ya implementaste)
+          if (typeof resetFormToInitialState === "function") {
+            resetFormToInitialState();
+          } else {
+            // fallback: recargar la página si no existe la función
+            location.reload();
+          }
         } else {
-          alert("⚠ Ocurrió un error guardando la hoja de vida.");
+          const msg = (result && result.error) ? result.error : "Ocurrió un error guardando la hoja de vida.";
+          alert("⚠ " + msg);
         }
       } catch (err) {
-        console.error(err);
-        alert("⚠ Error de conexión con el servidor.");
+        console.error("Error en submit HV:", err);
+        if (err.name === "AbortError") {
+          alert("⚠ Tiempo de espera agotado (30s). Intenta nuevamente.");
+        } else {
+          alert("⚠ Error de conexión con el servidor.");
+        }
+      } finally {
+        // Desbloquear UI (si resetFormToInitialState ya navegó al paso 0, esto es inofensivo)
+        form.dataset.submitting = "0";
+        btnSubmit.disabled = false;
+        btnNext.disabled = false;
+        // btnPrev solo si estamos en paso 0 quedará deshabilitado por showStep
+        btnPrev.disabled = currentStep === 0;
+        btnSubmit.innerHTML = originalSubmitHtml;
       }
     });
 
