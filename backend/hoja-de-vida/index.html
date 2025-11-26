@@ -2043,15 +2043,6 @@ async function rellenarFormulario(a) {
           edadInput.value = calcularEdadDesdeFecha(value);
         });
       }
-      const birthDate = new Date(value);
-      const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-      edadInput.value = age >= 0 ? age : "";
-    });
 
     // Navegación
     // Registrar el listener del botón "Anterior" UNA VEZ (corrección)
