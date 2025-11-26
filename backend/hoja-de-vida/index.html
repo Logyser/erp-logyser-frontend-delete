@@ -1808,31 +1808,30 @@
     });
 
     // Navegación
+    // Registrar el listener del botón "Anterior" UNA VEZ (corrección)
+    btnPrev.addEventListener("click", () => {
+      if (currentStep > 0) {
+        showStep(currentStep - 1);
+      }
+    });
+
     btnNext.addEventListener("click", async () => {
-      // Botón Anterior
-btnPrev.addEventListener("click", () => {
-  if (currentStep > 0) {
-    showStep(currentStep - 1);
-  }
-});
+      if (currentStep === 0) {
 
+        const ok = await validarIngreso();
+        if (!ok) return;
 
-  if (currentStep === 0) {
+        // Guardar valores solo cuando VALIDÓ y va a pasar al paso 1
+        sessionStorage.setItem("tipo_ingreso", tipoDocumentoIngreso.value.trim());
+        sessionStorage.setItem("id_ingreso", identificacionIngreso.value.trim());
+      }
 
-    const ok = await validarIngreso();
-    if (!ok) return;
+      if (!validateStep(currentStep)) return;
 
-    // Guardar valores solo cuando VALIDÓ y va a pasar al paso 1
-    sessionStorage.setItem("tipo_ingreso", tipoDocumentoIngreso.value.trim());
-    sessionStorage.setItem("id_ingreso", identificacionIngreso.value.trim());
-  }
-
-  if (!validateStep(currentStep)) return;
-
-  if (currentStep < steps.length - 1) {
-    showStep(currentStep + 1);
-  }
-});
+      if (currentStep < steps.length - 1) {
+        showStep(currentStep + 1);
+      }
+    });
 
 
     // Construcción de PREVIEW (Opción C)
@@ -2329,4 +2328,3 @@ async function cargarTiposPaso0() {
 </script>
 </body>
 </html>
-

@@ -4,16 +4,21 @@
   <meta charset="UTF-8" />
   <title>Registro Hoja de Vida - Logyser</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
     :root {
       --primary: #000b59;
       --primary-light: #1c2a80;
       --accent: #f55400;
       --bg: #f5f7fb;
+      --bg-soft: #f0f2fb;
       --text: #222;
+      --muted: #6b6b6b;
       --border: #d0d4e0;
       --error: #c0392b;
-      --radius: 10px;
+      --radius: 12px;
+      --radius-lg: 18px;
+      --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
 
     * {
@@ -30,15 +35,21 @@
 
     .page {
       max-width: 960px;
-      margin: 24px auto;
-      padding: 16px;
+      margin: 0 auto;
+      padding: 12px;
     }
 
     .card {
       background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-      padding: 24px 28px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      padding: 20px 18px 90px;
+    }
+
+    @media (min-width: 720px) {
+      .card {
+        padding: 24px 26px 26px;
+      }
     }
 
     h1 {
@@ -49,25 +60,61 @@
 
     .subtitle {
       margin-top: 4px;
-      margin-bottom: 20px;
-      color: #555;
+      margin-bottom: 16px;
+      color: var(--muted);
       font-size: 0.95rem;
     }
 
-    /* Stepper */
+    /* HEADER */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 4px;
+    }
+
+    .header img {
+      height: 44px;
+      width: auto;
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        padding: 0;
+      }
+      .card {
+        border-radius: 0;
+        min-height: 100vh;
+      }
+
+      .header {
+        gap: 10px;
+      }
+
+      h1 {
+        font-size: 1.4rem;
+      }
+
+      .subtitle {
+        font-size: 0.85rem;
+      }
+    }
+
+    /* STEPPER */
     .stepper {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
       position: relative;
+      padding: 0 2px;
     }
 
     .stepper::before {
       content: "";
       position: absolute;
       top: 50%;
-      left: 24px;
-      right: 24px;
+      left: 32px;
+      right: 32px;
       height: 2px;
       background: #e0e3ee;
       transform: translateY(-50%);
@@ -79,13 +126,13 @@
       z-index: 1;
       flex: 1;
       text-align: center;
-      font-size: 0.75rem;
-      color: #888;
+      font-size: 0.7rem;
+      color: #9aa0b8;
     }
 
     .step-number {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
       margin: 0 auto 4px;
       display: flex;
@@ -95,6 +142,12 @@
       color: #555;
       font-weight: 600;
       font-size: 0.8rem;
+    }
+
+    .step-label {
+      max-width: 110px;
+      margin: 0 auto;
+      line-height: 1.2;
     }
 
     .step.active .step-number {
@@ -112,14 +165,27 @@
       font-weight: 600;
     }
 
-    .step-label {
-      max-width: 120px;
-      margin: 0 auto;
+    @media (max-width: 720px) {
+      .stepper {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 4px;
+        scrollbar-width: thin;
+      }
+
+      .stepper::before {
+        display: none;
+      }
+
+      .step {
+        display: inline-block;
+        min-width: 80px;
+      }
     }
 
-    /* Form */
+    /* FORM */
     form {
-      margin-top: 8px;
+      margin-top: 4px;
     }
 
     .form-step {
@@ -142,19 +208,28 @@
       }
     }
 
+    .step-title {
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--primary);
+      font-size: 1.05rem;
+    }
+
+    .help-text {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px 20px;
+      gap: 14px 18px;
     }
 
     @media (max-width: 720px) {
       .grid {
         grid-template-columns: 1fr;
-      }
-      .stepper::before {
-        left: 16px;
-        right: 16px;
       }
     }
 
@@ -180,34 +255,36 @@
     input[type="tel"],
     input[type="date"],
     input[type="number"],
-    select {
-      padding: 8px 10px;
+    select,
+    textarea {
+      padding: 10px 12px;
       border-radius: var(--radius);
       border: 1px solid var(--border);
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       outline: none;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease,
+        background 0.16s ease;
       background: #fdfdff;
+      width: 100%;
+      resize: vertical;
+      min-height: 42px;
     }
 
     input:focus,
-    select:focus {
+    select:focus,
+    textarea:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(0, 11, 89, 0.16);
+      box-shadow: 0 0 0 2px rgba(0, 11, 89, 0.18);
       background: #fff;
+    }
+
+    textarea {
+      min-height: 70px;
+      font-size: 0.9rem;
     }
 
     .field-small {
       max-width: 180px;
-    }
-
-    .help-text {
-      font-size: 0.75rem;
-      color: #777;
-    }
-
-    .hidden {
-      display: none !important;
     }
 
     .error-message {
@@ -216,18 +293,22 @@
       font-size: 0.8rem;
     }
 
-    /* Buttons */
+    .hidden {
+      display: none !important;
+    }
+
+    /* BOTONES */
     .buttons {
       display: flex;
       justify-content: space-between;
-      margin-top: 24px;
-      gap: 12px;
+      margin-top: 20px;
+      gap: 10px;
       flex-wrap: wrap;
     }
 
     .btn {
       border-radius: 999px;
-      padding: 8px 18px;
+      padding: 9px 18px;
       border: none;
       font-size: 0.9rem;
       cursor: pointer;
@@ -235,14 +316,14 @@
       align-items: center;
       gap: 6px;
       transition: background 0.15s ease, transform 0.05s ease,
-        box-shadow 0.15s ease;
+        box-shadow 0.15s ease, opacity 0.15s ease;
       white-space: nowrap;
     }
 
     .btn-primary {
       background: var(--primary);
       color: #fff;
-      box-shadow: 0 4px 10px rgba(0, 11, 89, 0.3);
+      box-shadow: 0 4px 14px rgba(0, 11, 89, 0.3);
     }
 
     .btn-primary:hover {
@@ -270,253 +351,259 @@
       box-shadow: none;
     }
 
-    .step-title {
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: var(--primary);
-      font-size: 1.05rem;
-    }
-
-      @media (max-width: 720px) {
-    .page {
-      margin: 0;
-      padding: 0;
-    }
-    .card {
-      border-radius: 0;
-      padding: 20px 16px;
-    }
-    }
-
-      @media (max-width: 720px) {
-    .buttons {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #fff;
-      padding: 10px 16px;
-      border-top: 1px solid #ddd;
-      z-index: 999;
-    }
-    .card {
-      padding-bottom: 80px !important; /* espacio para los botones */
-    }
-    }
-
     @media (max-width: 720px) {
-    input, select {
-      height: 46px;
-      font-size: 1rem;
-    }
-    }
-
-      @media (max-width: 720px) {
-    .stepper {
-      overflow-x: auto;
-      white-space: nowrap;
-      padding-bottom: 6px;
-      scrollbar-width: thin;
-    }
-
-    .step {
-      display: inline-block;
-      min-width: 90px;
-    }
-
-    .stepper::before {
-      display: none;
-    }
+      .buttons {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.98);
+        padding: 10px 14px;
+        border-top: 1px solid #ddd;
+        z-index: 999;
+      }
+      .card {
+        padding-bottom: 90px;
+      }
+      .btn-primary {
+        padding: 11px 22px;
+        border-radius: 12px;
+        font-size: 1rem;
+      }
     }
 
-      @media (max-width: 720px) {
-    h1 {
-      font-size: 1.3rem;
-    }
-    .step-title {
-      font-size: 1rem;
-    }
-    }
-
-      @media (max-width: 720px) {
-    .btn-primary {
-      font-size: 1.05rem;
-      padding: 12px 20px;
-      border-radius: 12px;
-    }
-    }
-
-        .educ-card {
-      background: #f8f9ff;
-      border: 1px solid #d9dbe8;
-      padding: 14px 18px;
+    /* CARDS DINÁMICAS (Educación / Exp / Familia) */
+    .educ-card,
+    .exp-card,
+    .fam-card {
       border-radius: 14px;
-      margin-top: 16px;
+      padding: 14px 16px;
+      margin-top: 12px;
+      border: 1px solid #d9dbe8;
     }
 
-    .educ-grid {
+    .educ-card {
+      background: #f6f7ff;
+      border-color: #d1d5ff;
+    }
+
+    .exp-card {
+      background: #fff7f0;
+      border-color: #ffd8b3;
+    }
+
+    .fam-card {
+      background: #eef7ff;
+      border-color: #bcd9ff;
+    }
+
+    .educ-grid,
+    .exp-grid,
+    .fam-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 14px 18px;
+      gap: 12px 16px;
     }
 
     @media (max-width: 720px) {
-      .educ-grid {
+      .educ-grid,
+      .exp-grid,
+      .fam-grid {
         grid-template-columns: 1fr;
       }
     }
 
-    .educ-remove {
+    .educ-remove,
+    .exp-remove,
+    .fam-remove {
       background: #ffe6e6;
       border: 1px solid #ffbdbd;
       color: #a30000;
       padding: 6px 10px;
-      border-radius: 10px;
-      font-size: 0.75rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
       cursor: pointer;
       margin-top: 8px;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
 
-    .exp-card {
-  background: #fff7f0;
-  border: 1px solid #ffd8b3;
-  padding: 16px;
-  border-radius: 14px;
-  margin-top: 16px;
-}
-
-  .exp-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px 18px;
-  }
-
-  @media (max-width: 720px) {
-    .exp-grid {
-      grid-template-columns: 1fr;
+    /* REFERENCIAS CARDS */
+    .ref-card {
+      background: #fdfcff;
+      border-radius: 14px;
+      border: 1px solid #dde1f0;
+      padding: 12px 14px;
+      margin-top: 14px;
     }
-  }
 
-  .exp-remove {
-    background: #ffe6e6;
-    border: 1px solid #ffbdbd;
-    color: #a30000;
-    padding: 6px 10px;
-    border-radius: 10px;
-    font-size: 0.75rem;
-    cursor: pointer;
-    margin-top: 8px;
-    display: inline-block;
-  }
-
-    .fam-card {
-    background: #eef7ff;
-    border: 1px solid #bcd9ff;
-    padding: 16px;
-    border-radius: 14px;
-    margin-top: 16px;
-  }
-
-  .fam-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px 18px;
-  }
-
-  @media (max-width: 720px) {
-    .fam-grid {
-      grid-template-columns: 1fr;
+    .ref-card h4 {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      color: var(--primary);
     }
-  }
 
-  .fam-remove {
-    background: #ffe6e6;
-    border: 1px solid #ffbdbd;
-    color: #a30000;
-    padding: 6px 10px;
-    border-radius: 10px;
-    font-size: 0.75rem;
-    cursor: pointer;
-    margin-top: 8px;
-    display: inline-block;
-  }
+    /* PREVIEW */
+    .preview-container {
+      margin-top: 8px;
+      border-radius: 14px;
+      background: var(--bg-soft);
+      padding: 10px 10px 4px;
+      border: 1px solid #dde0f0;
+      max-height: 55vh;
+      overflow-y: auto;
+    }
+
+    .preview-section {
+      margin-bottom: 8px;
+    }
+
+    .preview-section details {
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid #e1e4f5;
+      padding: 8px 10px;
+    }
+
+    .preview-section summary {
+      list-style: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .preview-section summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .preview-pill {
+      display: inline-flex;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #f3f4ff;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-left: 8px;
+    }
+
+    .preview-content {
+      margin-top: 6px;
+      font-size: 0.86rem;
+      color: #333;
+    }
+
+    .preview-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 4px;
+      font-size: 0.82rem;
+    }
+
+    .preview-label {
+      font-weight: 600;
+      color: #555;
+    }
+
+    .preview-value {
+      text-align: right;
+      color: #222;
+    }
+
+    @media (max-width: 720px) {
+      .preview-row {
+        flex-direction: column;
+        text-align: left;
+      }
+
+      .preview-value {
+        text-align: left;
+      }
+    }
+    .field-help {
+      font-size: 0.85rem;
+      color: #555;
+      margin-top: -5px;
+      margin-bottom: 8px;
+    }
   </style>
 </head>
 <body>
   <div class="page">
     <div class="card">
-
-      <div style="display:flex; align-items:center; gap:16px; margin-bottom:10px;">
-  <img src="https://storage.googleapis.com/encuesta_satisfaccion/logo.png"
-       alt="Logo Logyser"
-       style="height:48px; width:auto;" />
-  <h1 style="margin:0;">Registro de Hoja de Vida</h1>
-</div>
-
-      <p class="subtitle">
-        Completa los pasos para registrar tu información. Podrás actualizar tu
-        hoja de vida más adelante usando tu número de identificación.
-      </p>
+      <div class="header">
+        <img src="https://storage.googleapis.com/encuesta_satisfaccion/logo.png"
+             alt="Logo Logyser" />
+        <div>
+          <h1>Registro de Hoja de Vida</h1>
+          <p class="subtitle">
+            Diligencia tu información en pocos pasos. Si ya te has registrado antes,
+            podrás actualizar tus datos con tu número de identificación.
+          </p>
+        </div>
+      </div>
 
       <!-- STEPPER -->
       <div class="stepper" id="stepper">
+        <div class="step active" data-step="0">
+          <div class="step-number">1</div>
+          <div class="step-label">Ingreso</div>
+        </div>
 
-      <div class="step active" data-step="0">
-        <div class="step-number">1</div>
-        <div class="step-label">Ingreso</div>
+        <div class="step" data-step="1">
+          <div class="step-number">2</div>
+          <div class="step-label">Medio de reclutamiento</div>
+        </div>
+
+        <div class="step" data-step="2">
+          <div class="step-number">3</div>
+          <div class="step-label">Datos personales</div>
+        </div>
+
+        <div class="step" data-step="3">
+          <div class="step-number">4</div>
+          <div class="step-label">Educación</div>
+        </div>
+
+        <div class="step" data-step="4">
+          <div class="step-number">5</div>
+          <div class="step-label">Experiencia</div>
+        </div>
+
+        <div class="step" data-step="5">
+          <div class="step-number">6</div>
+          <div class="step-label">Familia / Referencias</div>
+        </div>
+
+        <div class="step" data-step="6">
+          <div class="step-number">7</div>
+          <div class="step-label">Emergencia / Metas</div>
+        </div>
+
+        <div class="step" data-step="7">
+          <div class="step-number">8</div>
+          <div class="step-label">Cuestionario</div>
+        </div>
+
+        <div class="step" data-step="8">
+          <div class="step-number">9</div>
+          <div class="step-label">Revisión</div>
+        </div>
       </div>
 
-      <div class="step" data-step="1">
-        <div class="step-number">2</div>
-        <div class="step-label">Medio de reclutamiento</div>
-      </div>
-
-      <div class="step" data-step="2">
-        <div class="step-number">3</div>
-        <div class="step-label">Datos personales</div>
-      </div>
-
-      <div class="step" data-step="3">
-        <div class="step-number">4</div>
-        <div class="step-label">Educación</div>
-      </div>
-
-      <div class="step" data-step="4">
-        <div class="step-number">5</div>
-        <div class="step-label">Experiencia</div>
-      </div>
-
-      <div class="step" data-step="5">
-        <div class="step-number">6</div>
-        <div class="step-label">Familia / Referencias</div>
-      </div>
-
-      <div class="step" data-step="6">
-        <div class="step-number">7</div>
-        <div class="step-label">Emergencia / Metas</div>
-      </div>
-
-      <div class="step" data-step="7">
-        <div class="step-number">8</div>
-        <div class="step-label">Cuestionario personal</div>
-      </div>
-
-      <div class="step" data-step="8">
-        <div class="step-number">9</div>
-        <div class="step-label">Revisión</div>
-      </div>
-
-    </div>
-      
       <!-- FORM -->
       <form id="hv-form">
-
         <!-- PASO 0: INGRESO -->
         <div class="form-step active" data-step="0">
           <div class="step-title">Ingreso al formulario</div>
           <p class="help-text">
-            Digita tu número de identificación para validar si ya tienes información registrada.
+            Ingresa tu tipo y número de identificación. Si ya tienes información registrada,
+            la cargaremos automáticamente para que solo actualices lo que haga falta.
           </p>
 
           <div class="grid">
@@ -525,12 +612,8 @@
                 Tipo de identificación <span class="required">*</span>
               </label>
               <select id="tipo_documento_ingreso" data-required="true">
-                <option value="">Selecciona...</option>
-                <option value="CC">Cédula de ciudadanía</option>
-                <option value="CE">Cédula de extranjería</option>
-                <option value="TI">Tarjeta de identidad</option>
-                <option value="PAS">Pasaporte</option>
-              </select>
+              <option value="">Selecciona...</option>
+            </select>
             </div>
 
             <div class="field">
@@ -543,7 +626,6 @@
 
           <div id="ingreso-msg" class="error-message" style="margin-top:10px;"></div>
         </div>
-
 
         <!-- PASO 1: MEDIO DE RECLUTAMIENTO -->
         <div class="form-step" data-step="1">
@@ -568,12 +650,11 @@
                 <option value="otro">Otro</option>
               </select>
               <div class="help-text">
-                Esta información ayuda a mejorar nuestros canales de
-                reclutamiento.
+                Esta información nos ayuda a mejorar nuestros canales de reclutamiento.
               </div>
             </div>
 
-            <div class="field" id="campo-recomendador" class="hidden">
+            <div class="field hidden" id="campo-recomendador">
               <label for="recomendador_aspirante">
                 ¿Quién te recomendó? / Nombre del contacto
               </label>
@@ -583,13 +664,9 @@
                 name="recomendador_aspirante"
                 placeholder="Nombre de la persona o entidad"
               />
-              <div class="help-text">
-                Diligencia este campo solo si fuiste recomendado o vienes por un
-                contacto específico.
-              </div>
             </div>
           </div>
-          <div id="error-step-0" class="error-message"></div>
+          <div id="error-step-1" class="error-message"></div>
         </div>
 
         <!-- PASO 2: DATOS PERSONALES -->
@@ -601,17 +678,13 @@
                 Tipo de identificación <span class="required">*</span>
               </label>
               <select
-                id="tipo_documento"
-                name="tipo_documento"
-                data-required="true"
-              >
-                <option value="">Selecciona una opción</option>
-                <option value="CC">Cédula de ciudadanía</option>
-                <option value="CE">Cédula de extranjería</option>
-                <option value="PEP">PEP</option>
-                <option value="PPT">PPT</option>
-                <option value="PAS">Pasaporte</option>
-              </select>
+              id="tipo_documento"
+              name="tipo_documento"
+              data-required="true"
+            >
+              <option value="">Selecciona...</option>
+            </select>
+
             </div>
 
             <div class="field">
@@ -687,7 +760,6 @@
                 id="edad"
                 name="edad"
                 readonly
-                class="readonly"
               />
               <div class="help-text">
                 Se calcula automáticamente a partir de tu fecha de nacimiento.
@@ -698,6 +770,7 @@
               <label for="departamento_expedicion">
                 Departamento de expedición <span class="required">*</span>
               </label>
+              <p class="field-help">Si se expidió en Bogotá, escoge D.C</p>
               <select id="departamento_expedicion" data-required="true"></select>
             </div>
 
@@ -705,6 +778,9 @@
               <label for="ciudad_expedicion">
                 Ciudad de expedición <span class="required">*</span>
               </label>
+
+              <p class="field-help">&nbsp;</p>
+
               <select id="ciudad_expedicion" data-required="true"></select>
             </div>
 
@@ -855,331 +931,310 @@
               />
             </div>
           </div>
-          <div id="error-step-1" class="error-message"></div>
+          <div id="error-step-2" class="error-message"></div>
         </div>
 
-        <!-- PASOS FUTUROS (3–7): ESTRUCTURA VACÍA POR AHORA -->
+        <!-- PASO 3: EDUCACIÓN -->
         <div class="form-step" data-step="3">
-  <div class="step-title">Paso 3: Educación</div>
+          <div class="step-title">Paso 3: Educación</div>
+          <p class="help-text">
+            Registra tus estudios realizados. Puedes agregar todos los que necesites.
+          </p>
 
-  <p class="help-text">
-    Registra tus estudios realizados. Puedes agregar todos los que necesites.
-  </p>
+          <div id="educacion-list"></div>
 
-  <!-- Contenedor donde aparecerán los estudios -->
-  <div id="educacion-list"></div>
+          <button type="button" class="btn btn-primary" id="btn-add-educacion" style="margin-top: 10px;">
+            ➕ Agregar estudio
+          </button>
 
-  <!-- Botón agregar -->
-  <button type="button" class="btn btn-primary" id="btn-add-educacion" style="margin-top: 16px;">
-    ➕ Agregar estudio
-  </button>
-
-  <!-- Error -->
-  <div id="error-step-2" class="error-message"></div>
-</div>
-
-<div class="form-step" data-step="4">
-  <div class="step-title">Paso 4: Experiencia laboral</div>
-
-  <p class="help-text">
-    Registra tus empleos anteriores. Puedes agregar tantos como necesites.
-  </p>
-
-  <!-- Contenedor donde aparecerán las experiencias -->
-  <div id="exp-list"></div>
-
-  <!-- Botón agregar -->
-  <button type="button" class="btn btn-primary" id="btn-add-exp" style="margin-top: 16px;">
-    ➕ Agregar experiencia laboral
-  </button>
-
-  <!-- Error -->
-  <div id="error-step-3" class="error-message"></div>
-</div>
-
-
-    <div class="form-step" data-step="5">
-  <div class="step-title">Paso 5: Familiares</div>
-
-  <p class="help-text">
-    Puedes agregar todos los familiares que desees registrar.
-  </p>
-
-  <!-- Contenedor dinámico -->
-  <div id="fam-list"></div>
-
-  <!-- Botón agregar -->
-  <button type="button" class="btn btn-primary" id="btn-add-fam" style="margin-top: 16px;">
-    ➕ Agregar familiar
-  </button>
-
-  <div id="error-step-4" class="error-message" style="margin-top: 10px;"></div>
-
-  <!-- IMPORTANTE: Referencias van detrás de familiares -->
-  <div id="ref-container" style="margin-top: 40px;">
-    <div class="step-title">Referencias</div>
-
-    <!-- Laboral -->
-    <div class="card" style="margin-top:14px; border:1px solid #cce;">
-      <h4>Referencia laboral</h4>
-
-      <div class="grid">
-        <div class="field">
-          <label>Empresa</label>
-          <input type="text" id="ref_lab_empresa">
+          <div id="error-step-3" class="error-message"></div>
         </div>
-        <div class="field">
-          <label>Jefe inmediato</label>
-          <input type="text" id="ref_lab_jefe">
-        </div>
-        <div class="field">
-          <label>Cargo</label>
-          <input type="text" id="ref_lab_cargo">
-        </div>
-        <div class="field">
-          <label>Teléfono</label>
-          <input type="text" id="ref_lab_tel">
-        </div>
-      </div>
-    </div>
 
-    <!-- Familiar -->
-    <div class="card" style="margin-top:14px; border:1px solid #cce;">
-      <h4>Referencia familiar</h4>
+        <!-- PASO 4: EXPERIENCIA -->
+        <div class="form-step" data-step="4">
+          <div class="step-title">Paso 4: Experiencia laboral</div>
+          <p class="help-text">
+            Registra tus empleos anteriores. Puedes agregar tantos como necesites.
+          </p>
 
-      <div class="grid">
-        <div class="field">
-          <label>Nombre</label>
-          <input type="text" id="ref_fam_nombre">
-        </div>
-        <div class="field">
-          <label>Parentesco</label>
-          <input type="text" id="ref_fam_parentesco">
-        </div>
-        <div class="field">
-          <label>Teléfono</label>
-          <input type="text" id="ref_fam_tel">
-        </div>
-        <div class="field">
-          <label>Ocupación</label>
-          <input type="text" id="ref_fam_ocupacion">
-        </div>
-      </div>
-    </div>
+          <div id="exp-list"></div>
 
-    <!-- Personal -->
-    <div class="card" style="margin-top:14px; border:1px solid #cce;">
-      <h4>Referencia personal</h4>
+          <button type="button" class="btn btn-primary" id="btn-add-exp" style="margin-top: 10px;">
+            ➕ Agregar experiencia laboral
+          </button>
 
-      <div class="grid">
-        <div class="field">
-          <label>Nombre</label>
-          <input type="text" id="ref_per_nombre">
+          <div id="error-step-4" class="error-message"></div>
         </div>
-        <div class="field">
-          <label>Relación</label>
-          <input type="text" id="ref_per_relacion">
-        </div>
-        <div class="field">
-          <label>Teléfono</label>
-          <input type="text" id="ref_per_tel">
-        </div>
-        <div class="field">
-          <label>Ocupación</label>
-          <input type="text" id="ref_per_ocupacion">
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
+        <!-- PASO 5: FAMILIA + REFERENCIAS -->
+        <div class="form-step" data-step="5">
+          <div class="step-title">Paso 5: Familiares y referencias</div>
 
+          <p class="help-text">
+            Registra tu núcleo familiar y las referencias que podamos contactar.
+          </p>
+
+          <!-- Familiares -->
+          <div id="fam-list"></div>
+
+          <button type="button" class="btn btn-primary" id="btn-add-fam" style="margin-top: 10px;">
+            ➕ Agregar familiar
+          </button>
+
+          <div id="error-step-5" class="error-message" style="margin-top: 10px;"></div>
+
+          <!-- Referencias -->
+          <div style="margin-top: 28px;">
+            <div class="step-title">Referencias</div>
+
+            <div class="ref-card">
+              <h4>Referencia laboral</h4>
+              <div class="grid">
+                <div class="field">
+                  <label>Empresa</label>
+                  <input type="text" id="ref_lab_empresa" />
+                </div>
+                <div class="field">
+                  <label>Jefe inmediato</label>
+                  <input type="text" id="ref_lab_jefe" />
+                </div>
+                <div class="field">
+                  <label>Cargo</label>
+                  <input type="text" id="ref_lab_cargo" />
+                </div>
+                <div class="field">
+                  <label>Teléfono</label>
+                  <input type="text" id="ref_lab_tel" />
+                </div>
+              </div>
+            </div>
+
+            <div class="ref-card">
+              <h4>Referencia familiar</h4>
+              <div class="grid">
+                <div class="field">
+                  <label>Nombre</label>
+                  <input type="text" id="ref_fam_nombre" />
+                </div>
+                <div class="field">
+                  <label>Parentesco</label>
+                  <input type="text" id="ref_fam_parentesco" />
+                </div>
+                <div class="field">
+                  <label>Teléfono</label>
+                  <input type="text" id="ref_fam_tel" />
+                </div>
+                <div class="field">
+                  <label>Ocupación</label>
+                  <input type="text" id="ref_fam_ocupacion" />
+                </div>
+              </div>
+            </div>
+
+            <div class="ref-card">
+              <h4>Referencia personal</h4>
+              <div class="grid">
+                <div class="field">
+                  <label>Nombre</label>
+                  <input type="text" id="ref_per_nombre" />
+                </div>
+                <div class="field">
+                  <label>Relación</label>
+                  <input type="text" id="ref_per_relacion" />
+                </div>
+                <div class="field">
+                  <label>Teléfono</label>
+                  <input type="text" id="ref_per_tel" />
+                </div>
+                <div class="field">
+                  <label>Ocupación</label>
+                  <input type="text" id="ref_per_ocupacion" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PASO 6: EMERGENCIA + METAS -->
         <div class="form-step" data-step="6">
-  <div class="step-title">Paso 6: Contacto de emergencia</div>
+          <div class="step-title">Paso 6: Contacto de emergencia y metas</div>
 
-  <div class="grid">
-    <div class="field">
-      <label>Nombre completo</label>
-      <input type="text" id="emer_nombre">
-    </div>
+          <p class="help-text">
+            Indica a quién debemos contactar en caso de emergencia y cuéntanos tus metas.
+          </p>
 
-    <div class="field">
-      <label>Parentesco</label>
-      <input type="text" id="emer_parentesco">
-    </div>
+          <div class="grid">
+            <div class="field">
+              <label>Nombre completo (emergencia)</label>
+              <input type="text" id="emer_nombre" />
+            </div>
 
-    <div class="field">
-      <label>Teléfono</label>
-      <input type="text" id="emer_telefono">
-    </div>
+            <div class="field">
+              <label>Parentesco</label>
+              <input type="text" id="emer_parentesco" />
+            </div>
 
-    <div class="field">
-      <label>Correo electrónico</label>
-      <input type="email" id="emer_correo">
-    </div>
+            <div class="field">
+              <label>Teléfono</label>
+              <input type="tel" id="emer_telefono" />
+            </div>
 
-    <div class="field" style="grid-column:span 2;">
-      <label>Dirección</label>
-      <input type="text" id="emer_direccion">
-    </div>
-  </div>
+            <div class="field">
+              <label>Correo electrónico</label>
+              <input type="email" id="emer_correo" />
+            </div>
 
-  <div style="margin-top:24px;">
-  <div class="step-title">Metas personales</div>
+            <div class="field" style="grid-column:span 2;">
+              <label>Dirección</label>
+              <input type="text" id="emer_direccion" />
+            </div>
+          </div>
 
-  <div class="field">
-    <label>Corto plazo</label>
-    <textarea id="meta_corto" rows="2"></textarea>
-  </div>
+          <div style="margin-top: 20px;">
+            <div class="step-title">Metas personales</div>
 
-  <div class="field">
-    <label>Mediano plazo</label>
-    <textarea id="meta_mediano" rows="2"></textarea>
-  </div>
+            <div class="field">
+              <label>Corto plazo</label>
+              <textarea id="meta_corto" rows="2"></textarea>
+            </div>
 
-  <div class="field">
-    <label>Largo plazo</label>
-    <textarea id="meta_largo" rows="2"></textarea>
-  </div>
-</div>
+            <div class="field">
+              <label>Mediano plazo</label>
+              <textarea id="meta_mediano" rows="2"></textarea>
+            </div>
 
-</div>
+            <div class="field">
+              <label>Largo plazo</label>
+              <textarea id="meta_largo" rows="2"></textarea>
+            </div>
+          </div>
+        </div>
 
+        <!-- PASO 7: CUESTIONARIO PERSONAL -->
         <div class="form-step" data-step="7">
-  <div class="step-title">Paso 7: Cuestionario personal y seguridad</div>
+          <div class="step-title">Paso 7: Cuestionario personal y seguridad</div>
+          <p class="help-text">
+            Responde con sinceridad. Esta información es confidencial y se usa solo para el proceso.
+          </p>
 
-  <p class="help-text">Responde con sinceridad. Esta información no afecta tu postulación, pero es importante para el proceso.</p>
+          <div class="grid">
+            <div class="field">
+              <label>¿Has tenido llamados de atención?</label>
+              <select id="seg_llamados">
+                <option value="0">No</option>
+                <option value="1">Sí</option>
+              </select>
+            </div>
 
-  <div class="grid">
+            <div class="field hidden" id="detalle_llamados_wrap">
+              <label>Describe los llamados de atención</label>
+              <textarea id="seg_detalle_llamados" rows="2"></textarea>
+            </div>
 
-    <!-- LLAMADOS DE ATENCIÓN -->
-    <div class="field">
-      <label>¿Has tenido llamados de atención?</label>
-      <select id="seg_llamados">
-        <option value="0">No</option>
-        <option value="1">Sí</option>
-      </select>
-    </div>
+            <div class="field">
+              <label>¿Has sufrido accidente laboral?</label>
+              <select id="seg_accidente">
+                <option value="0">No</option>
+                <option value="1">Sí</option>
+              </select>
+            </div>
 
-    <div class="field hidden" id="detalle_llamados_wrap">
-      <label>Describe los llamados de atención</label>
-      <textarea id="seg_detalle_llamados" rows="2"></textarea>
-    </div>
+            <div class="field hidden" id="detalle_accidente_wrap">
+              <label>Describe el accidente o enfermedad laboral</label>
+              <textarea id="seg_detalle_accidente" rows="2"></textarea>
+            </div>
 
-    <!-- ACCIDENTE LABORAL -->
-    <div class="field">
-      <label>¿Has sufrido accidente laboral?</label>
-      <select id="seg_accidente">
-        <option value="0">No</option>
-        <option value="1">Sí</option>
-      </select>
-    </div>
+            <div class="field">
+              <label>¿Tienes alguna enfermedad importante?</label>
+              <select id="seg_enfermedad">
+                <option value="0">No</option>
+                <option value="1">Sí</option>
+              </select>
+            </div>
 
-    <div class="field hidden" id="detalle_accidente_wrap">
-      <label>Describe el accidente o enfermedad laboral</label>
-      <textarea id="seg_detalle_accidente" rows="2"></textarea>
-    </div>
+            <div class="field hidden" id="detalle_enfermedad_wrap">
+              <label>Describe la enfermedad</label>
+              <textarea id="seg_detalle_enfermedad" rows="2"></textarea>
+            </div>
 
-    <!-- ENFERMEDAD IMPORTANTE -->
-    <div class="field">
-      <label>¿Tienes alguna enfermedad importante?</label>
-      <select id="seg_enfermedad">
-        <option value="0">No</option>
-        <option value="1">Sí</option>
-      </select>
-    </div>
+            <div class="field">
+              <label>¿Consumes alcohol?</label>
+              <select id="seg_alcohol">
+                <option value="0">No</option>
+                <option value="1">Sí</option>
+              </select>
+            </div>
 
-    <div class="field hidden" id="detalle_enfermedad_wrap">
-      <label>Describe la enfermedad</label>
-      <textarea id="seg_detalle_enfermedad" rows="2"></textarea>
-    </div>
+            <div class="field hidden" id="detalle_alcohol_wrap">
+              <label>Frecuencia (si aplica)</label>
+              <input type="text" id="seg_frecuencia" />
+            </div>
 
-    <!-- CONSUMO DE ALCOHOL -->
-    <div class="field">
-      <label>¿Consumes alcohol?</label>
-      <select id="seg_alcohol">
-        <option value="0">No</option>
-        <option value="1">Sí</option>
-      </select>
-    </div>
+            <div class="field">
+              <label>¿Algún familiar trabaja aquí?</label>
+              <select id="seg_familiar">
+                <option value="0">No</option>
+                <option value="1">Sí</option>
+              </select>
+            </div>
 
-    <div class="field hidden" id="detalle_alcohol_wrap">
-      <label>Frecuencia (si aplica)</label>
-      <input type="text" id="seg_frecuencia">
-    </div>
+            <div class="field hidden" id="detalle_familiar_wrap">
+              <label>Nombre del familiar y relación</label>
+              <input type="text" id="seg_familiar_nombre" />
+            </div>
 
-    <!-- FAMILIAR EN LA EMPRESA -->
-    <div class="field">
-      <label>¿Algún familiar trabaja aquí?</label>
-      <select id="seg_familiar">
-        <option value="0">No</option>
-        <option value="1">Sí</option>
-      </select>
-    </div>
+            <div class="field">
+              <label>¿Has suministrado información falsa?</label>
+              <select id="seg_falsa">
+                <option value="0">No</option>
+                <option value="1">Sí</option>
+              </select>
+            </div>
 
-    <div class="field hidden" id="detalle_familiar_wrap">
-      <label>Nombre del familiar y relación</label>
-      <input type="text" id="seg_familiar_nombre">
-    </div>
+            <div class="field">
+              <label>¿Aceptas pruebas de validación o polígrafo de ser necesario?</label>
+              <select id="seg_poligrafo">
+                <option value="1">Sí</option>
+                <option value="0">No</option>
+              </select>
+            </div>
+          </div>
 
-    <!-- INFORMACIÓN FALSA -->
-    <div class="field">
-      <label>¿Has suministrado información falsa?</label>
-      <select id="seg_falsa">
-        <option value="0">No</option>
-        <option value="1">Sí</option>
-      </select>
-    </div>
+          <div class="field" style="margin-top:14px;">
+            <label>Observaciones adicionales</label>
+            <textarea id="seg_observaciones" rows="2"></textarea>
+          </div>
 
-    <!-- POLÍGRAFO -->
-    <div class="field">
-      <label>¿Aceptas pruebas de validacion o polígrafo de ser necesario?</label>
-      <select id="seg_poligrafo">
-        <option value="1">Sí</option>
-        <option value="0">No</option>
-      </select>
-    </div>
+          <div class="field">
+            <label>¿Por qué crees que calificas para el cargo?</label>
+            <textarea id="seg_califica" rows="2"></textarea>
+          </div>
 
-  </div>
+          <div class="field">
+            <label>Fortalezas</label>
+            <textarea id="seg_fortal" rows="2"></textarea>
+          </div>
 
-  <!-- TEXTOS LARGOS -->
-  <div class="field" style="margin-top:16px;">
-    <label>Observaciones adicionales del candidato</label>
-    <textarea id="seg_observaciones" rows="2"></textarea>
-  </div>
+          <div class="field">
+            <label>Aspectos por mejorar</label>
+            <textarea id="seg_mejorar" rows="2"></textarea>
+          </div>
 
-  <div class="field" style="margin-top:16px;">
-    <label>¿Por qué crees que calificas para el cargo?</label>
-    <textarea id="seg_califica" rows="2"></textarea>
-  </div>
+          <div class="field">
+            <label>Describe una situación difícil que enfrentaste y cómo la resolviste.</label>
+            <textarea id="seg_resolucion" rows="2"></textarea>
+          </div>
+        </div>
 
-  <div class="field">
-    <label>Fortalezas</label>
-    <textarea id="seg_fortal" rows="2"></textarea>
-  </div>
-
-  <div class="field">
-    <label>Aspectos por mejorar</label>
-    <textarea id="seg_mejorar" rows="2"></textarea>
-  </div>
-
-  <div class="field">
-    <label>Describe una situación difícil que enfrentaste y cómo la resolviste.</label>
-    <textarea id="seg_resolucion" rows="2"></textarea>
-  </div>
-
-</div>
-
+        <!-- PASO 8: PREVISUALIZACIÓN -->
         <div class="form-step" data-step="8">
           <div class="step-title">Paso 8: Revisión y envío</div>
           <p class="help-text">
-            Aquí luego puedes mostrar un resumen de los datos diligenciados
-            antes de enviarlos al backend en Cloud Run.
+            Verifica un resumen de la información que registraste. Puedes volver a pasos anteriores si quieres corregir algo
+            antes de enviar.
           </p>
-          <p class="help-text">
-            Por ahora, al enviar, solo mostraremos los datos en consola
-            (para pruebas).
-          </p>
+
+          <div id="preview-container" class="preview-container"></div>
         </div>
 
         <!-- BOTONES -->
@@ -1192,7 +1247,7 @@
           >
             ⬅ Anterior
           </button>
-          <div>
+          <div style="display:flex; gap:8px;">
             <button
               type="button"
               class="btn btn-primary"
@@ -1205,7 +1260,7 @@
               class="btn btn-primary hidden"
               id="btn-submit"
             >
-              Enviar formulario ✅
+              Enviar hoja de vida ✅
             </button>
           </div>
         </div>
@@ -1221,73 +1276,84 @@
     const btnNext = document.getElementById("btn-next");
     const btnSubmit = document.getElementById("btn-submit");
     const medioSelect = document.getElementById("medio_reclutamiento");
-    // Referencias
-const ref_lab_empresa = document.getElementById("ref_lab_empresa");
-const ref_lab_jefe = document.getElementById("ref_lab_jefe");
-const ref_lab_cargo = document.getElementById("ref_lab_cargo");
-const ref_lab_tel = document.getElementById("ref_lab_tel");
-
-const ref_fam_nombre = document.getElementById("ref_fam_nombre");
-const ref_fam_parentesco = document.getElementById("ref_fam_parentesco");
-const ref_fam_tel = document.getElementById("ref_fam_tel");
-const ref_fam_ocupacion = document.getElementById("ref_fam_ocupacion");
-
-const ref_per_nombre = document.getElementById("ref_per_nombre");
-const ref_per_relacion = document.getElementById("ref_per_relacion");
-const ref_per_tel = document.getElementById("ref_per_tel");
-const ref_per_ocupacion = document.getElementById("ref_per_ocupacion");
-
-// Emergencia
-const emer_nombre = document.getElementById("emer_nombre");
-const emer_parentesco = document.getElementById("emer_parentesco");
-const emer_telefono = document.getElementById("emer_telefono");
-const emer_correo = document.getElementById("emer_correo");
-const emer_direccion = document.getElementById("emer_direccion");
-
-// Metas
-const meta_corto = document.getElementById("meta_corto");
-const meta_mediano = document.getElementById("meta_mediano");
-const meta_largo = document.getElementById("meta_largo");
-
-// Seguridad
-const seg_llamados = document.getElementById("seg_llamados");
-const seg_accidente = document.getElementById("seg_accidente");
-const seg_enfermedad = document.getElementById("seg_enfermedad");
-const seg_alcohol = document.getElementById("seg_alcohol");
-const seg_familiar = document.getElementById("seg_familiar");
-const seg_familiar_nombre = document.getElementById("seg_familiar_nombre");
-const seg_frecuencia = document.getElementById("seg_frecuencia");
-const seg_falsa = document.getElementById("seg_falsa");
-const seg_poligrafo = document.getElementById("seg_poligrafo");
-const seg_observaciones = document.getElementById("seg_observaciones");
-const seg_califica = document.getElementById("seg_califica");
-const seg_fortal = document.getElementById("seg_fortal");
-const seg_mejorar = document.getElementById("seg_mejorar");
-const seg_resolucion = document.getElementById("seg_resolucion");
-
     const campoRecomendador = document.getElementById("campo-recomendador");
     const fechaNacimientoInput = document.getElementById("fecha_nacimiento");
     const edadInput = document.getElementById("edad");
-    // =====================================================
-    // Validar si el aspirante ya existe al dejar la cédula
-    // =====================================================
-    const identificacionInput = document.getElementById("identificacion");
-    // ========= PASO 0: Validación de ingreso =========
+
+    // Paso 0 (Ingreso)
     const identificacionIngreso = document.getElementById("identificacion_ingreso");
     const tipoDocumentoIngreso = document.getElementById("tipo_documento_ingreso");
+    const medioReclutamiento = document.getElementById("medio_reclutamiento");
     const ingresoMsg = document.getElementById("ingreso-msg");
 
-    // Avanza automáticamente si ya existe
+    // Referencias
+    const ref_lab_empresa = document.getElementById("ref_lab_empresa");
+    const ref_lab_jefe = document.getElementById("ref_lab_jefe");
+    const ref_lab_cargo = document.getElementById("ref_lab_cargo");
+    const ref_lab_tel = document.getElementById("ref_lab_tel");
+
+    const ref_fam_nombre = document.getElementById("ref_fam_nombre");
+    const ref_fam_parentesco = document.getElementById("ref_fam_parentesco");
+    const ref_fam_tel = document.getElementById("ref_fam_tel");
+    const ref_fam_ocupacion = document.getElementById("ref_fam_ocupacion");
+
+    const ref_per_nombre = document.getElementById("ref_per_nombre");
+    const ref_per_relacion = document.getElementById("ref_per_relacion");
+    const ref_per_tel = document.getElementById("ref_per_tel");
+    const ref_per_ocupacion = document.getElementById("ref_per_ocupacion");
+
+    // Emergencia
+    const emer_nombre = document.getElementById("emer_nombre");
+    const emer_parentesco = document.getElementById("emer_parentesco");
+    const emer_telefono = document.getElementById("emer_telefono");
+    const emer_correo = document.getElementById("emer_correo");
+    const emer_direccion = document.getElementById("emer_direccion");
+
+    // Metas
+    const meta_corto = document.getElementById("meta_corto");
+    const meta_mediano = document.getElementById("meta_mediano");
+    const meta_largo = document.getElementById("meta_largo");
+
+    // Seguridad
+    const seg_llamados = document.getElementById("seg_llamados");
+    const seg_accidente = document.getElementById("seg_accidente");
+    const seg_enfermedad = document.getElementById("seg_enfermedad");
+    const seg_alcohol = document.getElementById("seg_alcohol");
+    const seg_familiar = document.getElementById("seg_familiar");
+    const seg_familiar_nombre = document.getElementById("seg_familiar_nombre");
+    const seg_frecuencia = document.getElementById("seg_frecuencia");
+    const seg_falsa = document.getElementById("seg_falsa");
+    const seg_poligrafo = document.getElementById("seg_poligrafo");
+    const seg_observaciones = document.getElementById("seg_observaciones");
+    const seg_califica = document.getElementById("seg_califica");
+    const seg_fortal = document.getElementById("seg_fortal");
+    const seg_mejorar = document.getElementById("seg_mejorar");
+    const seg_resolucion = document.getElementById("seg_resolucion");
+
+    // Datos personales base
+    const identificacionInput = document.getElementById("identificacion");
+
+    let currentStep = 0;
+
+    // ⭐ AHORA SÍ PONLO AQUÍ ⭐
+    showStep(0);
+
+    // ========= PASO 0: Validación de ingreso =========
     async function validarIngreso() {
       const tipo = tipoDocumentoIngreso.value.trim();
       const id = identificacionIngreso.value.trim();
 
+
       if (!tipo || !id) {
         ingresoMsg.textContent = "Debes completar ambos campos.";
+        ingresoMsg.style.color = "var(--error)";
         return false;
       }
 
       try {
+        console.log("OBJETO identificaciónIngreso:", identificacionIngreso);
+        console.log("VALOR identificaciónIngreso:", identificacionIngreso ? identificacionIngreso.value : "NO EXISTE");
+        console.log("ID ENVIADO:", id);
         const resp = await fetch(`/api/aspirante?identificacion=${id}`);
         const data = await resp.json();
 
@@ -1295,20 +1361,29 @@ const seg_resolucion = document.getElementById("seg_resolucion");
           ingresoMsg.style.color = "green";
           ingresoMsg.textContent = "✔ Registro encontrado. Cargando datos...";
 
-          // prellenar
           rellenarFormulario(data.aspirante);
 
-          // avanzar al paso 1 (medio de reclutamiento)
-          setTimeout(() => showStep(1), 800);
+          // Sincronizar identificación y tipo de documento con el paso 2
+          if (identificacionInput) identificacionInput.value = id;
+          const tipoDocMain = document.getElementById("tipo_documento");
+          if (tipoDocMain) tipoDocMain.value = tipo;
+
+          setTimeout(() => {
+            showStep(1);
+          }, 300);
 
           return true;
         } else {
           ingresoMsg.style.color = "#444";
-          ingresoMsg.textContent = "ℹ No tienes registro previo. Continúa llenando el formulario.";
+          ingresoMsg.textContent = "ℹ No encontramos un registro previo. Continúa con el formulario.";
+
+          setTimeout(() => {
+            showStep(1);
+          }, 300);
           return true;
         }
       } catch (err) {
-        ingresoMsg.style.color = "red";
+        ingresoMsg.style.color = "var(--error)";
         ingresoMsg.textContent = "⚠ Error consultando el servidor.";
         console.error(err);
         return false;
@@ -1319,39 +1394,6 @@ const seg_resolucion = document.getElementById("seg_resolucion");
     tipoDocumentoIngreso.addEventListener("change", () => {
       ingresoMsg.textContent = "";
     });
-
-identificacionInput.addEventListener("blur", async () => {
-  const identificacion = identificacionInput.value.trim();
-  if (!identificacion) return;
-
-  try {
-    const resp = await fetch(`/api/aspirante?identificacion=${identificacion}`);
-    const data = await resp.json();
-
-    if (data.existe) {
-      alert("⚠ Este aspirante ya está registrado. Sus datos se cargarán automáticamente.");
-      // aquí puedes prellenar si quieres
-    }
-  } catch (err) {
-    console.error("Error consultando aspirante:", err);
-  }
-});
-           async function buscarAspirantePorIdentificacion(identificacion) {
-        try {
-          const response = await fetch(`/api/aspirante?identificacion=${identificacion}`);
-          if (!response.ok) return null;
-
-          const data = await response.json();
-          return data; // { existe: true/false, aspirante: { ... } }
-        } catch (error) {
-          console.error("Error consultando aspirante:", error);
-          return null;
-        }
-      }
-
-
-    let currentStep = 0; // Ahora sí empezamos en Paso 0 (Ingreso)
-
 
     function showStep(index) {
       steps.forEach((step, i) => {
@@ -1368,6 +1410,7 @@ identificacionInput.addEventListener("blur", async () => {
       });
 
       btnPrev.disabled = index === 0;
+
       if (index === steps.length - 1) {
         btnNext.classList.add("hidden");
         btnSubmit.classList.remove("hidden");
@@ -1377,18 +1420,21 @@ identificacionInput.addEventListener("blur", async () => {
       }
 
       currentStep = index;
+
+      // Si entramos a la previsualización, construir resumen
+      if (index === 8) {
+        buildPreview();
+      }
     }
 
     function validateStep(stepIndex) {
       const stepElement = steps[stepIndex];
-      const requiredFields = stepElement.querySelectorAll(
-        "[data-required='true']"
-      );
+      const requiredFields = stepElement.querySelectorAll("[data-required='true']");
       let valid = true;
       let firstInvalid = null;
 
       requiredFields.forEach((field) => {
-        const value = field.value.trim();
+        const value = (field.value || "").trim();
         const isInvalid = value === "";
         field.style.borderColor = isInvalid ? "var(--error)" : "var(--border)";
         if (isInvalid && !firstInvalid) {
@@ -1414,308 +1460,325 @@ identificacionInput.addEventListener("blur", async () => {
       return valid;
     }
 
-const educacionList = document.getElementById("educacion-list");
-const btnAddEducacion = document.getElementById("btn-add-educacion");
+    // =====================
+    // EDUCACIÓN DINÁMICA
+    // =====================
+    const educacionList = document.getElementById("educacion-list");
+    const btnAddEducacion = document.getElementById("btn-add-educacion");
 
-let educacionData = []; // array donde guardamos los estudios
+    let educacionData = [];
 
-function crearCardEducacion(index, data = {}) {
-  return `
-    <div class="educ-card" data-index="${index}">
-      <div class="educ-grid">
-
-        <div class="field">
-          <label>Institución</label>
-          <input type="text" class="educ-institucion" value="${data.institucion || ""}">
+    function crearCardEducacion(index, data = {}) {
+      return `
+        <div class="educ-card" data-index="${index}">
+          <div class="educ-grid">
+            <div class="field">
+              <label>Institución</label>
+              <input type="text" class="educ-institucion" value="${data.institucion || ""}">
+            </div>
+            <div class="field">
+              <label>Programa</label>
+              <input type="text" class="educ-programa" value="${data.programa || ""}">
+            </div>
+            <div class="field">
+              <label>Modalidad</label>
+              <select class="educ-modalidad">
+                <option value="">Selecciona</option>
+                <option value="presencial" ${data.modalidad === "presencial" ? "selected" : ""}>Presencial</option>
+                <option value="virtual" ${data.modalidad === "virtual" ? "selected" : ""}>Virtual</option>
+                <option value="distancia" ${data.modalidad === "distancia" ? "selected" : ""}>A distancia</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Año</label>
+              <input type="number" class="educ-ano" min="1950" max="2050" value="${data.ano || ""}">
+            </div>
+            <div class="field">
+              <label>Finalizado</label>
+              <select class="educ-finalizado">
+                <option value="1" ${data.finalizado == 1 ? "selected" : ""}>Sí</option>
+                <option value="0" ${data.finalizado == 0 ? "selected" : ""}>No</option>
+              </select>
+            </div>
+          </div>
+          <span class="educ-remove" onclick="eliminarEducacion(${index})">🗑️ Eliminar</span>
         </div>
+      `;
+    }
 
-        <div class="field">
-          <label>Programa</label>
-          <input type="text" class="educ-programa" value="${data.programa || ""}">
-        </div>
+    function renderEducacion() {
+      educacionList.innerHTML = "";
+      educacionData.forEach((item, index) => {
+        educacionList.innerHTML += crearCardEducacion(index, item);
+      });
+    }
 
-        <div class="field">
-          <label>Modalidad</label>
-          <select class="educ-modalidad">
-            <option value="">Selecciona</option>
-            <option value="presencial" ${data.modalidad === "presencial" ? "selected" : ""}>Presencial</option>
-            <option value="virtual" ${data.modalidad === "virtual" ? "selected" : ""}>Virtual</option>
-            <option value="distancia" ${data.modalidad === "distancia" ? "selected" : ""}>A distancia</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Año</label>
-          <input type="number" class="educ-ano" min="1950" max="2050" value="${data.ano || ""}">
-        </div>
-
-        <div class="field">
-          <label>Finalizado</label>
-          <select class="educ-finalizado">
-            <option value="1" ${data.finalizado == 1 ? "selected" : ""}>Sí</option>
-            <option value="0" ${data.finalizado == 0 ? "selected" : ""}>No</option>
-          </select>
-        </div>
-      </div>
-
-      <span class="educ-remove" onclick="eliminarEducacion(${index})">🗑️ Eliminar</span>
-    </div>
-  `;
-}
-
-function renderEducacion() {
-  educacionList.innerHTML = "";
-  educacionData.forEach((item, index) => {
-    educacionList.innerHTML += crearCardEducacion(index, item);
-  });
-}
-
-btnAddEducacion.addEventListener("click", () => {
-  // 1. Guardar lo que ya hay en pantalla
-  recopilarEducacion();
-
-  // 2. Agregar nuevo estudio vacío
-  educacionData.push({
-    institucion: "",
-    programa: "",
-    modalidad: "",
-    ano: "",
-    finalizado: "1"
-  });
-
-  // 3. Redibujar sin perder lo que había
-  renderEducacion();
-});
-
-
-function eliminarEducacion(index) {
-  educacionData.splice(index, 1);
-  renderEducacion();
-}
-
-// función para capturar todos los estudios antes de enviar
-function recopilarEducacion() {
-  const cards = document.querySelectorAll(".educ-card");
-
-  educacionData = Array.from(cards).map(card => ({
-    institucion: card.querySelector(".educ-institucion").value.trim(),
-    programa: card.querySelector(".educ-programa").value.trim(),
-    modalidad: card.querySelector(".educ-modalidad").value.trim(),
-    ano: card.querySelector(".educ-ano").value.trim(),
-    finalizado: card.querySelector(".educ-finalizado").value.trim()
-  }));
-
-  return educacionData;
-}
-
-// =====================
-// EXPERIENCIA LABORAL
-// =====================
-const expList = document.getElementById("exp-list");
-const btnAddExp = document.getElementById("btn-add-exp");
-
-let expData = []; // cada elemento es una experiencia laboral
-
-function crearCardExp(index, data = {}) {
-  return `
-    <div class="exp-card" data-index="${index}">
-      <div class="exp-grid">
-
-        <div class="field">
-          <label>Empresa</label>
-          <input type="text" class="exp-empresa" value="${data.empresa || ""}">
-        </div>
-
-        <div class="field">
-          <label>Cargo</label>
-          <input type="text" class="exp-cargo" value="${data.cargo || ""}">
-        </div>
-
-        <div class="field">
-          <label>Tiempo laborado</label>
-          <input type="text" class="exp-tiempo" value="${data.tiempo_laborado || ""}">
-        </div>
-
-        <div class="field">
-          <label>Salario</label>
-          <input type="text" class="exp-salario" value="${data.salario || ""}">
-        </div>
-
-        <div class="field">
-          <label>Motivo del retiro</label>
-          <input type="text" class="exp-motivo" value="${data.motivo_retiro || ""}">
-        </div>
-
-        <div class="field">
-          <label>Causa del motivo</label>
-          <input type="text" class="exp-causa" value="${data.causa_motivo_retiro || ""}">
-        </div>
-
-        <div class="field" style="grid-column: span 2;">
-          <label>Funciones realizadas</label>
-          <textarea class="exp-funciones" rows="2">${data.funciones || ""}</textarea>
-        </div>
-
-        <div class="field" style="grid-column: span 2;">
-          <label>Observaciones</label>
-          <textarea class="exp-observaciones" rows="2">${data.observaciones || ""}</textarea>
-        </div>
-
-      </div>
-
-      <span class="exp-remove" onclick="eliminarExp(${index})">🗑️ Eliminar</span>
-    </div>
-  `;
-}
-
-function renderExp() {
-  expList.innerHTML = "";
-  expData.forEach((item, index) => {
-    expList.innerHTML += crearCardExp(index, item);
-  });
-}
-
-btnAddExp.addEventListener("click", () => {
-  recopilarExp();
-  expData.push({
-    empresa: "",
-    cargo: "",
-    tiempo_laborado: "",
-    salario: "",
-    motivo_retiro: "",
-    causa_motivo_retiro: "",
-    funciones: "",
-    observaciones: ""
-  });
-  renderExp();
-});
-
-function eliminarExp(index) {
-  expData.splice(index, 1);
-  renderExp();
-}
-
-function recopilarExp() {
-  const cards = document.querySelectorAll(".exp-card");
-
-  expData = Array.from(cards).map(card => ({
-    empresa: card.querySelector(".exp-empresa").value.trim(),
-    cargo: card.querySelector(".exp-cargo").value.trim(),
-    tiempo_laborado: card.querySelector(".exp-tiempo").value.trim(),
-    salario: card.querySelector(".exp-salario").value.trim(),
-    motivo_retiro: card.querySelector(".exp-motivo").value.trim(),
-    causa_motivo_retiro: card.querySelector(".exp-causa").value.trim(),
-    funciones: card.querySelector(".exp-funciones").value.trim(),
-    observaciones: card.querySelector(".exp-observaciones").value.trim()
-  }));
-
-  return expData;
-}
-// =====================
-// FAMILIARES DINÁMICOS
-// =====================
-const famList = document.getElementById("fam-list");
-const btnAddFam = document.getElementById("btn-add-fam");
-
-let familiaresData = [];
-
-function crearCardFamiliar(index, data = {}) {
-  return `
-    <div class="fam-card" data-index="${index}">
-      <div class="fam-grid">
-
-        <div class="field">
-          <label>Nombre completo</label>
-          <input type="text" class="fam-nombre" value="${data.nombre_completo || ""}">
-        </div>
-
-        <div class="field">
-          <label>Parentesco</label>
-          <input type="text" class="fam-parentesco" value="${data.parentesco || ""}">
-        </div>
-
-        <div class="field">
-          <label>Edad</label>
-          <input type="number" class="fam-edad" value="${data.edad || ""}">
-        </div>
-
-        <div class="field">
-          <label>Ocupación</label>
-          <input type="text" class="fam-ocupacion" value="${data.ocupacion || ""}">
-        </div>
-
-        <div class="field">
-          <label>¿Conviven juntos?</label>
-          <select class="fam-conviven">
-            <option value="1" ${data.conviven_juntos == 1 ? "selected" : ""}>Sí</option>
-            <option value="0" ${data.conviven_juntos == 0 ? "selected" : ""}>No</option>
-          </select>
-        </div>
-
-      </div>
-
-      <span class="fam-remove" onclick="eliminarFamiliar(${index})">🗑️ Eliminar</span>
-    </div>
-  `;
-}
-
-function renderFamiliares() {
-  famList.innerHTML = "";
-  familiaresData.forEach((item, index) => {
-    famList.innerHTML += crearCardFamiliar(index, item);
-  });
-}
-
-btnAddFam.addEventListener("click", () => {
-  recopilarFamiliares();
-  familiaresData.push({
-    nombre_completo: "",
-    parentesco: "",
-    edad: "",
-    ocupacion: "",
-    conviven_juntos: "1"
-  });
-  renderFamiliares();
-});
-
-function eliminarFamiliar(index) {
-  familiaresData.splice(index, 1);
-  renderFamiliares();
-}
-
-function recopilarFamiliares() {
-  const cards = document.querySelectorAll(".fam-card");
-
-  familiaresData = Array.from(cards).map(card => ({
-    nombre_completo: card.querySelector(".fam-nombre").value.trim(),
-    parentesco: card.querySelector(".fam-parentesco").value.trim(),
-    edad: card.querySelector(".fam-edad").value.trim(),
-    ocupacion: card.querySelector(".fam-ocupacion").value.trim(),
-    conviven_juntos: card.querySelector(".fam-conviven").value.trim()
-  }));
-
-  return familiaresData;
-}
-    btnNext.addEventListener("click", async () => {
-
-      if (currentStep === 0) {
-        const ok = await validarIngreso();
-        if (!ok) return;
-      }
-
-      if (!validateStep(currentStep)) return;
-
-      if (currentStep < steps.length - 1) {
-        showStep(currentStep + 1);
-      }
+    btnAddEducacion.addEventListener("click", () => {
+      recopilarEducacion();
+      educacionData.push({
+        institucion: "",
+        programa: "",
+        modalidad: "",
+        ano: "",
+        finalizado: "1"
+      });
+      renderEducacion();
     });
 
-    btnPrev.addEventListener("click", () => {
-      if (currentStep > 0) {
-        showStep(currentStep - 1);
-      }
+    function eliminarEducacion(index) {
+      educacionData.splice(index, 1);
+      renderEducacion();
+    }
+    window.eliminarEducacion = eliminarEducacion;
+
+    function recopilarEducacion() {
+      const cards = document.querySelectorAll(".educ-card");
+
+      educacionData = Array.from(cards).map(card => ({
+        institucion: card.querySelector(".educ-institucion").value.trim(),
+        programa: card.querySelector(".educ-programa").value.trim(),
+        modalidad: card.querySelector(".educ-modalidad").value.trim(),
+        ano: card.querySelector(".educ-ano").value.trim(),
+        finalizado: card.querySelector(".educ-finalizado").value.trim()
+      }));
+
+      return educacionData;
+    }
+
+    // =====================
+    // EXPERIENCIA LABORAL
+    // =====================
+    const expList = document.getElementById("exp-list");
+    const btnAddExp = document.getElementById("btn-add-exp");
+
+    let expData = [];
+
+    function crearCardExp(index, data = {}) {
+      return `
+        <div class="exp-card" data-index="${index}">
+          <div class="exp-grid">
+            <div class="field">
+              <label>Empresa</label>
+              <input type="text" class="exp-empresa" value="${data.empresa || ""}">
+            </div>
+            <div class="field">
+              <label>Cargo</label>
+              <input type="text" class="exp-cargo" value="${data.cargo || ""}">
+            </div>
+            <div class="field">
+              <label>Tiempo laborado</label>
+              <input type="text" class="exp-tiempo" value="${data.tiempo_laborado || ""}">
+            </div>
+            <div class="field">
+              <label>Salario</label>
+              <input type="text" class="exp-salario" value="${data.salario || ""}">
+            </div>
+            <div class="field">
+              <label>Motivo del retiro</label>
+              <input type="text" class="exp-motivo" value="${data.motivo_retiro || ""}">
+            </div>
+            <div class="field">
+              <label>Causa del motivo</label>
+              <input type="text" class="exp-causa" value="${data.causa_motivo_retiro || ""}">
+            </div>
+            <div class="field" style="grid-column: span 2;">
+              <label>Funciones realizadas</label>
+              <textarea class="exp-funciones" rows="2">${data.funciones || ""}</textarea>
+            </div>
+            <div class="field" style="grid-column: span 2;">
+              <label>Observaciones</label>
+              <textarea class="exp-observaciones" rows="2">${data.observaciones || ""}</textarea>
+            </div>
+          </div>
+          <span class="exp-remove" onclick="eliminarExp(${index})">🗑️ Eliminar</span>
+        </div>
+      `;
+    }
+
+    function renderExp() {
+      expList.innerHTML = "";
+      expData.forEach((item, index) => {
+        expList.innerHTML += crearCardExp(index, item);
+      });
+    }
+
+    btnAddExp.addEventListener("click", () => {
+      recopilarExp();
+      expData.push({
+        empresa: "",
+        cargo: "",
+        tiempo_laborado: "",
+        salario: "",
+        motivo_retiro: "",
+        causa_motivo_retiro: "",
+        funciones: "",
+        observaciones: ""
+      });
+      renderExp();
     });
 
+    function eliminarExp(index) {
+      expData.splice(index, 1);
+      renderExp();
+    }
+    window.eliminarExp = eliminarExp;
+
+    function recopilarExp() {
+      const cards = document.querySelectorAll(".exp-card");
+
+      expData = Array.from(cards).map(card => ({
+        empresa: card.querySelector(".exp-empresa").value.trim(),
+        cargo: card.querySelector(".exp-cargo").value.trim(),
+        tiempo_laborado: card.querySelector(".exp-tiempo").value.trim(),
+        salario: card.querySelector(".exp-salario").value.trim(),
+        motivo_retiro: card.querySelector(".exp-motivo").value.trim(),
+        causa_motivo_retiro: card.querySelector(".exp-causa").value.trim(),
+        funciones: card.querySelector(".exp-funciones").value.trim(),
+        observaciones: card.querySelector(".exp-observaciones").value.trim()
+      }));
+
+      return expData;
+    }
+
+    // =====================
+    // FAMILIARES DINÁMICOS
+    // =====================
+    const famList = document.getElementById("fam-list");
+    const btnAddFam = document.getElementById("btn-add-fam");
+
+    let familiaresData = [];
+
+    function crearCardFamiliar(index, data = {}) {
+      return `
+        <div class="fam-card" data-index="${index}">
+          <div class="fam-grid">
+            <div class="field">
+              <label>Nombre completo</label>
+              <input type="text" class="fam-nombre" value="${data.nombre_completo || ""}">
+            </div>
+            <div class="field">
+              <label>Parentesco</label>
+              <input type="text" class="fam-parentesco" value="${data.parentesco || ""}">
+            </div>
+            <div class="field">
+              <label>Edad</label>
+              <input type="number" class="fam-edad" value="${data.edad || ""}">
+            </div>
+            <div class="field">
+              <label>Ocupación</label>
+              <input type="text" class="fam-ocupacion" value="${data.ocupacion || ""}">
+            </div>
+            <div class="field">
+              <label>¿Conviven juntos?</label>
+              <select class="fam-conviven">
+                <option value="1" ${data.conviven_juntos == 1 ? "selected" : ""}>Sí</option>
+                <option value="0" ${data.conviven_juntos == 0 ? "selected" : ""}>No</option>
+              </select>
+            </div>
+          </div>
+          <span class="fam-remove" onclick="eliminarFamiliar(${index})">🗑️ Eliminar</span>
+        </div>
+      `;
+    }
+
+    function renderFamiliares() {
+      famList.innerHTML = "";
+      familiaresData.forEach((item, index) => {
+        famList.innerHTML += crearCardFamiliar(index, item);
+      });
+    }
+
+    btnAddFam.addEventListener("click", () => {
+      recopilarFamiliares();
+      familiaresData.push({
+        nombre_completo: "",
+        parentesco: "",
+        edad: "",
+        ocupacion: "",
+        conviven_juntos: "1"
+      });
+      renderFamiliares();
+    });
+
+    function eliminarFamiliar(index) {
+      familiaresData.splice(index, 1);
+      renderFamiliares();
+    }
+    window.eliminarFamiliar = eliminarFamiliar;
+
+    function recopilarFamiliares() {
+      const cards = document.querySelectorAll(".fam-card");
+
+      familiaresData = Array.from(cards).map(card => ({
+        nombre_completo: card.querySelector(".fam-nombre").value.trim(),
+        parentesco: card.querySelector(".fam-parentesco").value.trim(),
+        edad: card.querySelector(".fam-edad").value.trim(),
+        ocupacion: card.querySelector(".fam-ocupacion").value.trim(),
+        conviven_juntos: card.querySelector(".fam-conviven").value.trim()
+      }));
+
+      return familiaresData;
+    }
+
+    // ========= Toggles de seguridad =========
+    function handleToggle(selectId, wrapperId) {
+      const select = document.getElementById(selectId);
+      const wrapper = document.getElementById(wrapperId);
+
+      if (!select || !wrapper) return;
+
+      select.addEventListener("change", () => {
+        if (select.value === "1") {
+          wrapper.classList.remove("hidden");
+        } else {
+          wrapper.classList.add("hidden");
+          const inputs = wrapper.querySelectorAll("input, textarea");
+          inputs.forEach(i => i.value = "");
+        }
+      });
+    }
+
+    handleToggle("seg_llamados", "detalle_llamados_wrap");
+    handleToggle("seg_accidente", "detalle_accidente_wrap");
+    handleToggle("seg_enfermedad", "detalle_enfermedad_wrap");
+    handleToggle("seg_alcohol", "detalle_alcohol_wrap");
+    handleToggle("seg_familiar", "detalle_familiar_wrap");
+
+    // ======== Función para PRELLENAR datos ========
+    function rellenarFormulario(a) {
+      if (!a) return;
+
+      const set = (id, value) => {
+        const el = document.getElementById(id);
+        if (el && value != null) el.value = value;
+      };
+
+      // NO sobreescribir tipo e identificación venidos del paso 0
+      // set("tipo_documento", a.tipo_documento);
+      // set("identificacion", a.identificacion);
+      set("primer_nombre", a.primer_nombre);
+      set("segundo_nombre", a.segundo_nombre);
+      set("primer_apellido", a.primer_apellido);
+      set("segundo_apellido", a.segundo_apellido);
+      set("correo_electronico", a.correo_electronico);
+      set("telefono", a.telefono);
+      set("direccion_barrio", a.direccion_barrio);
+      set("estado_civil", a.estado_civil);
+      set("eps", a.eps);
+      set("afp", a.afp);
+      set("rh", a.rh);
+      set("talla_pantalon", a.talla_pantalon);
+      set("camisa_talla", a.camisa_talla);
+      set("zapatos_talla", a.zapatos_talla);
+      set("fecha_nacimiento", a.fecha_nacimiento);
+      set("fecha_expedicion", a.fecha_expedicion);
+      set("departamento_expedicion", a.departamento_expedicion);
+      set("ciudad_expedicion", a.ciudad_expedicion);
+      set("departamento_residencia", a.departamento_residencia);
+      set("ciudad_residencia", a.ciudad_residencia);
+    }
+
+    // Medio de reclutamiento → mostrar campo recomendador
     medioSelect.addEventListener("change", () => {
       const value = medioSelect.value;
       const needsRecomendador =
@@ -1727,6 +1790,7 @@ function recopilarFamiliares() {
       }
     });
 
+    // Edad automática
     fechaNacimientoInput.addEventListener("change", () => {
       const value = fechaNacimientoInput.value;
       if (!value) {
@@ -1743,145 +1807,526 @@ function recopilarFamiliares() {
       edadInput.value = age >= 0 ? age : "";
     });
 
-    function handleToggle(selectId, wrapperId) {
-  const select = document.getElementById(selectId);
-  const wrapper = document.getElementById(wrapperId);
-
-  if (!select || !wrapper) return;
-
-  select.addEventListener("change", () => {
-    if (select.value === "1") {
-      wrapper.classList.remove("hidden");
-    } else {
-      wrapper.classList.add("hidden");
-      const inputs = wrapper.querySelectorAll("input, textarea");
-      inputs.forEach(i => i.value = ""); // limpiar si no aplica
-    }
-  });
-}
-
-// Activar lógica condicional
-handleToggle("seg_llamados", "detalle_llamados_wrap");
-handleToggle("seg_accidente", "detalle_accidente_wrap");
-handleToggle("seg_enfermedad", "detalle_enfermedad_wrap");
-handleToggle("seg_alcohol", "detalle_alcohol_wrap");
-handleToggle("seg_familiar", "detalle_familiar_wrap");
-
-// ======== Función para PRELLENAR datos ========
-function rellenarFormulario(a) {
-  if (!a) return;
-
-  document.getElementById("primer_nombre").value = a.primer_nombre || "";
-  document.getElementById("segundo_nombre").value = a.segundo_nombre || "";
-  document.getElementById("primer_apellido").value = a.primer_apellido || "";
-  document.getElementById("segundo_apellido").value = a.segundo_apellido || "";
-  document.getElementById("correo_electronico").value = a.correo_electronico || "";
-  document.getElementById("telefono").value = a.telefono || "";
-  document.getElementById("direccion_barrio").value = a.direccion_barrio || "";
-  document.getElementById("estado_civil").value = a.estado_civil || "";
-  document.getElementById("eps").value = a.eps || "";
-  document.getElementById("afp").value = a.afp || "";
-  document.getElementById("rh").value = a.rh || "";
-}
-
-    form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const formData = new FormData(form);
-  const data = {};
-
-  // Datos base
-  formData.forEach((value, key) => {
-    data[key] = value;
-  });
-
-  // Agregar bloques dinámicos
-  data.educacion = recopilarEducacion();
-  data.experiencia_laboral = recopilarExp();
-  data.familiares = recopilarFamiliares();
-
-  // Referencias
-  data.referencias = [
-    {
-      tipo_referencia: "laboral",
-      empresa: ref_lab_empresa.value.trim(),
-      jefe_inmediato: ref_lab_jefe.value.trim(),
-      cargo_jefe: ref_lab_cargo.value.trim(),
-      telefono: ref_lab_tel.value.trim(),
-    },
-    {
-      tipo_referencia: "familiar",
-      nombre_completo: ref_fam_nombre.value.trim(),
-      parentesco: ref_fam_parentesco.value.trim(),
-      telefono: ref_fam_tel.value.trim(),
-      ocupacion: ref_fam_ocupacion.value.trim(),
-    },
-    {
-      tipo_referencia: "personal",
-      nombre_completo: ref_per_nombre.value.trim(),
-      relacion: ref_per_relacion.value.trim(),
-      telefono: ref_per_tel.value.trim(),
-      ocupacion: ref_per_ocupacion.value.trim(),
-    }
-  ];
-
-  // Emergencia
-  data.contacto_emergencia = {
-    nombre_completo: emer_nombre.value.trim(),
-    parentesco: emer_parentesco.value.trim(),
-    telefono: emer_telefono.value.trim(),
-    correo_electronico: emer_correo.value.trim(),
-    direccion: emer_direccion.value.trim()
-  };
-
-  // Metas
-  data.metas_personales = {
-    corto_plazo: meta_corto.value.trim(),
-    mediano_plazo: meta_mediano.value.trim(),
-    largo_plazo: meta_largo.value.trim(),
-  };
-
-  // Seguridad
-  data.seguridad = {
-    llamados_atencion: seg_llamados.value,
-    accidente_laboral: seg_accidente.value,
-    enfermedad_importante: seg_enfermedad.value,
-    consume_alcohol: seg_alcohol.value,
-    frecuencia_alcohol: seg_frecuencia.value.trim(),
-    familiar_en_empresa: seg_familiar.value,
-    detalle_familiar_empresa: seg_familiar_nombre.value.trim(),
-    info_falsa: seg_falsa.value,
-    acepta_poligrafo: seg_poligrafo.value,
-    observaciones: seg_observaciones.value.trim(),
-    califica_para_cargo: seg_califica.value.trim(),
-    fortalezas: seg_fortal.value.trim(),
-    aspectos_mejorar: seg_mejorar.value.trim(),
-    resolucion_problemas: seg_resolucion.value.trim(),
-  };
-
-  // Envío final
-  try {
-    const resp = await fetch("/api/hv/registrar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-
-    const result = await resp.json();
-
-    if (resp.ok && result.ok) {
-      alert("✔ Hoja de vida registrada correctamente.\nID: " + result.id_aspirante);
-    } else {
-      alert("⚠ Error guardando la hoja de vida.");
-    }
-  } catch (err) {
-    console.error(err);
-    alert("⚠ Error de conexión con el servidor.");
+    // Navegación
+    btnNext.addEventListener("click", async () => {
+      // Botón Anterior
+btnPrev.addEventListener("click", () => {
+  if (currentStep > 0) {
+    showStep(currentStep - 1);
   }
+});
+
+
+  if (currentStep === 0) {
+
+    const ok = await validarIngreso();
+    if (!ok) return;
+
+    // Guardar valores solo cuando VALIDÓ y va a pasar al paso 1
+    sessionStorage.setItem("tipo_ingreso", tipoDocumentoIngreso.value.trim());
+    sessionStorage.setItem("id_ingreso", identificacionIngreso.value.trim());
+  }
+
+  if (!validateStep(currentStep)) return;
+
+  if (currentStep < steps.length - 1) {
+    showStep(currentStep + 1);
+  }
+});
+
+
+    // Construcción de PREVIEW (Opción C)
+    function buildPreview() {
+      const wrap = document.getElementById("preview-container");
+      if (!wrap) return;
+
+      // Actualizar arrays dinámicos antes de leer
+      recopilarEducacion();
+      recopilarExp();
+      recopilarFamiliares();
+
+      const v = (id) => {
+        const el = document.getElementById(id);
+        return el ? (el.value || "").trim() : "";
+      };
+
+      const datosPersonalesResumen =
+        [v("primer_nombre"), v("segundo_nombre"), v("primer_apellido"), v("segundo_apellido")]
+          .filter(Boolean)
+          .join(" ");
+
+      const ciudadResidencia = [v("ciudad_residencia"), v("departamento_residencia")]
+        .filter(Boolean)
+        .join(" - ");
+
+      const medioRec = v("medio_reclutamiento");
+
+      const educCount = educacionData.length;
+      const expCount = expData.length;
+      const famCount = familiaresData.length;
+
+      // Secciones
+      const bloqueDatos = `
+        <div class="preview-section">
+          <details open>
+            <summary>
+              Datos personales
+              <span class="preview-pill">Obligatorio</span>
+            </summary>
+            <div class="preview-content">
+              <div class="preview-row">
+                <span class="preview-label">Nombre completo</span>
+                <span class="preview-value">${datosPersonalesResumen || "-"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Identificación</span>
+                <span class="preview-value">${v("identificacion") || "-"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Fecha nacimiento</span>
+                <span class="preview-value">${v("fecha_nacimiento") || "-"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Edad</span>
+                <span class="preview-value">${v("edad") || "-"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Ciudad de residencia</span>
+                <span class="preview-value">${ciudadResidencia || "-"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Teléfono</span>
+                <span class="preview-value">${v("telefono") || "-"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Correo</span>
+                <span class="preview-value">${v("correo_electronico") || "-"}</span>
+              </div>
+            </div>
+          </details>
+        </div>
+      `;
+
+      const bloqueReclutamiento = `
+        <div class="preview-section">
+          <details>
+            <summary>
+              Medio de reclutamiento
+              <span class="preview-pill">Registro inicial</span>
+            </summary>
+            <div class="preview-content">
+              <div class="preview-row">
+                <span class="preview-label">Medio</span>
+                <span class="preview-value">${medioRec || "-"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Recomendador / contacto</span>
+                <span class="preview-value">${v("recomendador_aspirante") || "-"}</span>
+              </div>
+            </div>
+          </details>
+        </div>
+      `;
+
+      const bloqueSalud = `
+        <div class="preview-section">
+          <details>
+            <summary>
+              Salud y dotación
+              <span class="preview-pill">Información general</span>
+            </summary>
+            <div class="preview-content">
+              <div class="preview-row">
+                <span class="preview-label">EPS</span>
+                <span class="preview-value">${v("eps") || "-"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Pensión</span>
+                <span class="preview-value">${v("afp") || "-"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">RH</span>
+                <span class="preview-value">${v("rh") || "-"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Talla pantalón</span>
+                <span class="preview-value">${v("talla_pantalon") || "-"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Talla camisa</span>
+                <span class="preview-value">${v("camisa_talla") || "-"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Talla zapatos</span>
+                <span class="preview-value">${v("zapatos_talla") || "-"}</span>
+              </div>
+            </div>
+          </details>
+        </div>
+      `;
+
+      const bloqueEducacion = `
+        <div class="preview-section">
+          <details>
+            <summary>
+              Educación
+              <span class="preview-pill">${educCount} registro(s)</span>
+            </summary>
+            <div class="preview-content">
+              ${
+                educCount === 0
+                  ? "<p>No registraste estudios.</p>"
+                  : educacionData.map((e, i) => `
+                    <div style="margin-bottom:6px;">
+                      <strong>${i + 1}. ${e.institucion || "Institución no especificada"}</strong><br>
+                      <span>${e.programa || "Programa no especificado"} (${e.modalidad || "-"})</span><br>
+                      <span>Año: ${e.ano || "-"} | Finalizado: ${e.finalizado == 1 ? "Sí" : "No"}</span>
+                    </div>
+                  `).join("")
+              }
+            </div>
+          </details>
+        </div>
+      `;
+
+      const bloqueExp = `
+        <div class="preview-section">
+          <details>
+            <summary>
+              Experiencia laboral
+              <span class="preview-pill">${expCount} registro(s)</span>
+            </summary>
+            <div class="preview-content">
+              ${
+                expCount === 0
+                  ? "<p>No registraste experiencia laboral.</p>"
+                  : expData.map((e, i) => `
+                    <div style="margin-bottom:6px;">
+                      <strong>${i + 1}. ${e.empresa || "Empresa no especificada"}</strong><br>
+                      <span>Cargo: ${e.cargo || "-"}</span><br>
+                      <span>Tiempo: ${e.tiempo_laborado || "-"} | Salario: ${e.salario || "-"}</span><br>
+                      <span>Motivo retiro: ${e.motivo_retiro || "-"}</span>
+                    </div>
+                  `).join("")
+              }
+            </div>
+          </details>
+        </div>
+      `;
+
+      const bloqueFamilia = `
+        <div class="preview-section">
+          <details>
+            <summary>
+              Familiares
+              <span class="preview-pill">${famCount} registro(s)</span>
+            </summary>
+            <div class="preview-content">
+              ${
+                famCount === 0
+                  ? "<p>No registraste familiares.</p>"
+                  : familiaresData.map((f, i) => `
+                    <div style="margin-bottom:6px;">
+                      <strong>${i + 1}. ${f.nombre_completo || "Sin nombre"}</strong><br>
+                      <span>Parentesco: ${f.parentesco || "-"}</span><br>
+                      <span>Edad: ${f.edad || "-"}</span><br>
+                      <span>Ocupación: ${f.ocupacion || "-"}</span><br>
+                      <span>Conviven juntos: ${f.conviven_juntos == 1 ? "Sí" : "No"}</span>
+                    </div>
+                  `).join("")
+              }
+            </div>
+          </details>
+        </div>
+      `;
+
+      const bloqueReferencias = `
+        <div class="preview-section">
+          <details>
+            <summary>
+              Referencias
+              <span class="preview-pill">3 tipos</span>
+            </summary>
+            <div class="preview-content">
+              <strong>Laboral</strong><br>
+              Empresa: ${ref_lab_empresa.value.trim() || "-"}<br>
+              Jefe: ${ref_lab_jefe.value.trim() || "-"}<br>
+              Teléfono: ${ref_lab_tel.value.trim() || "-"}<br><br>
+
+              <strong>Familiar</strong><br>
+              Nombre: ${ref_fam_nombre.value.trim() || "-"}<br>
+              Parentesco: ${ref_fam_parentesco.value.trim() || "-"}<br>
+              Teléfono: ${ref_fam_tel.value.trim() || "-"}<br><br>
+
+              <strong>Personal</strong><br>
+              Nombre: ${ref_per_nombre.value.trim() || "-"}<br>
+              Relación: ${ref_per_relacion.value.trim() || "-"}<br>
+              Teléfono: ${ref_per_tel.value.trim() || "-"}
+            </div>
+          </details>
+        </div>
+      `;
+
+      const bloqueEmergencia = `
+        <div class="preview-section">
+          <details>
+            <summary>
+              Contacto de emergencia
+              <span class="preview-pill">1 contacto</span>
+            </summary>
+            <div class="preview-content">
+              <div class="preview-row">
+                <span class="preview-label">Nombre</span>
+                <span class="preview-value">${emer_nombre.value.trim() || "-"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Parentesco</span>
+                <span class="preview-value">${emer_parentesco.value.trim() || "-"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Teléfono</span>
+                <span class="preview-value">${emer_telefono.value.trim() || "-"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Correo</span>
+                <span class="preview-value">${emer_correo.value.trim() || "-"}</span>
+              </div>
+            </div>
+          </details>
+        </div>
+      `;
+
+      const bloqueMetas = `
+        <div class="preview-section">
+          <details>
+            <summary>
+              Metas personales
+              <span class="preview-pill">Resumen</span>
+            </summary>
+            <div class="preview-content">
+              <div class="preview-row">
+                <span class="preview-label">Corto plazo</span>
+                <span class="preview-value">${meta_corto.value.trim() || "-"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Mediano plazo</span>
+                <span class="preview-value">${meta_mediano.value.trim() || "-"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Largo plazo</span>
+                <span class="preview-value">${meta_largo.value.trim() || "-"}</span>
+              </div>
+            </div>
+          </details>
+        </div>
+      `;
+
+      const bloqueSeguridad = `
+        <div class="preview-section">
+          <details>
+            <summary>
+              Cuestionario personal
+              <span class="preview-pill">Confidencial</span>
+            </summary>
+            <div class="preview-content">
+              <div class="preview-row">
+                <span class="preview-label">Llamados de atención</span>
+                <span class="preview-value">${seg_llamados.value === "1" ? "Sí" : "No"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Accidente laboral</span>
+                <span class="preview-value">${seg_accidente.value === "1" ? "Sí" : "No"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Enfermedad importante</span>
+                <span class="preview-value">${seg_enfermedad.value === "1" ? "Sí" : "No"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Consume alcohol</span>
+                <span class="preview-value">${seg_alcohol.value === "1" ? "Sí" : "No"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Familiar en empresa</span>
+                <span class="preview-value">${seg_familiar.value === "1" ? "Sí" : "No"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Acepta polígrafo</span>
+                <span class="preview-value">${seg_poligrafo.value === "1" ? "Sí" : "No"}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Motivación para el cargo</span>
+                <span class="preview-value">${seg_califica.value.trim() || "-"}</span>
+              </div>
+            </div>
+          </details>
+        </div>
+      `;
+
+      wrap.innerHTML =
+        bloqueDatos +
+        bloqueReclutamiento +
+        bloqueSalud +
+        bloqueEducacion +
+        bloqueExp +
+        bloqueFamilia +
+        bloqueReferencias +
+        bloqueEmergencia +
+        bloqueMetas +
+        bloqueSeguridad;
+    }
+
+    // Submit final
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const data = {};
+
+      formData.forEach((value, key) => {
+        data[key] = value;
+      });
+
+      data.educacion = recopilarEducacion();
+      data.experiencia_laboral = recopilarExp();
+      data.familiares = recopilarFamiliares();
+
+      data.referencias = [
+        {
+          tipo_referencia: "laboral",
+          empresa: ref_lab_empresa.value.trim(),
+          jefe_inmediato: ref_lab_jefe.value.trim(),
+          cargo_jefe: ref_lab_cargo.value.trim(),
+          telefono: ref_lab_tel.value.trim(),
+        },
+        {
+          tipo_referencia: "familiar",
+          nombre_completo: ref_fam_nombre.value.trim(),
+          parentesco: ref_fam_parentesco.value.trim(),
+          telefono: ref_fam_tel.value.trim(),
+          ocupacion: ref_fam_ocupacion.value.trim(),
+        },
+        {
+          tipo_referencia: "personal",
+          nombre_completo: ref_per_nombre.value.trim(),
+          relacion: ref_per_relacion.value.trim(),
+          telefono: ref_per_tel.value.trim(),
+          ocupacion: ref_per_ocupacion.value.trim(),
+        }
+      ];
+
+      data.contacto_emergencia = {
+        nombre_completo: emer_nombre.value.trim(),
+        parentesco: emer_parentesco.value.trim(),
+        telefono: emer_telefono.value.trim(),
+        correo_electronico: emer_correo.value.trim(),
+        direccion: emer_direccion.value.trim()
+      };
+
+      data.metas_personales = {
+        corto_plazo: meta_corto.value.trim(),
+        mediano_plazo: meta_mediano.value.trim(),
+        largo_plazo: meta_largo.value.trim(),
+      };
+
+      data.seguridad = {
+        llamados_atencion: seg_llamados.value,
+        accidente_laboral: seg_accidente.value,
+        enfermedad_importante: seg_enfermedad.value,
+        consume_alcohol: seg_alcohol.value,
+        frecuencia_alcohol: seg_frecuencia.value.trim(),
+        familiar_en_empresa: seg_familiar.value,
+        detalle_familiar_empresa: seg_familiar_nombre.value.trim(),
+        info_falsa: seg_falsa.value,
+        acepta_poligrafo: seg_poligrafo.value,
+        observaciones: seg_observaciones.value.trim(),
+        califica_para_cargo: seg_califica.value.trim(),
+        fortalezas: seg_fortal.value.trim(),
+        aspectos_mejorar: seg_mejorar.value.trim(),
+        resolucion_problemas: seg_resolucion.value.trim(),
+      };
+
+      try {
+        const resp = await fetch("/api/hv/registrar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        const result = await resp.json();
+
+        if (resp.ok && result.ok) {
+          alert("✔ Hoja de vida registrada correctamente.\nID: " + result.id_aspirante);
+        } else {
+          alert("⚠ Ocurrió un error guardando la hoja de vida.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("⚠ Error de conexión con el servidor.");
+      }
     });
 
-    showStep(0);
+        // ⭐ FUNCIÓN PARA PRELLENAR DATOS PERSONALES ⭐
+    // ⭐ FUNCIÓN PARA PRELLENAR DATOS PERSONALES ⭐
+function prellenarDatosPersonales() {
+  // Lo que se guardó en el paso 0
+  const tipo = sessionStorage.getItem("tipo_ingreso");   // ya es la DESCRIPCIÓN
+  const id   = sessionStorage.getItem("id_ingreso");
+
+  // === Tipo de documento (Paso 2) ===
+  if (tipo) {
+    const selectTipo = document.getElementById("tipo_documento");
+    selectTipo.value = tipo;              // coincide con las opciones que carga app.js
+    selectTipo.setAttribute("disabled", true);
+  }
+
+  // === Número de identificación (Paso 2) ===
+  if (id) {
+    const inputId = document.getElementById("identificacion");
+    inputId.value = id;
+    inputId.setAttribute("disabled", true);
+  }
+}
+
+
   </script>
-  <script src="app.js"></script>
+
+  <!-- Selects dinámicos (tipo doc, dptos, ciudades, EPS, AFP) -->
+<script src="app.js"></script>
+
+<script>
+  // ⭐ Cargar tipos de identificación dinámicos para el Paso 0 ⭐
+async function cargarTiposPaso0() {
+  try {
+    const res = await fetch("/api/config/tipo-identificacion");
+    const tipos = await res.json();
+
+    const select = document.getElementById("tipo_documento_ingreso");
+    select.innerHTML = `<option value="">Selecciona...</option>`;
+
+    tipos.forEach(t => {
+      select.innerHTML += `
+        <option value="${t.descripcion}">${t.descripcion}</option>
+      `;
+    });
+
+  } catch (err) {
+    console.error("Error cargando tipos de identificación para Paso 0:", err);
+  }
+}
+  // Cuando el DOM esté listo cargamos ambos pasos
+  document.addEventListener("DOMContentLoaded", () => {
+
+    // 1) Cargar selects del paso 2 (desde app.js)
+    inicializarSelects();
+
+    // 2) Cargar selects del paso 0 (dinámico desde MySQL)
+    cargarTiposPaso0();
+
+    // 3) Después de que ambos selects estén cargados, prellenar tipo + identificación
+    document.addEventListener("tipos-cargados", prellenarDatosPersonales);
+
+  });
+</script>
 </body>
 </html>
+
