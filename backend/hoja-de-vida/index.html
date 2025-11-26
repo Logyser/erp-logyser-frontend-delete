@@ -2017,28 +2017,32 @@ async function rellenarFormulario(a) {
         campoRecomendador.classList.add("hidden");
       }
     });
-    function calcularEdadDesdeFecha(value) {
-      if (!value) return "";
-      // asegurar formato YYYY-MM-DD
-      const parts = value.split("T")[0].split("-");
-      if (parts.length < 3) return "";
-      const year = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
-      const day = parseInt(parts[2], 10);
-      const birth = new Date(year, month, day);
-      const today = new Date();
-      let age = today.getFullYear() - birth.getFullYear();
-      const m = today.getMonth() - birth.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
-        age--;
+    // --- Reemplazar por este bloque limpio ---
+      function calcularEdadDesdeFecha(value) {
+        if (!value) return "";
+        // asegurar formato YYYY-MM-DD
+        const parts = String(value).split("T")[0].split("-");
+        if (parts.length < 3) return "";
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+        const birth = new Date(year, month, day);
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const m = today.getMonth() - birth.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+          age--;
+        }
+        return age >= 0 ? String(age) : "";
       }
-      return age >= 0 ? String(age) : "";
-    }
-    // Edad automática
-    fechaNacimientoInput.addEventListener("change", () => {
-        const value = fechaNacimientoInput.value;
-        edadInput.value = calcularEdadDesdeFecha(value);
-      });
+
+      // Edad automática: usa la función y no deja código extra
+      if (fechaNacimientoInput) {
+        fechaNacimientoInput.addEventListener("change", () => {
+          const value = fechaNacimientoInput.value;
+          edadInput.value = calcularEdadDesdeFecha(value);
+        });
+      }
       const birthDate = new Date(value);
       const today = new Date();
       let age = today.getFullYear() - birthDate.getFullYear();
@@ -2551,6 +2555,7 @@ function prellenarDatosPersonales() {
     }
   }
 }
+document.addEventListener("tipos-cargados", prellenarDatosPersonales);
   </script>
 
   <!-- Selects dinámicos (tipo doc, dptos, ciudades, EPS, AFP) -->
@@ -2584,9 +2589,6 @@ async function cargarTiposPaso0() {
 
     // 2) Cargar selects del paso 0 (dinámico desde MySQL)
     cargarTiposPaso0();
-
-    // 3) Después de que ambos selects estén cargados, prellenar tipo + identificación
-    document.addEventListener("tipos-cargados", prellenarDatosPersonales);
 
   });
 </script>
