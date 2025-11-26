@@ -771,7 +771,7 @@
                 Departamento de expedición <span class="required">*</span>
               </label>
               <p class="field-help">Si se expidió en Bogotá, escoge D.C</p>
-              <select id="departamento_expedicion" data-required="true"></select>
+              <select id="departamento_expedicion" name="departamento_expedicion" data-required="true"></select>
             </div>
 
             <div class="field">
@@ -781,7 +781,7 @@
 
               <p class="field-help">&nbsp;</p>
 
-              <select id="ciudad_expedicion" data-required="true"></select>
+              <select id="ciudad_expedicion" name="ciudad_expedicion" data-required="true"></select>
             </div>
 
             <div class="field">
@@ -830,14 +830,14 @@
               <label for="departamento_residencia">
                 Departamento de residencia <span class="required">*</span>
               </label>
-              <select id="departamento_residencia" data-required="true"></select>
+              <select id="departamento_residencia" name="departamento_residencia" data-required="true"></select>
             </div>
 
             <div class="field">
               <label for="ciudad_residencia">
                 Ciudad de residencia <span class="required">*</span>
               </label>
-              <select id="ciudad_residencia" data-required="true"></select>
+              <select id="ciudad_residencia" name="ciudad_residencia" data-required="true"></select>
             </div>
 
             <div class="field">
@@ -868,14 +868,14 @@
               <label for="eps">
                 EPS <span class="required">*</span>
               </label>
-              <select id="eps" data-required="true"></select>
+              <select id="eps" name="eps" data-required="true"></select>
             </div>
 
             <div class="field">
               <label for="afp">
                 Fondo de pensión <span class="required">*</span>
               </label>
-              <select id="afp" data-required="true"></select>
+              <select id="afp" name="afp" data-required="true"></select>
             </div>
 
             <div class="field">
@@ -1783,23 +1783,37 @@
     // ======== Función para PRELLENAR datos ========
     // Reemplazar la función rellenarFormulario existente por esta:
     // Reemplaza la función existente por esta versión más robusta y con logs:
-function rellenarFormulario(a) {
+// Reemplaza la función rellenarFormulario existente por esta:
+async function rellenarFormulario(a) {
   try {
     console.log("rellenarFormulario - payload:", a);
-
     if (!a) return;
+
+    // Si los selects aún no están listos, esperar al evento 'selects-cargados'
+    if (!window.selectsLoaded) {
+      window._pendingAspirante = a;
+      console.log("Espera selects-cargados antes de rellenar los selects.");
+      document.addEventListener("selects-cargados", async () => {
+        try {
+          await rellenarFormulario(window._pendingAspirante);
+        } catch (err) {
+          console.error("Error rellenando tras selects-cargados:", err);
+        } finally {
+          window._pendingAspirante = null;
+        }
+      }, { once: true });
+      return;
+    }
 
     // aspirante puede estar en a.aspirante (forma que devuelve el backend) o directamente en 'a'
     const aspirante = a.aspirante || a;
 
     const set = (id, value) => {
       const el = document.getElementById(id);
-      if (el) {
-        el.value = value != null ? value : "";
-      }
+      if (el) el.value = value != null ? value : "";
     };
 
-    // --- Campos personales (usar la fila aspirante si existe) ---
+    // --- Campos personales simples ---
     if (aspirante) {
       set("primer_nombre", aspirante.primer_nombre || "");
       set("segundo_nombre", aspirante.segundo_nombre || "");
@@ -1815,27 +1829,53 @@ function rellenarFormulario(a) {
       set("talla_pantalon", aspirante.talla_pantalon || "");
       set("camisa_talla", aspirante.camisa_talla || "");
       set("zapatos_talla", aspirante.zapatos_talla || "");
-      set("fecha_nacimiento", aspirante.fecha_nacimiento || "");
-      set("fecha_expedicion", aspirante.fecha_expedicion || "");
-      set("departamento_expedicion", aspirante.departamento_expedicion || "");
-      set("ciudad_expedicion", aspirante.ciudad_expedicion || "");
-      // En la BD la columna de residencia se llama 'departamento' / 'ciudad' en la tabla aspirante
-      set("departamento_residencia", aspirante.departamento || "");
-      set("ciudad_residencia", aspirante.ciudad || "");
-      // Tipo de documento e identificación sólo si están vacíos (se manejan por sessionStorage/prellenado)
-      const identEl = document.getElementById("identificacion");
-      if (identEl && !identEl.value && aspirante.identificacion) identEl.value = aspirante.identificacion;
-      const tipoEl = document.getElementById("tipo_documento");
-      if (tipoEl && !tipoEl.value && aspirante.tipo_documento) tipoEl.value = aspirante.tipo_documento;
+      // Fecha de nacimiento: el input date acepta 'YYYY-MM-DD' si viene así desde DB
+      set("fecha_nacimiento", aspirante.fecha_nacimiento ? aspirante.fecha_nacimiento.split("T")[0] || aspirante.fecha_nacimiento : "");
+      set("fecha_expedicion", aspirante.fecha_expedicion ? aspirante.fecha_expedicion.split("T")[0] || aspirante.fecha_expedicion : "");
     }
 
-    // --- Relacionales (arrays) ---
-    const educ = Array.isArray(a.educacion) ? a.educacion : (Array.isArray(a.educacion) ? a.educacion : (a.educacion || []));
-    const exp = Array.isArray(a.experiencia_laboral) ? a.experiencia_laboral : (a.experiencia_laboral || []);
-    const fam = Array.isArray(a.familiares) ? a.familiares : (a.familiares || []);
+    // --- Departamentos y ciudades (hay que poblar ciudades después de asignar departamento) ---
+    // Expedición
+    if (aspirante && aspirante.departamento_expedicion) {
+      set("departamento_expedicion", aspirante.departamento_expedicion);
+      // cargar ciudades y luego fijar la ciudad si existe
+      if (typeof cargarCiudades === "function") {
+        await cargarCiudades("departamento_expedicion", "ciudad_expedicion");
+        set("ciudad_expedicion", aspirante.ciudad_expedicion || "");
+      }
+    } else {
+      set("departamento_expedicion", "");
+      set("ciudad_expedicion", "");
+    }
 
+    // Residencia
+    if (aspirante && (aspirante.departamento || aspirante.departamento_residencia)) {
+      const depResid = aspirante.departamento || aspirante.departamento_residencia || "";
+      set("departamento_residencia", depResid);
+      if (typeof cargarCiudades === "function") {
+        await cargarCiudades("departamento_residencia", "ciudad_residencia");
+        // en la tabla el campo se llama 'ciudad' (mapeado antes), usamos aspirante.ciudad o ciudad_residencia
+        set("ciudad_residencia", aspirante.ciudad || aspirante.ciudad_residencia || "");
+      }
+    } else {
+      set("departamento_residencia", "");
+      set("ciudad_residencia", "");
+    }
+
+    // Tipo de documento e identificacion (solo si están vacíos en el formulario)
+    const identEl = document.getElementById("identificacion");
+    if (identEl && !identEl.value && aspirante.identificacion) {
+      identEl.value = aspirante.identificacion;
+    }
+    const tipoEl = document.getElementById("tipo_documento");
+    if (tipoEl && !tipoEl.value && aspirante.tipo_documento) {
+      tipoEl.value = aspirante.tipo_documento;
+    }
+
+    // --- Arrays relacionales y otros campos ya manejados anteriormente ---
     // Educación
-    if (educ && educ.length > 0) {
+    const educ = Array.isArray(a.educacion) ? a.educacion : (a.educacion || []);
+    if (educ.length > 0) {
       educacionData = educ.map(e => ({
         institucion: e.institucion || "",
         programa: e.programa || "",
@@ -1843,20 +1883,14 @@ function rellenarFormulario(a) {
         ano: e.ano || "",
         finalizado: (typeof e.finalizado !== "undefined" && e.finalizado !== null) ? String(e.finalizado) : "1"
       }));
-    } else {
-      // mantener al menos una card vacía para UX
-      educacionData = educacionData && educacionData.length > 0 ? educacionData : [{
-        institucion: "",
-        programa: "",
-        modalidad: "",
-        ano: "",
-        finalizado: "1"
-      }];
+    } else if (!educacionData || educacionData.length === 0) {
+      educacionData = [{ institucion: "", programa: "", modalidad: "", ano: "", finalizado: "1" }];
     }
     renderEducacion();
 
     // Experiencia
-    if (exp && exp.length > 0) {
+    const exp = Array.isArray(a.experiencia_laboral) ? a.experiencia_laboral : (a.experiencia_laboral || []);
+    if (exp.length > 0) {
       expData = exp.map(x => ({
         empresa: x.empresa || "",
         cargo: x.cargo || "",
@@ -1867,22 +1901,14 @@ function rellenarFormulario(a) {
         funciones: x.funciones || "",
         observaciones: x.observaciones || ""
       }));
-    } else {
-      expData = expData && expData.length > 0 ? expData : [{
-        empresa: "",
-        cargo: "",
-        tiempo_laborado: "",
-        salario: "",
-        motivo_retiro: "",
-        causa_motivo_retiro: "",
-        funciones: "",
-        observaciones: ""
-      }];
+    } else if (!expData || expData.length === 0) {
+      expData = [{ empresa: "", cargo: "", tiempo_laborado: "", salario: "", motivo_retiro: "", causa_motivo_retiro: "", funciones: "", observaciones: "" }];
     }
     renderExp();
 
     // Familiares
-    if (fam && fam.length > 0) {
+    const fam = Array.isArray(a.familiares) ? a.familiares : (a.familiares || []);
+    if (fam.length > 0) {
       familiaresData = fam.map(f => ({
         nombre_completo: f.nombre_completo || "",
         parentesco: f.parentesco || "",
@@ -1890,23 +1916,17 @@ function rellenarFormulario(a) {
         ocupacion: f.ocupacion || "",
         conviven_juntos: (typeof f.conviven_juntos !== "undefined" && f.conviven_juntos !== null) ? String(f.conviven_juntos) : "1"
       }));
-    } else {
-      familiaresData = familiaresData && familiaresData.length > 0 ? familiaresData : [{
-        nombre_completo: "",
-        parentesco: "",
-        edad: "",
-        ocupacion: "",
-        conviven_juntos: "1"
-      }];
+    } else if (!familiaresData || familiaresData.length === 0) {
+      familiaresData = [{ nombre_completo: "", parentesco: "", edad: "", ocupacion: "", conviven_juntos: "1" }];
     }
     renderFamiliares();
 
     // Referencias
     const refs = Array.isArray(a.referencias) ? a.referencias : (a.referencias || []);
-    if (refs && refs.length > 0) {
+    if (refs.length > 0) {
       refs.forEach(r => {
         const tipo = (r.tipo_referencia || "").toLowerCase();
-        if (tipo === "laboral" || tipo === "laboral") {
+        if (tipo === "laboral") {
           set("ref_lab_empresa", r.empresa || "");
           set("ref_lab_jefe", r.jefe_inmediato || "");
           set("ref_lab_cargo", r.cargo_jefe || "");
