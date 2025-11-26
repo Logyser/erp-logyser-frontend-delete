@@ -3,6 +3,8 @@
 //  Node.js + Express + MySQL (mysql2/promise)
 //  Listo para Cloud Run
 // ==========================================================
+import { generateAndUploadPdf } from "./pdf-generator.js"; // agrega import
+
 import multer from "multer";
 import { Storage } from "@google-cloud/storage";
 
@@ -755,6 +757,45 @@ app.post("/api/hv/registrar", async (req, res) => {
     }
     
     await conn.commit();
+
+    try {
+      // preparar dataObjects a partir de lo que acabas de insertar/actualizar
+      const aspiranteData = {
+        NOMBRE_COMPLETO: `${primer_nombre || ""} ${primer_apellido || ""}`.trim(),
+        TIPO_ID: tipo_documento || "",
+        IDENTIFICACION: identificacion || "",
+        CIUDAD_RESIDENCIA: ciudad_residencia || "",
+        TELEFONO: telefono || "",
+        CORREO: correo_electronico || "",
+        DIRECCION: direccion_barrio || "",
+        FECHA_NACIMIENTO: fecha_nacimiento || "",
+        ESTADO_CIVIL: estado_civil || "",
+        EPS: eps || "",
+        AFP: afp || "",
+        PHOTO_URL: datosAspirante.foto_public_url || "",
+
+        // Y campos compuestos: EDUCACION_LIST, EXPERIENCIA_LIST, REFERENCIAS_LIST, FAMILIARES_LIST, METAS, RESUMEN_PERFIL
+        // Debes transformar las filas que ya cargaste (educacion, experiencia, etc.) a HTML con <div>…</div>.
+        EDUCACION_LIST: /* generar HTML desde educacion array */,
+        EXPERIENCIA_LIST: /* generar HTML */,
+        REFERENCIAS_LIST: /* generar HTML */,
+        FAMILIARES_LIST: /* generar HTML */,
+        METAS: /* metas_personales texto */,
+        RESUMEN_PERFIL: "" ,
+        FECHA_GENERACION: new Date().toLocaleString()
+      };
+
+      const { destName, signedUrl } = await generateAndUploadPdf({ identificacion, dataObjects: aspiranteData });
+
+      // Actualizar DB con referencia al PDF
+      await conn.query(
+        `UPDATE Dynamic_hv_aspirante SET pdf_gcs_path = ?, pdf_public_url = ? WHERE identificacion = ?`,
+        [destName, signedUrl, identificacion]
+      );
+    } catch (err) {
+      console.error("Error generando PDF:", err);
+      // no fallo crítico: puedes continuar; opcional: notificar
+    }
 
     res.json({
       ok: true,
