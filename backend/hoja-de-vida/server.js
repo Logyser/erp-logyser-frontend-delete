@@ -608,15 +608,18 @@ app.post("/api/hv/registrar", async (req, res) => {
       );
     }
 
-    // 8) Seguridad / cuestionario personal (Dynamic_hv_seguridad)
+        // 8) Seguridad / cuestionario personal (Dynamic_hv_seguridad)
     if (seguridad) {
       await conn.query(
         `
         INSERT INTO Dynamic_hv_seguridad (
           id_aspirante,
           llamados_atencion,
+          detalle_llamados,
           accidente_laboral,
+          detalle_accidente,
           enfermedad_importante,
+          detalle_enfermedad,
           consume_alcohol,
           frecuencia_alcohol,
           familiar_en_empresa,
@@ -629,13 +632,16 @@ app.post("/api/hv/registrar", async (req, res) => {
           aspectos_mejorar,
           resolucion_problemas
         )
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         `,
         [
           idAspirante,
           seguridad.llamados_atencion || null,
+          seguridad.detalle_llamados || null,
           seguridad.accidente_laboral || null,
+          seguridad.detalle_accidente || null,
           seguridad.enfermedad_importante || null,
+          seguridad.detalle_enfermedad || null,
           seguridad.consume_alcohol || null,
           seguridad.frecuencia_alcohol || null,
           seguridad.familiar_en_empresa || null,
@@ -650,7 +656,7 @@ app.post("/api/hv/registrar", async (req, res) => {
         ]
       );
     }
-
+    
     await conn.commit();
 
     res.json({

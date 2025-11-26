@@ -2515,8 +2515,11 @@ async function rellenarFormulario(a) {
 
       data.seguridad = {
         llamados_atencion: seg_llamados.value,
+        detalle_llamados: seg_detalle_llamados ? seg_detalle_llamados.value.trim() : "",
         accidente_laboral: seg_accidente.value,
+        detalle_accidente: seg_detalle_accidente ? seg_detalle_accidente.value.trim() : "",
         enfermedad_importante: seg_enfermedad.value,
+        detalle_enfermedad: seg_detalle_enfermedad ? seg_detalle_enfermedad.value.trim() : "",
         consume_alcohol: seg_alcohol.value,
         frecuencia_alcohol: seg_frecuencia.value.trim(),
         familiar_en_empresa: seg_familiar.value,
@@ -2527,7 +2530,7 @@ async function rellenarFormulario(a) {
         califica_para_cargo: seg_califica.value.trim(),
         fortalezas: seg_fortal.value.trim(),
         aspectos_mejorar: seg_mejorar.value.trim(),
-        resolucion_problemas: seg_resolucion.value.trim(),
+        resolucion_problemas: seg_resolucion.value.trim()
       };
 
       try {
