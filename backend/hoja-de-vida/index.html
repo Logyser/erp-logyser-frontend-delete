@@ -1603,17 +1603,9 @@
               <label>Motivo del retiro</label>
               <input type="text" class="exp-motivo" value="${data.motivo_retiro || ""}">
             </div>
-            <div class="field">
-              <label>Causa del motivo</label>
-              <input type="text" class="exp-causa" value="${data.causa_motivo_retiro || ""}">
-            </div>
             <div class="field" style="grid-column: span 2;">
               <label>Funciones realizadas</label>
               <textarea class="exp-funciones" rows="2">${data.funciones || ""}</textarea>
-            </div>
-            <div class="field" style="grid-column: span 2;">
-              <label>Observaciones</label>
-              <textarea class="exp-observaciones" rows="2">${data.observaciones || ""}</textarea>
             </div>
           </div>
           <span class="exp-remove" onclick="eliminarExp(${index})">🗑️ Eliminar</span>
@@ -1650,21 +1642,20 @@
     window.eliminarExp = eliminarExp;
 
     function recopilarExp() {
-      const cards = document.querySelectorAll(".exp-card");
+  const cards = document.querySelectorAll(".exp-card");
 
-      expData = Array.from(cards).map(card => ({
-        empresa: card.querySelector(".exp-empresa").value.trim(),
-        cargo: card.querySelector(".exp-cargo").value.trim(),
-        tiempo_laborado: card.querySelector(".exp-tiempo").value.trim(),
-        salario: card.querySelector(".exp-salario").value.trim(),
-        motivo_retiro: card.querySelector(".exp-motivo").value.trim(),
-        causa_motivo_retiro: card.querySelector(".exp-causa").value.trim(),
-        funciones: card.querySelector(".exp-funciones").value.trim(),
-        observaciones: card.querySelector(".exp-observaciones").value.trim()
-      }));
+  expData = Array.from(cards).map(card => ({
+    empresa: (card.querySelector(".exp-empresa")?.value || "").trim(),
+    cargo: (card.querySelector(".exp-cargo")?.value || "").trim(),
+    tiempo_laborado: (card.querySelector(".exp-tiempo")?.value || "").trim(),
+    salario: (card.querySelector(".exp-salario")?.value || "").trim(),
+    motivo_retiro: (card.querySelector(".exp-motivo")?.value || "").trim(),
+    funciones: (card.querySelector(".exp-funciones")?.value || "").trim()
+    // nota: ya no se incluye causa_motivo_retiro ni observaciones
+  }));
 
-      return expData;
-    }
+  return expData;
+}
 
     // =====================
     // FAMILIARES DINÁMICOS
@@ -1935,7 +1926,7 @@ async function rellenarFormulario(a) {
     // Renderizar una sola vez después de haber preparado educacionData
     renderEducacion();
 
-    // Experiencia
+        // Experiencia
     const exp = Array.isArray(a.experiencia_laboral) ? a.experiencia_laboral : (a.experiencia_laboral || []);
     if (exp.length > 0) {
       expData = exp.map(x => ({
@@ -1944,12 +1935,11 @@ async function rellenarFormulario(a) {
         tiempo_laborado: x.tiempo_laborado || "",
         salario: x.salario || "",
         motivo_retiro: x.motivo_retiro || "",
-        causa_motivo_retiro: x.causa_motivo_retiro || "",
-        funciones: x.funciones || "",
-        observaciones: x.observaciones || ""
+        funciones: x.funciones || ""
+        // NO incluimos causa_motivo_retiro ni observaciones
       }));
     } else if (!expData || expData.length === 0) {
-      expData = [{ empresa: "", cargo: "", tiempo_laborado: "", salario: "", motivo_retiro: "", causa_motivo_retiro: "", funciones: "", observaciones: "" }];
+      expData = [{ empresa: "", cargo: "", tiempo_laborado: "", salario: "", motivo_retiro: "", funciones: "" }];
     }
     renderExp();
 
@@ -2114,7 +2104,15 @@ async function rellenarFormulario(a) {
       }
     });
 
-
+    // Escapa texto para insertarlo en el HTML de preview (protege contra caracteres especiales)
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
     // Construcción de PREVIEW (Opción C)
     function buildPreview() {
       const wrap = document.getElementById("preview-container");
@@ -2280,14 +2278,21 @@ async function rellenarFormulario(a) {
               ${
                 expCount === 0
                   ? "<p>No registraste experiencia laboral.</p>"
-                  : expData.map((e, i) => `
-                    <div style="margin-bottom:6px;">
-                      <strong>${i + 1}. ${e.empresa || "Empresa no especificada"}</strong><br>
-                      <span>Cargo: ${e.cargo || "-"}</span><br>
-                      <span>Tiempo: ${e.tiempo_laborado || "-"} | Salario: ${e.salario || "-"}</span><br>
-                      <span>Motivo retiro: ${e.motivo_retiro || "-"}</span>
-                    </div>
-                  `).join("")
+                  : expData.map((e, i) => {
+                      const empresa = e?.empresa ? escapeHtml(e.empresa) : "Empresa no especificada";
+                      const cargo = escapeHtml(e?.cargo || "-");
+                      const tiempo = escapeHtml(e?.tiempo_laborado || "-");
+                      const salario = escapeHtml(e?.salario || "-");
+                      const motivo = escapeHtml(e?.motivo_retiro || "-");
+                      return `
+                        <div style="margin-bottom:6px;">
+                          <strong>${i + 1}. ${empresa}</strong><br>
+                          <span>Cargo: ${cargo}</span><br>
+                          <span>Tiempo: ${tiempo} | Salario: ${salario}</span><br>
+                          <span>Motivo retiro: ${motivo}</span>
+                        </div>
+                      `;
+                    }).join("")
               }
             </div>
           </details>

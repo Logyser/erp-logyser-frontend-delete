@@ -182,7 +182,7 @@ app.get("/api/aspirante", async (req, res) => {
     );
 
     const experiencia = await query(
-      `SELECT empresa, cargo, tiempo_laborado, salario, motivo_retiro, causa_motivo_retiro, funciones, observaciones FROM Dynamic_hv_experiencia_laboral WHERE id_aspirante = ? ORDER BY fecha_registro`,
+      `SELECT empresa, cargo, tiempo_laborado, salario, motivo_retiro, funciones FROM Dynamic_hv_experiencia_laboral WHERE id_aspirante = ? ORDER BY fecha_registro`,
       [id]
     );
 
@@ -488,11 +488,9 @@ app.post("/api/hv/registrar", async (req, res) => {
           tiempo_laborado,
           salario,
           motivo_retiro,
-          causa_motivo_retiro,
-          funciones,
-          observaciones
+          funciones
         )
-        VALUES (?,?,?,?,?,?,?,?,?)
+        VALUES (?,?,?,?,?,?,?)
         `,
         [
           idAspirante,
@@ -501,9 +499,7 @@ app.post("/api/hv/registrar", async (req, res) => {
           exp.tiempo_laborado || null,
           exp.salario || null,
           exp.motivo_retiro || null,
-          exp.causa_motivo_retiro || null,
-          exp.funciones || null,
-          exp.observaciones || null
+          exp.funciones || null
         ]
       );
     }
