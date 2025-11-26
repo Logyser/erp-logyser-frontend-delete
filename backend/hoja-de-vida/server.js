@@ -146,7 +146,7 @@ app.use(express.static(__dirname));
 //  INICIO SERVIDOR
 // ==========================================
 
-const PORT = process.env.PORT || 8080;
+
 // ======================================================
 //  CONSULTAR ASPIRANTE POR IDENTIFICACIÓN (para evitar duplicados)
 //  GET /api/aspirante?identificacion=123
@@ -669,7 +669,8 @@ app.post("/api/hv/registrar", async (req, res) => {
     conn.release();
   }
 
-}
+});
+
 // --- Inicio del servidor ---
 const PORT = process.env.PORT || 8080;
 
@@ -691,5 +692,3 @@ async function shutdown() {
 
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
-
-);
