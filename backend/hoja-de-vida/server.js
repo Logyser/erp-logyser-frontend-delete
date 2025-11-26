@@ -272,26 +272,40 @@ app.post("/api/hv/upload-photo", upload.single("photo"), async (req, res) => {
       return res.status(500).json({ ok: false, error: "Error subiendo archivo a storage" });
     });
 
-    stream.on("finish", async () => {
+        stream.on("finish", async () => {
       try {
-        // Opcional: hacer público (requiere permisos). Si prefieres signed URLs, genera uno aquí en su lugar.
-        await blob.makePublic().catch(err => {
-          // si falla makePublic por permisos, lo ignoramos y devolvemos path (se puede generar signedUrl en ese caso)
-          console.warn("makePublic falló (permiso?)", err.message || err);
-        });
+        // Construir la URL pública: usaremos Signed URL (lectura) en lugar de makePublic()
+        // Duración por defecto: 7 días (configurable)
+        const expiresMs = parseInt(process.env.SIGNED_URL_EXPIRES_MS || String(7 * 24 * 60 * 60 * 1000), 10);
+        const expiresAt = Date.now() + expiresMs;
 
-        const publicUrl = `https://storage.googleapis.com/${GCS_BUCKET}/${encodeURIComponent(destName)}`;
+        // Generar signed URL (lectura)
+        let signedUrl;
+        try {
+          const [url] = await blob.getSignedUrl({
+            action: "read",
+            expires: expiresAt
+          });
+          signedUrl = url;
+        } catch (errSigned) {
+          console.warn("getSignedUrl falló:", errSigned.message || errSigned);
+          // No romper: si no se puede generar signed URL devolvemos la ruta (gcs path)
+          signedUrl = null;
+        }
+
+        const publicUrl = signedUrl || `gs://${GCS_BUCKET}/${destName}`;
 
         // Guardar en DB: update por identificacion (si existe aspirante)
         await pool.query(
           `UPDATE Dynamic_hv_aspirante SET foto_gcs_path = ?, foto_public_url = ? WHERE identificacion = ?`,
-          [destName, publicUrl, identificacion]
+          [destName, signedUrl || null, identificacion]
         );
 
         return res.json({
           ok: true,
           foto_gcs_path: destName,
-          foto_public_url: publicUrl
+          foto_public_url: signedUrl || null,
+          message: signedUrl ? "Signed URL generada" : "Archivo subido; no se pudo generar signed URL"
         });
       } catch (err) {
         console.error("Error post-upload:", err);
