@@ -44,6 +44,16 @@ async function query(sql, params = []) {
   const [rows] = await pool.query(sql, params);
   return rows;
 }
+
+// Helper: escape HTML para textos que iremos inyectando en la plantilla
+function escapeHtml(str = "") {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 // Multer: almacenar en memoria para subir directamente a GCS
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -760,31 +770,69 @@ app.post("/api/hv/registrar", async (req, res) => {
 
     try {
       // preparar dataObjects a partir de lo que acabas de insertar/actualizar
-      const aspiranteData = {
-        NOMBRE_COMPLETO: `${primer_nombre || ""} ${primer_apellido || ""}`.trim(),
-        TIPO_ID: tipo_documento || "",
-        IDENTIFICACION: identificacion || "",
-        CIUDAD_RESIDENCIA: ciudad_residencia || "",
-        TELEFONO: telefono || "",
-        CORREO: correo_electronico || "",
-        DIRECCION: direccion_barrio || "",
-        FECHA_NACIMIENTO: fecha_nacimiento || "",
-        ESTADO_CIVIL: estado_civil || "",
-        EPS: eps || "",
-        AFP: afp || "",
-        PHOTO_URL: datosAspirante.foto_public_url || "",
+      // --- Construir HTML para listas (insertar en server.js justo antes de llamar generateAndUploadPdf) ---
+      function toHtmlList(items, renderer) {
+        if (!Array.isArray(items) || items.length === 0) return "<div class='small'>No registrado</div>";
+        return items.map((it, i) => `<div class="list-item"><strong>${i+1}.</strong> ${renderer(it)}</div>`).join("");
+      }
 
-        // Y campos compuestos: EDUCACION_LIST, EXPERIENCIA_LIST, REFERENCIAS_LIST, FAMILIARES_LIST, METAS, RESUMEN_PERFIL
-        // Debes transformar las filas que ya cargaste (educacion, experiencia, etc.) a HTML con <div>…</div>.
-        EDUCACION_LIST: /* generar HTML desde educacion array */,
-        EXPERIENCIA_LIST: /* generar HTML */,
-        REFERENCIAS_LIST: /* generar HTML */,
-        FAMILIARES_LIST: /* generar HTML */,
-        METAS: /* metas_personales texto */,
-        RESUMEN_PERFIL: "" ,
+      const EDUCACION_LIST = toHtmlList(
+        educacion,
+        e => `${escapeHtml(e.institucion || "")} — ${escapeHtml(e.programa || "")} (${escapeHtml(e.modalidad || "-")}) ${e.ano ? `• ${escapeHtml(String(e.ano))}` : ""}`
+      );
+
+      const EXPERIENCIA_LIST = toHtmlList(
+        experiencia_laboral,
+        ex => `${escapeHtml(ex.empresa || "")} — ${escapeHtml(ex.cargo || "")}<br><span class="small">${escapeHtml(ex.tiempo_laborado || "")} • ${escapeHtml(ex.funciones || "")}</span>`
+      );
+
+      const REFERENCIAS_LIST = toHtmlList(
+        referencias,
+        r => {
+          if ((r.tipo_referencia || "").toLowerCase().includes("laboral")) {
+            return `${escapeHtml(r.empresa || "")} — ${escapeHtml(r.jefe_inmediato || "")} (${escapeHtml(r.telefono || "")})`;
+          }
+          return `${escapeHtml(r.nombre_completo || "")} — ${escapeHtml(r.telefono || "")} ${escapeHtml(r.ocupacion || "") ? "• " + escapeHtml(r.ocupacion) : ""}`;
+        }
+      );
+
+      const FAMILIARES_LIST = toHtmlList(
+        familiares,
+        f => `${escapeHtml(f.nombre_completo || "")} — ${escapeHtml(f.parentesco || "")} • ${escapeHtml(String(f.edad || ""))}`
+      );
+
+      const CONTACTO_HTML = contacto_emergencia && contacto_emergencia.nombre_completo
+        ? `${escapeHtml(contacto_emergencia.nombre_completo)} • ${escapeHtml(contacto_emergencia.telefono || "")} • ${escapeHtml(contacto_emergencia.correo_electronico || "")}`
+        : "";
+
+      const METAS_HTML = metas_personales
+        ? `${escapeHtml(metas_personales.meta_corto_plazo || "")}<br>${escapeHtml(metas_personales.meta_mediano_plazo || "")}<br>${escapeHtml(metas_personales.meta_largo_plazo || "")}`
+        : "";
+
+      // Construir dataObjects para la plantilla
+      const aspiranteData = {
+        NOMBRE_COMPLETO: `${escapeHtml(primer_nombre || "")} ${escapeHtml(primer_apellido || "")}`.trim(),
+        TIPO_ID: escapeHtml(tipo_documento || ""),
+        IDENTIFICACION: escapeHtml(identificacion || ""),
+        CIUDAD_RESIDENCIA: escapeHtml(ciudad_residencia || ""),
+        TELEFONO: escapeHtml(telefono || ""),
+        CORREO: escapeHtml(correo_electronico || ""),
+        DIRECCION: escapeHtml(direccion_barrio || ""),
+        FECHA_NACIMIENTO: escapeHtml(fecha_nacimiento || ""),
+        ESTADO_CIVIL: escapeHtml(estado_civil || ""),
+        EPS: escapeHtml(eps || ""),
+        AFP: escapeHtml(afp || ""),
+        PHOTO_URL: datosAspirante.foto_public_url || datosAspirante.foto_public_url || "",
+
+        EDUCACION_LIST,
+        EXPERIENCIA_LIST,
+        REFERENCIAS_LIST,
+        FAMILIARES_LIST,
+        CONTACTO_EMERGENCIA: CONTACTO_HTML,
+        METAS: METAS_HTML,
+        RESUMEN_PERFIL: escapeHtml((datosAspirante.resumen_perfil) || ""),
         FECHA_GENERACION: new Date().toLocaleString()
       };
-
       const { destName, signedUrl } = await generateAndUploadPdf({ identificacion, dataObjects: aspiranteData });
 
       // Actualizar DB con referencia al PDF

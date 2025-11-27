@@ -1,11 +1,17 @@
 import fs from "fs/promises";
 import path from "path";
-import puppeteer from "puppeteer"; // add a dependency
+import puppeteer from "puppeteer";
 import { Storage } from "@google-cloud/storage";
+import { fileURLToPath } from "url";
 
 const GCS_BUCKET = process.env.GCS_BUCKET || "hojas_vida_logyser";
 const storage = new Storage();
 const bucket = storage.bucket(GCS_BUCKET);
+
+// Resolve template path relative to this module (robusto en dev/contener)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const TEMPLATE_PATH = path.join(__dirname, "templates", "cv_template.html");
 
 // helper: load template file and replace placeholders
 async function renderHtmlFromTemplate(templatePath, data) {
@@ -19,7 +25,6 @@ async function renderHtmlFromTemplate(templatePath, data) {
 }
 
 async function htmlToPdfBuffer(html) {
-  // Puppeteer launch options for Cloud Run / container without sandbox
   const browser = await puppeteer.launch({
     args: ["--no-sandbox", "--disable-setuid-sandbox"]
   });
@@ -38,8 +43,7 @@ async function htmlToPdfBuffer(html) {
 }
 
 export async function generateAndUploadPdf({ identificacion, dataObjects, destNamePrefix }) {
-  // dataObjects: object with keys expected by template (you fill in the transformation)
-  const templatePath = path.join(process.cwd(), "templates", "cv_template.html");
+  const templatePath = TEMPLATE_PATH;
   const html = await renderHtmlFromTemplate(templatePath, dataObjects);
   const pdfBuffer = await htmlToPdfBuffer(html);
 
@@ -51,7 +55,6 @@ export async function generateAndUploadPdf({ identificacion, dataObjects, destNa
     resumable: false
   });
 
-  // Try to generate signed URL (same expiry policy as server.js)
   const expiresMs = parseInt(process.env.SIGNED_URL_EXPIRES_MS || String(7 * 24 * 60 * 60 * 1000), 10);
   const expiresAt = Date.now() + expiresMs;
   let signedUrl = null;
