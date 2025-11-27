@@ -805,9 +805,14 @@ app.post("/api/hv/registrar", async (req, res) => {
         ? `${escapeHtml(contacto_emergencia.nombre_completo)} • ${escapeHtml(contacto_emergencia.telefono || "")} • ${escapeHtml(contacto_emergencia.correo_electronico || "")}`
         : "";
 
-      const METAS_HTML = metas_personales
-        ? `${escapeHtml(metas_personales.meta_corto_plazo || "")}<br>${escapeHtml(metas_personales.meta_mediano_plazo || "")}<br>${escapeHtml(metas_personales.meta_largo_plazo || "")}`
-        : "";
+      const metasObj = metas_personales || {};
+      const METAS_HTML = (
+        escapeHtml(metasObj.meta_corto_plazo || metasObj.corto_plazo || "") +
+        ( (metasObj.meta_corto_plazo || metasObj.corto_plazo) ? "<br>" : "" ) +
+        escapeHtml(metasObj.meta_mediano_plazo || metasObj.mediano_plazo || "") +
+        ( (metasObj.meta_mediano_plazo || metasObj.mediano_plazo) ? "<br>" : "" ) +
+        escapeHtml(metasObj.meta_largo_plazo || metasObj.largo_plazo || "")
+      );
 
       // Construir dataObjects para la plantilla
       const aspiranteData = {
