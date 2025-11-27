@@ -819,18 +819,19 @@ app.post("/api/hv/registrar", async (req, res) => {
       }
 
       // Construir dataObjects para la plantilla
+      // --- Construir dataObjects para la plantilla (reemplazar el aspiranteData actual) ---
       const aspiranteData = {
-        NOMBRE_COMPLETO: "...",
-        TIPO_ID: "...",
-        IDENTIFICACION: "...",
-        CIUDAD_RESIDENCIA: "...",
-        TELEFONO: "...",
-        CORREO: "...",
-        DIRECCION: "...",
-        FECHA_NACIMIENTO: "...",
-        ESTADO_CIVIL: "...",
-        EPS: "...",
-        AFP: "...",
+        NOMBRE_COMPLETO: `${escapeHtml(primer_nombre || "")} ${escapeHtml(primer_apellido || "")}`.trim(),
+        TIPO_ID: escapeHtml(tipo_documento || ""),
+        IDENTIFICACION: escapeHtml(identificacion || ""),
+        CIUDAD_RESIDENCIA: escapeHtml(ciudad_residencia || datosAspirante.ciudad || ""),
+        TELEFONO: escapeHtml(telefono || datosAspirante.telefono || ""),
+        CORREO: escapeHtml(correo_electronico || datosAspirante.correo_electronico || ""),
+        DIRECCION: escapeHtml(direccion_barrio || datosAspirante.direccion_barrio || ""),
+        FECHA_NACIMIENTO: escapeHtml(fecha_nacimiento || ""),
+        ESTADO_CIVIL: escapeHtml(estado_civil || ""),
+        EPS: escapeHtml(eps || ""),
+        AFP: escapeHtml(afp || ""),
 
         RH: escapeHtml(rh || ""),
         CAMISA_TALLA: escapeHtml(camisa_talla || ""),
@@ -838,6 +839,8 @@ app.post("/api/hv/registrar", async (req, res) => {
         ZAPATOS_TALLA: escapeHtml(zapatos_talla || ""),
 
         PHOTO_URL: datosAspirante.foto_public_url || "",
+
+        // HTML ya construido arriba
         EDUCACION_LIST,
         EXPERIENCIA_LIST,
         REFERENCIAS_LIST,
@@ -846,26 +849,28 @@ app.post("/api/hv/registrar", async (req, res) => {
         METAS: METAS_HTML,
 
         FECHA_GENERACION: new Date().toLocaleString(),
-        LOGO_URL: "https://storage.googleapis.com/logyser-recibo-public/logo.png",
 
-        SEG_LLAMADOS: siNo(seguridad.llamados_atencion),
-        SEG_DETALLE_LLAMADOS: escapeHtml(seguridad.detalle_llamados || ""),
-        SEG_ACCIDENTE: siNo(seguridad.accidente_laboral),
-        SEG_DETALLE_ACCIDENTE: escapeHtml(seguridad.detalle_accidente || ""),
-        SEG_ENFERMEDAD: siNo(seguridad.enfermedad_importante),
-        SEG_DETALLE_ENFERMEDAD: escapeHtml(seguridad.detalle_enfermedad || ""),
-        SEG_ALCOHOL: siNo(seguridad.consume_alcohol),
-        SEG_FRECUENCIA: escapeHtml(seguridad.frecuencia_alcohol || ""),
-        SEG_FAMILIAR: siNo(seguridad.familiar_en_empresa),
-        SEG_DETALLE_FAMILIAR: escapeHtml(seguridad.detalle_familiar_empresa || ""),
-        SEG_INFO_FALSA: siNo(seguridad.info_falsa),
-        SEG_POLIGRAFO: siNo(seguridad.acepta_poligrafo),
-        SEG_FORTALEZAS: escapeHtml(seguridad.fortalezas || ""),
-        SEG_MEJORAR: escapeHtml(seguridad.aspectos_mejorar || ""),
-        SEG_RESOLUCION: escapeHtml(seguridad.resolucion_problemas || ""),
-        SEG_OBSERVACIONES: escapeHtml(seguridad.observaciones || "")
+        // Logo: preferible usar variable de entorno LOGO_PUBLIC_URL en lugar de hardcodear
+        LOGO_URL: process.env.LOGO_PUBLIC_URL || "https://storage.googleapis.com/logyser-recibo-public/logo.png",
+
+        // Seguridad / cuestionario
+        SEG_LLAMADOS: siNo(seguridad && seguridad.llamados_atencion),
+        SEG_DETALLE_LLAMADOS: escapeHtml((seguridad && seguridad.detalle_llamados) || ""),
+        SEG_ACCIDENTE: siNo(seguridad && seguridad.accidente_laboral),
+        SEG_DETALLE_ACCIDENTE: escapeHtml((seguridad && seguridad.detalle_accidente) || ""),
+        SEG_ENFERMEDAD: siNo(seguridad && seguridad.enfermedad_importante),
+        SEG_DETALLE_ENFERMEDAD: escapeHtml((seguridad && seguridad.detalle_enfermedad) || ""),
+        SEG_ALCOHOL: siNo(seguridad && seguridad.consume_alcohol),
+        SEG_FRECUENCIA: escapeHtml((seguridad && seguridad.frecuencia_alcohol) || ""),
+        SEG_FAMILIAR: siNo(seguridad && seguridad.familiar_en_empresa),
+        SEG_DETALLE_FAMILIAR: escapeHtml((seguridad && seguridad.detalle_familiar_empresa) || ""),
+        SEG_INFO_FALSA: siNo(seguridad && seguridad.info_falsa),
+        SEG_POLIGRAFO: siNo(seguridad && seguridad.acepta_poligrafo),
+        SEG_FORTALEZAS: escapeHtml((seguridad && seguridad.fortalezas) || ""),
+        SEG_MEJORAR: escapeHtml((seguridad && seguridad.aspectos_mejorar) || ""),
+        SEG_RESOLUCION: escapeHtml((seguridad && seguridad.resolucion_problemas) || ""),
+        SEG_OBSERVACIONES: escapeHtml((seguridad && seguridad.observaciones) || "")
       };
-
 
       const { destName, signedUrl } = await generateAndUploadPdf({ identificacion, dataObjects: aspiranteData });
 
