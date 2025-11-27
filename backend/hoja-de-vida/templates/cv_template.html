@@ -1,36 +1,113 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Hoja de Vida</title>
-  <style>
-    /* Reset y tipografía */
-    @page { margin: 20mm; }
-    body { font-family: "Helvetica Neue", Arial, sans-serif; color:#222; margin:0; font-size:12px; line-height:1.35; }
-    .container { max-width:800px; margin:0 auto; background:#fff; padding:18px; }
-    .header { display:flex; gap:16px; align-items:center; border-bottom:1px solid #e6e9f2; padding-bottom:12px; margin-bottom:14px; }
-    .photo { width:110px; height:110px; border-radius:8px; object-fit:cover; border:1px solid #e1e4f8; }
-    .name { font-size:20px; font-weight:700; color:#0b1a66; margin:0; }
-    .meta { color:#6b6b6b; margin-top:6px; font-size:12px; }
-    .two-col { display:flex; gap:18px; }
-    .left { width: 36%; }
-    .right { width: 64%; }
-    .section { margin-bottom:12px; }
-    .section h3 { margin:0 0 8px 0; font-size:13px; color:#0b1a66; border-left:4px solid #f55400; padding-left:8px; }
-    .field { margin-bottom:6px; }
-    .small { font-size:11px; color:#666; }
-    .list-item { margin-bottom:8px; }
-    .edu-title { font-weight:700; font-size:12px; color:#222; }
-    .divider { height:1px; background:#eef0fb; margin:14px 0; border-radius:2px; }
-    /* Footer */
-    .footer { margin-top:18px; font-size:10px; color:#8a8a8a; text-align:center; }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Hoja de Vida – Logyser</title>
+
+<style>
+  @page { margin: 18mm; }
+  body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    color:#222;
+    margin:0;
+    font-size:12px;
+    line-height:1.35;
+    background:#ffffff;
+  }
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  /* ===========================
+     ENCABEZADO
+  ============================*/
+  .header {
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    padding-bottom:12px;
+    border-bottom:2px solid #e6e9f2;
+    margin-bottom:16px;
+  }
+  .header-left { display:flex; gap:14px; align-items:center; }
+  .photo {
+    width:110px; height:110px;
+    border-radius:8px;
+    object-fit:cover;
+    border:1px solid #e1e4f8;
+  }
+  .name {
+    margin:0; padding:0;
+    font-size:22px;
+    font-weight:700;
+    color:#000b59;
+  }
+  .meta { font-size:12px; color:#6b6b6b; margin-top:4px; }
+
+  .logo {
+    width:120px;
+    object-fit:contain;
+  }
+
+  /* ===========================
+     SECCIONES Y TITULOS
+  ============================*/
+  h3 {
+    margin:0;
+    font-size:13px;
+    font-weight:700;
+    color:#000b59;
+    padding-left:8px;
+    border-left:4px solid #F55400;
+    margin-bottom:6px;
+  }
+
+  .section { margin-bottom:14px; }
+  .small { font-size:11px; color:#444; }
+
+  /* ===========================
+     COLUMNAS
+  ============================*/
+  .two-col { display:flex; gap:18px; }
+  .left { width:34%; }
+  .right { width:66%; }
+
+  /* ===========================
+     LISTAS
+  ============================*/
+  .list-item { margin-bottom:8px; }
+
+  .divider {
+    height:1px;
+    background:#e7e7f5;
+    margin:14px 0;
+    border-radius:2px;
+  }
+
+  /* ===========================
+     FOOTER
+  ============================*/
+  .footer {
+    margin-top:18px;
+    font-size:10px;
+    text-align:center;
+    color:#888;
+  }
+
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <img class="photo" src="{{PHOTO_URL}}" alt="Foto" onerror="this.style.display='none'"/>
+<div class="container">
+
+  <!-- ===========================
+       ENCABEZADO
+  ============================-->
+  <div class="header">
+    <div class="header-left">
+      <img class="photo" src="{{PHOTO_URL}}" onerror="this.style.display='none'" />
       <div>
         <h1 class="name">{{NOMBRE_COMPLETO}}</h1>
         <div class="meta">{{TIPO_ID}} {{IDENTIFICACION}} • {{CIUDAD_RESIDENCIA}} • {{TELEFONO}}</div>
@@ -38,63 +115,117 @@
       </div>
     </div>
 
-    <div class="two-col">
-      <div class="left">
-        <div class="section">
-          <h3>Contacto</h3>
-          <div class="field small">{{CONTACTO_EMERGENCIA}}</div>
-          <div class="field small">{{DIRECCION}}</div>
-        </div>
+    <!-- Logo de Logyser -->
+    <img class="logo" src="https://storage.googleapis.com/logyser-public/logo/logyser_horizontal.png" />
+  </div>
 
-        <div class="section">
-          <h3>Datos</h3>
-          <div class="field small">Fecha de nacimiento: {{FECHA_NACIMIENTO}}</div>
-          <div class="field small">Estado civil: {{ESTADO_CIVIL}}</div>
-          <div class="field small">EPS: {{EPS}}</div>
-          <div class="field small">AFP: {{AFP}}</div>
-        </div>
 
-        <div class="section">
-          <h3>Familiares</h3>
-          {{FAMILIARES_LIST}}
-        </div>
+  <div class="two-col">
+
+    <!-- ===========================
+         COLUMNA IZQUIERDA
+    ============================-->
+    <div class="left">
+
+      <div class="section">
+        <h3>Contacto</h3>
+        <div class="small">{{CONTACTO_EMERGENCIA}}</div>
+        <div class="small">{{DIRECCION}}</div>
       </div>
 
-      <div class="right">
-        <div class="section">
-          <h3>Perfil</h3>
-          <div class="field small">{{RESUMEN_PERFIL}}</div>
-        </div>
-
-        <div class="section">
-          <h3>Educación</h3>
-          {{EDUCACION_LIST}}
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="section">
-          <h3>Experiencia</h3>
-          {{EXPERIENCIA_LIST}}
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="section">
-          <h3>Referencias</h3>
-          {{REFERENCIAS_LIST}}
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="section">
-          <h3>Metas</h3>
-          <div class="small">{{METAS}}</div>
-        </div>
+      <div class="section">
+        <h3>Datos Personales</h3>
+        <div class="small">F. Nacimiento: {{FECHA_NACIMIENTO}}</div>
+        <div class="small">Estado civil: {{ESTADO_CIVIL}}</div>
+        <div class="small">RH: {{RH}}</div>
+        <div class="small">EPS: {{EPS}}</div>
+        <div class="small">AFP: {{AFP}}</div>
+        <div class="small">Talla camisa: {{CAMISA_TALLA}}</div>
+        <div class="small">Talla pantalón: {{TALLA_PANTALON}}</div>
+        <div class="small">Talla zapatos: {{ZAPATOS_TALLA}}</div>
       </div>
+
+      <div class="section">
+        <h3>Familiares</h3>
+        {{FAMILIARES_LIST}}
+      </div>
+
     </div>
 
-    <div class="footer">Logyser • Hoja de vida generada el {{FECHA_GENERACION}}</div>
+    <!-- ===========================
+         COLUMNA DERECHA
+    ============================-->
+    <div class="right">
+
+      <div class="section">
+        <h3>Perfil Profesional</h3>
+        <div class="small">{{RESUMEN_PERFIL}}</div>
+      </div>
+
+      <div class="section">
+        <h3>Educación</h3>
+        {{EDUCACION_LIST}}
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section">
+        <h3>Experiencia</h3>
+        {{EXPERIENCIA_LIST}}
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section">
+        <h3>Referencias</h3>
+        {{REFERENCIAS_LIST}}
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section">
+        <h3>Metas</h3>
+        <div class="small">{{METAS}}</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section">
+        <h3>Cuestionario de Seguridad</h3>
+
+        <div class="small"><strong>Llamados de atención:</strong> {{SEG_LLAMADOS}}</div>
+        <div class="small">{{SEG_DETALLE_LLAMADOS}}</div>
+
+        <div class="small"><strong>Accidente laboral:</strong> {{SEG_ACCIDENTE}}</div>
+        <div class="small">{{SEG_DETALLE_ACCIDENTE}}</div>
+
+        <div class="small"><strong>Enfermedad importante:</strong> {{SEG_ENFERMEDAD}}</div>
+        <div class="small">{{SEG_DETALLE_ENFERMEDAD}}</div>
+
+        <div class="small"><strong>Consume alcohol:</strong> {{SEG_ALCOHOL}}</div>
+        <div class="small"><strong>Frecuencia:</strong> {{SEG_FRECUENCIA}}</div>
+
+        <div class="small"><strong>Familiar en empresa:</strong> {{SEG_FAMILIAR}}</div>
+        <div class="small">{{SEG_DETALLE_FAMILIAR}}</div>
+
+        <div class="small"><strong>Información falsa:</strong> {{SEG_INFO_FALSA}}</div>
+        <div class="small"><strong>Acepta polígrafo:</strong> {{SEG_POLIGRAFO}}</div>
+
+        <div class="small"><strong>Fortalezas:</strong> {{SEG_FORTALEZAS}}</div>
+        <div class="small"><strong>Aspectos a mejorar:</strong> {{SEG_MEJORAR}}</div>
+        <div class="small"><strong>Resolución de problemas:</strong> {{SEG_RESOLUCION}}</div>
+
+        <div class="small"><strong>Observaciones:</strong><br>{{SEG_OBSERVACIONES}}</div>
+
+      </div>
+
+    </div>
   </div>
+
+  <div class="footer">
+    Logyser • Hoja de vida generada el {{FECHA_GENERACION}}
+  </div>
+
+</div>
 </body>
 </html>
