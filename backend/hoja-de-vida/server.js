@@ -805,14 +805,24 @@ app.post("/api/hv/registrar", async (req, res) => {
         ? `${escapeHtml(contacto_emergencia.nombre_completo)} • ${escapeHtml(contacto_emergencia.telefono || "")} • ${escapeHtml(contacto_emergencia.correo_electronico || "")}`
         : "";
 
+      // Construir METAS_HTML enumerada (mantiene compatibilidad con meta_* o corto_plazo)
       const metasObj = metas_personales || {};
-      const METAS_HTML = (
-        escapeHtml(metasObj.meta_corto_plazo || metasObj.corto_plazo || "") +
-        ( (metasObj.meta_corto_plazo || metasObj.corto_plazo) ? "<br>" : "" ) +
-        escapeHtml(metasObj.meta_mediano_plazo || metasObj.mediano_plazo || "") +
-        ( (metasObj.meta_mediano_plazo || metasObj.mediano_plazo) ? "<br>" : "" ) +
-        escapeHtml(metasObj.meta_largo_plazo || metasObj.largo_plazo || "")
-      );
+      const metasItems = [];
+      const m1 = metasObj.meta_corto_plazo || metasObj.corto_plazo || "";
+      const m2 = metasObj.meta_mediano_plazo || metasObj.mediano_plazo || "";
+      const m3 = metasObj.meta_largo_plazo || metasObj.largo_plazo || "";
+      if (m1 && m1.trim()) metasItems.push(m1.trim());
+      if (m2 && m2.trim()) metasItems.push(m2.trim());
+      if (m3 && m3.trim()) metasItems.push(m3.trim());
+
+      let METAS_HTML;
+      if (metasItems.length === 0) {
+        METAS_HTML = "<div class='small'>No registrado</div>";
+      } else {
+        METAS_HTML = metasItems.map((txt, i) =>
+          `<div class="list-item"><strong>${i + 1}.</strong> ${escapeHtml(txt)}</div>`
+        ).join("");
+      }
       function siNo(valor) {
         if (valor === null || valor === undefined) return "";
         return valor == 1 ? "Sí" : "No";
