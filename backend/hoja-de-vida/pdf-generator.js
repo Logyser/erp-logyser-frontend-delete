@@ -7,7 +7,10 @@ import { fileURLToPath } from "url";
 const GCS_BUCKET = process.env.GCS_BUCKET || "hojas_vida_logyser";
 const LOGO_GCS_BUCKET = process.env.LOGO_GCS_BUCKET || "logyser-public"; // bucket donde está el logo
 const LOGO_GCS_PATH = process.env.LOGO_GCS_PATH || "logo/logyser_horizontal.png"; // ruta dentro del bucket
-const storage = new Storage();
+const storage = new Storage({
+  projectId: process.env.GOOGLE_CLOUD_PROJECT || "eternal-brand-454501-i8",
+});
+
 const bucket = storage.bucket(GCS_BUCKET);
 
 // Resolve template path relative to this module (robusto en dev/contener)
@@ -75,9 +78,15 @@ async function htmlToPdfBuffer(html) {
 
 export async function generateAndUploadPdf({ identificacion, dataObjects = {}, destNamePrefix }) {
   // Asegurar que LOGO_URL esté disponible en dataObjects — preferir valor pasado por caller
-  if (!dataObjects.LOGO_URL) {
-    dataObjects.LOGO_URL = await getLogoDataUrl();
-  }
+  // if (!dataObjects.LOGO_URL) {
+  //    dataObjects.LOGO_URL = await getLogoDataUrl();
+  // }
+
+  // NO sobreescribir LOGO_URL; server.js ya manda la correcta
+    if (!dataObjects.LOGO_URL) {
+        dataObjects.LOGO_URL = "https://storage.googleapis.com/logyser-recibo-public/logo.png";
+    }
+
 
   const templatePath = TEMPLATE_PATH;
   const html = await renderHtmlFromTemplate(templatePath, dataObjects);

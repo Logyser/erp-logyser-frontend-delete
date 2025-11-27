@@ -813,48 +813,59 @@ app.post("/api/hv/registrar", async (req, res) => {
         ( (metasObj.meta_mediano_plazo || metasObj.mediano_plazo) ? "<br>" : "" ) +
         escapeHtml(metasObj.meta_largo_plazo || metasObj.largo_plazo || "")
       );
+      function siNo(valor) {
+        if (valor === null || valor === undefined) return "";
+        return valor == 1 ? "Sí" : "No";
+      }
 
       // Construir dataObjects para la plantilla
       const aspiranteData = {
-        NOMBRE_COMPLETO: `${escapeHtml(primer_nombre || "")} ${escapeHtml(primer_apellido || "")}`.trim(),
-        TIPO_ID: escapeHtml(tipo_documento || ""),
-        IDENTIFICACION: escapeHtml(identificacion || ""),
-        CIUDAD_RESIDENCIA: escapeHtml(ciudad_residencia || ""),
-        TELEFONO: escapeHtml(telefono || ""),
-        CORREO: escapeHtml(correo_electronico || ""),
-        DIRECCION: escapeHtml(direccion_barrio || ""),
-        FECHA_NACIMIENTO: escapeHtml(fecha_nacimiento || ""),
-        ESTADO_CIVIL: escapeHtml(estado_civil || ""),
-        EPS: escapeHtml(eps || ""),
-        AFP: escapeHtml(afp || ""),
-        PHOTO_URL: datosAspirante.foto_public_url || "",
+        NOMBRE_COMPLETO: "...",
+        TIPO_ID: "...",
+        IDENTIFICACION: "...",
+        CIUDAD_RESIDENCIA: "...",
+        TELEFONO: "...",
+        CORREO: "...",
+        DIRECCION: "...",
+        FECHA_NACIMIENTO: "...",
+        ESTADO_CIVIL: "...",
+        EPS: "...",
+        AFP: "...",
 
+        RH: escapeHtml(rh || ""),
+        CAMISA_TALLA: escapeHtml(camisa_talla || ""),
+        TALLA_PANTALON: escapeHtml(talla_pantalon || ""),
+        ZAPATOS_TALLA: escapeHtml(zapatos_talla || ""),
+
+        PHOTO_URL: datosAspirante.foto_public_url || "",
         EDUCACION_LIST,
         EXPERIENCIA_LIST,
         REFERENCIAS_LIST,
         FAMILIARES_LIST,
         CONTACTO_EMERGENCIA: CONTACTO_HTML,
         METAS: METAS_HTML,
-        RESUMEN_PERFIL: escapeHtml(datosAspirante.resumen_perfil || ""),
-        FECHA_GENERACION: new Date().toLocaleString(),   // ← ⚠️ AQUÍ
 
-        SEG_LLAMADOS: escapeHtml(seguridad.llamados_atencion || ""),
+        FECHA_GENERACION: new Date().toLocaleString(),
+        LOGO_URL: "https://storage.googleapis.com/logyser-recibo-public/logo.png",
+
+        SEG_LLAMADOS: siNo(seguridad.llamados_atencion),
         SEG_DETALLE_LLAMADOS: escapeHtml(seguridad.detalle_llamados || ""),
-        SEG_ACCIDENTE: escapeHtml(seguridad.accidente_laboral || ""),
+        SEG_ACCIDENTE: siNo(seguridad.accidente_laboral),
         SEG_DETALLE_ACCIDENTE: escapeHtml(seguridad.detalle_accidente || ""),
-        SEG_ENFERMEDAD: escapeHtml(seguridad.enfermedad_importante || ""),
+        SEG_ENFERMEDAD: siNo(seguridad.enfermedad_importante),
         SEG_DETALLE_ENFERMEDAD: escapeHtml(seguridad.detalle_enfermedad || ""),
-        SEG_ALCOHOL: escapeHtml(seguridad.consume_alcohol || ""),
+        SEG_ALCOHOL: siNo(seguridad.consume_alcohol),
         SEG_FRECUENCIA: escapeHtml(seguridad.frecuencia_alcohol || ""),
-        SEG_FAMILIAR: escapeHtml(seguridad.familiar_en_empresa || ""),
+        SEG_FAMILIAR: siNo(seguridad.familiar_en_empresa),
         SEG_DETALLE_FAMILIAR: escapeHtml(seguridad.detalle_familiar_empresa || ""),
-        SEG_INFO_FALSA: escapeHtml(seguridad.info_falsa || ""),
-        SEG_POLIGRAFO: escapeHtml(seguridad.acepta_poligrafo || ""),
+        SEG_INFO_FALSA: siNo(seguridad.info_falsa),
+        SEG_POLIGRAFO: siNo(seguridad.acepta_poligrafo),
         SEG_FORTALEZAS: escapeHtml(seguridad.fortalezas || ""),
         SEG_MEJORAR: escapeHtml(seguridad.aspectos_mejorar || ""),
         SEG_RESOLUCION: escapeHtml(seguridad.resolucion_problemas || ""),
         SEG_OBSERVACIONES: escapeHtml(seguridad.observaciones || "")
-    };
+      };
+
 
       const { destName, signedUrl } = await generateAndUploadPdf({ identificacion, dataObjects: aspiranteData });
 
