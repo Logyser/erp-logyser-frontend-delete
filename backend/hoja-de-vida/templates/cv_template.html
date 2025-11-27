@@ -6,20 +6,22 @@
 <title>Hoja de Vida – Logyser</title>
 
 <style>
-  @page { margin: 18mm; }
+  /* CONFIGURACIÓN BASE PARA PUPPETEER */
+  @page { margin: 18mm;
+  /* source: 1, 2 */ }
   body {
     font-family: "Helvetica Neue", Arial, sans-serif;
-    color:#222;
+    color:#333; 
     margin:0;
     font-size:12px;
-    line-height:1.35;
+    line-height:1.4; 
     background:#ffffff;
-  }
+  /* source: 2, 3 */ }
   .container {
     max-width: 800px;
     margin: 0 auto;
     padding: 0;
-  }
+  /* source: 3, 4 */ }
 
   /* ===========================
      ENCABEZADO
@@ -29,72 +31,154 @@
     justify-content: space-between;
     align-items:center;
     padding-bottom:12px;
-    border-bottom:2px solid #e6e9f2;
+    border-bottom:1px solid #e1e4f8; 
     margin-bottom:16px;
-  }
-  .header-left { display:flex; gap:14px; align-items:center; }
+  /* source: 4, 5 */ }
+  .header-left { display:flex; gap:14px; align-items:center;
+  /* source: 5, 6 */ }
   .photo {
-    width:110px; height:110px;
-    border-radius:8px;
+    width:100px; height:100px; 
+    border-radius:50%; 
     object-fit:cover;
-    border:1px solid #e1e4f8;
-  }
+    border:3px solid #F55400; /* Borde naranja vibrante */
+  /* source: 6, 7 */ }
   .name {
     margin:0; padding:0;
-    font-size:22px;
-    font-weight:700;
-    color:#000b59;
-  }
-  .meta { font-size:12px; color:#6b6b6b; margin-top:4px; }
+    font-size:26px; 
+    font-weight:800;
+    color:#000b59; /* Azul Oscuro */
+  /* source: 7 */ }
+  .meta { font-size:11px; color:#6b6b6b; margin-top:4px;
+  /* source: 7, 8 */ }
 
   .logo {
-    width:120px;
+    width:100px; 
     object-fit:contain;
-  }
+  /* source: 8 */ }
 
   /* ===========================
      SECCIONES Y TITULOS
   ============================*/
   h3 {
     margin:0;
-    font-size:13px;
+    font-size:14px; 
     font-weight:700;
-    color:#000b59;
-    padding-left:8px;
-    border-left:4px solid #F55400;
-    margin-bottom:6px;
-  }
+    color:#333; 
+    padding-left:10px; 
+    border-left:5px solid #F55400; /* Naranja Vibrante más grueso */
+    margin-bottom:10px; 
+  /* source: 9 */ }
 
-  .section { margin-bottom:14px; }
-  .small { font-size:11px; color:#444; }
+  .section { margin-bottom:20px; }
+  .small { font-size:11px; color:#4a4a4a; 
+  /* source: 9, 10 */ }
+  .small strong { color:#333; } 
+
+  /* Estilo para items de lista (Experiencia, Educación) */
+  .list-item { 
+    margin-bottom:10px;
+    padding:6px 10px; 
+    border-left: 2px solid #e1e4f8;
+  /* source: 12, 13 */ }
+  .list-item:last-child { margin-bottom:0; }
+
+  /* Títulos dentro de las secciones de lista */
+  .list-item-title {
+    font-size:12px;
+    font-weight:700;
+    color:#000b59; /* Azul Oscuro para los títulos */
+    margin-bottom:2px;
+  }
+  .list-item-subtitle {
+    font-size:11px;
+    font-style:italic;
+    color:#F55400; /* Naranja Vibrante para el cargo o institución */
+    margin-bottom:4px;
+  }
 
   /* ===========================
      COLUMNAS
   ============================*/
-  .two-col { display:flex; gap:18px; }
-  .left { width:34%; }
-  .right { width:66%; }
-
+  .two-col { display:flex; gap:20px; 
+  /* source: 10, 11 */ }
+  .left { width:32%; }
+  .right { width:68%;
+  /* source: 11, 12 */ }
+  
   /* ===========================
-     LISTAS
+     CUESTIONARIO SEGURIDAD (Sección movida y centrada)
   ============================*/
-  .list-item { margin-bottom:8px; }
-
-  .divider {
-    height:1px;
-    background:#e7e7f5;
-    margin:14px 0;
-    border-radius:2px;
+  .security-section {
+    width: 80%; /* Más estrecho para el centrado */
+    margin: 20px auto 0 auto;
+    border: 1px solid #e1e4f8;
+    padding: 15px;
+    border-radius: 6px;
+  }
+  
+  .security-section h3 {
+    text-align: center;
+    border-left: none;
+    color: #000b59;
+    padding-left: 0;
+    margin-bottom: 12px;
   }
 
   /* ===========================
-     FOOTER
+     DIVISOR
   ============================*/
+  .divider {
+    height:1px;
+    background:#e1e4f8; 
+    margin:18px 0; 
+    border-radius:2px;
+  /* source: 13, 14 */ }
+
+  /* ===========================
+     FOOTER Y ELEMENTOS GRÁFICOS
+  ============================*/
+  .footer-container {
+    position: relative; /* Contenedor para los elementos absolutos */
+    margin-top:24px;
+    padding-top:10px;
+    border-top:1px solid #e1e4f8;
+  }
+  
   .footer {
-    margin-top:18px;
     font-size:10px;
     text-align:center;
     color:#888;
+    position: relative;
+    z-index: 2; /* Asegura que el texto esté encima de las figuras */
+  /* source: 14, 15 */ }
+
+  /* Figuras geométricas sutiles (toque moderno) */
+  .abstract-shape {
+    position: absolute;
+    background-color: #000b59; /* Azul Oscuro */
+    opacity: 0.05; /* Muy transparente */
+    z-index: 1;
+  }
+  
+  .shape-1 {
+    width: 60px;
+    height: 3px;
+    top: 0;
+    left: 20%;
+  }
+  .shape-2 {
+    width: 15px;
+    height: 15px;
+    top: -5px;
+    right: 15%;
+    transform: rotate(45deg); /* Cuadrado rotado */
+  }
+  .shape-3 {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    bottom: -10px;
+    left: 10%;
   }
 
 </style>
@@ -102,36 +186,29 @@
 <body>
 <div class="container">
 
-  <!-- ===========================
-       ENCABEZADO
-  ============================-->
   <div class="header">
     <div class="header-left">
       <img class="photo" src="{{PHOTO_URL}}" onerror="this.style.display='none'" />
       <div>
         <h1 class="name">{{NOMBRE_COMPLETO}}</h1>
-        <div class="meta">{{TIPO_ID}} {{IDENTIFICACION}} • {{CIUDAD_RESIDENCIA}} • {{TELEFONO}}</div>
+        <div class="meta" style="color:#000b59; font-weight:600;">{{TIPO_ID}} {{IDENTIFICACION}}</div>
+        <div class="meta">{{CIUDAD_RESIDENCIA}} • {{TELEFONO}}</div>
         <div class="meta">{{CORREO}}</div>
       </div>
     </div>
 
-    <!-- Logo de Logyser: ahora se inyecta como {{LOGO_URL}} -->
-    <img class="logo" src="{{LOGO_URL}}" onerror="this.style.display='none'" />
+    <img class="logo" src="{{LOGO_URL}}" 
+  /* source: 15, 16 */ onerror="this.style.display='none'" />
   </div>
 
-  <!-- resto del template igual (sin cambios) -->
   <div class="two-col">
 
     <div class="left">
-      <div class="section">
-        <h3>Contacto</h3>
-        <div class="small">{{CONTACTO_EMERGENCIA}}</div>
-        <div class="small">{{DIRECCION}}</div>
-      </div>
-
+      
       <div class="section">
         <h3>Datos Personales</h3>
-        <div class="small">F. Nacimiento: {{FECHA_NACIMIENTO}}</div>
+        <div class="small">F.
+  /* source: 17 */ Nacimiento: {{FECHA_NACIMIENTO}}</div>
         <div class="small">Estado civil: {{ESTADO_CIVIL}}</div>
         <div class="small">RH: {{RH}}</div>
         <div class="small">EPS: {{EPS}}</div>
@@ -142,13 +219,26 @@
       </div>
 
       <div class="section">
-        <h3>Familiares</h3>
-        {{FAMILIARES_LIST}}
+        <h3>Contacto</h3>
+        <div class="small">{{CONTACTO_EMERGENCIA}}</div>
+        <div class="small">{{DIRECCION}}</div>
       </div>
 
+      <div class="section">
+        <h3>Familiares</h3>
+  /* source: 18 */     {{FAMILIARES_LIST}}
+      </div>
+      
     </div>
 
     <div class="right">
+      
+      <div class="section">
+        <h3>Experiencia</h3>
+        {{EXPERIENCIA_LIST}}
+      </div>
+
+      <div class="divider"></div>
 
       <div class="section">
         <h3>Educación</h3>
@@ -158,60 +248,58 @@
       <div class="divider"></div>
 
       <div class="section">
-        <h3>Experiencia</h3>
-        {{EXPERIENCIA_LIST}}
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="section">
-        <h3>Referencias</h3>
+  /* source: 19 */       <h3>Referencias</h3>
         {{REFERENCIAS_LIST}}
       </div>
 
       <div class="divider"></div>
-
+      
       <div class="section">
         <h3>Metas</h3>
         <div class="small">{{METAS}}</div>
       </div>
 
-      <div class="divider"></div>
-
-      <div class="section">
-        <h3>Cuestionario de Seguridad</h3>
-
-        <div class="small"><strong>Llamados de atención:</strong> {{SEG_LLAMADOS}}</div>
-        <div class="small">{{SEG_DETALLE_LLAMADOS}}</div>
-
-        <div class="small"><strong>Accidente laboral:</strong> {{SEG_ACCIDENTE}}</div>
-        <div class="small">{{SEG_DETALLE_ACCIDENTE}}</div>
-
-        <div class="small"><strong>Enfermedad importante:</strong> {{SEG_ENFERMEDAD}}</div>
-        <div class="small">{{SEG_DETALLE_ENFERMEDAD}}</div>
-
-        <div class="small"><strong>Consume alcohol:</strong> {{SEG_ALCOHOL}}</div>
-        <div class="small"><strong>Frecuencia:</strong> {{SEG_FRECUENCIA}}</div>
-
-        <div class="small"><strong>Familiar en empresa:</strong> {{SEG_FAMILIAR}}</div>
-        <div class="small">{{SEG_DETALLE_FAMILIAR}}</div>
-
-        <div class="small"><strong>Información falsa:</strong> {{SEG_INFO_FALSA}}</div>
-        <div class="small"><strong>Acepta polígrafo:</strong> {{SEG_POLIGRAFO}}</div>
-
-        <div class="small"><strong>Fortalezas:</strong> {{SEG_FORTALEZAS}}</div>
-        <div class="small"><strong>Aspectos a mejorar:</strong> {{SEG_MEJORAR}}</div>
-        <div class="small"><strong>Resolución de problemas:</strong> {{SEG_RESOLUCION}}</div>
-
-        <div class="small"><strong>Observaciones:</strong><br>{{SEG_OBSERVACIONES}}</div>
-
-      </div>
-
     </div>
   </div>
 
-  <div class="footer">
-    Logyser • Hoja de vida generada el {{FECHA_GENERACION}}
+  <div class="security-section">
+      <h3 style="border-left-color: transparent; color:#000b59; padding-left: 0;">Cuestionario de Seguridad</h3>
+
+      <div class="small" style="margin-top: 6px;"><strong>Llamados de atención:</strong> {{SEG_LLAMADOS}}</div>
+       
+  /* source: 20 */  <div class="small" style="margin-bottom: 8px;">{{SEG_DETALLE_LLAMADOS}}</div>
+
+      <div class="small"><strong>Accidente laboral:</strong> {{SEG_ACCIDENTE}}</div>
+      <div class="small" style="margin-bottom: 8px;">{{SEG_DETALLE_ACCIDENTE}}</div>
+
+      <div class="small"><strong>Enfermedad importante:</strong> {{SEG_ENFERMEDAD}}</div>
+      <div class="small" style="margin-bottom: 8px;">{{SEG_DETALLE_ENFERMEDAD}}</div>
+
+      <div class="small"><strong>Consume alcohol:</strong> {{SEG_ALCOHOL}}</div>
+      <div class="small" style="margin-bottom: 8px;"><strong>Frecuencia:</strong> {{SEG_FRECUENCIA}}</div>
+
+      <div class="small"><strong>Familiar en empresa:</strong> {{SEG_FAMILIAR}}</div>
+      <div class="small" style="margin-bottom: 8px;">{{SEG_DETALLE_FAMILIAR}}</div>
+
+      <div class="small"><strong>Información falsa:</strong> {{SEG_INFO_FALSA}}</div>
+     
+  /* source: 21 */    <div class="small" style="margin-bottom: 8px;"><strong>Acepta polígrafo:</strong> {{SEG_POLIGRAFO}}</div>
+
+      <div class="small"><strong>Fortalezas:</strong><br>{{SEG_FORTALEZAS}}</div>
+      <div class="small"><strong>Aspectos a mejorar:</strong><br>{{SEG_MEJORAR}}</div>
+      <div class="small"><strong>Resolución de problemas:</strong><br>{{SEG_RESOLUCION}}</div>
+
+      <div class="small" style="margin-top: 8px;"><strong>Observaciones:</strong><br>{{SEG_OBSERVACIONES}}</div>
+
+  </div>
+
+  <div class="footer-container">
+    <div class="abstract-shape shape-1"></div>
+    <div class="abstract-shape shape-2"></div>
+    <div class="abstract-shape shape-3"></div>
+    <div class="footer">
+      Logyser • Hoja de vida generada el {{FECHA_GENERACION}}
+    </div>
   </div>
 
 </div>
