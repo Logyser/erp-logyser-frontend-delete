@@ -822,7 +822,7 @@ app.post("/api/hv/registrar", async (req, res) => {
         ESTADO_CIVIL: escapeHtml(estado_civil || ""),
         EPS: escapeHtml(eps || ""),
         AFP: escapeHtml(afp || ""),
-        PHOTO_URL: datosAspirante.foto_public_url || datosAspirante.foto_public_url || "",
+        PHOTO_URL: datosAspirante.foto_public_url || "",
 
         EDUCACION_LIST,
         EXPERIENCIA_LIST,
@@ -830,9 +830,27 @@ app.post("/api/hv/registrar", async (req, res) => {
         FAMILIARES_LIST,
         CONTACTO_EMERGENCIA: CONTACTO_HTML,
         METAS: METAS_HTML,
-        RESUMEN_PERFIL: escapeHtml((datosAspirante.resumen_perfil) || ""),
-        FECHA_GENERACION: new Date().toLocaleString()
-      };
+        RESUMEN_PERFIL: escapeHtml(datosAspirante.resumen_perfil || ""),
+        FECHA_GENERACION: new Date().toLocaleString(),   // ← ⚠️ AQUÍ
+
+        SEG_LLAMADOS: escapeHtml(seguridad.llamados_atencion || ""),
+        SEG_DETALLE_LLAMADOS: escapeHtml(seguridad.detalle_llamados || ""),
+        SEG_ACCIDENTE: escapeHtml(seguridad.accidente_laboral || ""),
+        SEG_DETALLE_ACCIDENTE: escapeHtml(seguridad.detalle_accidente || ""),
+        SEG_ENFERMEDAD: escapeHtml(seguridad.enfermedad_importante || ""),
+        SEG_DETALLE_ENFERMEDAD: escapeHtml(seguridad.detalle_enfermedad || ""),
+        SEG_ALCOHOL: escapeHtml(seguridad.consume_alcohol || ""),
+        SEG_FRECUENCIA: escapeHtml(seguridad.frecuencia_alcohol || ""),
+        SEG_FAMILIAR: escapeHtml(seguridad.familiar_en_empresa || ""),
+        SEG_DETALLE_FAMILIAR: escapeHtml(seguridad.detalle_familiar_empresa || ""),
+        SEG_INFO_FALSA: escapeHtml(seguridad.info_falsa || ""),
+        SEG_POLIGRAFO: escapeHtml(seguridad.acepta_poligrafo || ""),
+        SEG_FORTALEZAS: escapeHtml(seguridad.fortalezas || ""),
+        SEG_MEJORAR: escapeHtml(seguridad.aspectos_mejorar || ""),
+        SEG_RESOLUCION: escapeHtml(seguridad.resolucion_problemas || ""),
+        SEG_OBSERVACIONES: escapeHtml(seguridad.observaciones || "")
+    };
+
       const { destName, signedUrl } = await generateAndUploadPdf({ identificacion, dataObjects: aspiranteData });
 
       // Actualizar DB con referencia al PDF
