@@ -115,18 +115,14 @@
       </div>
     </div>
 
-    <!-- Logo de Logyser -->
-    <img class="logo" src="https://storage.googleapis.com/logyser-public/logo/logyser_horizontal.png" />
+    <!-- Logo de Logyser: ahora se inyecta como {{LOGO_URL}} -->
+    <img class="logo" src="{{LOGO_URL}}" onerror="this.style.display='none'" />
   </div>
 
-
+  <!-- resto del template igual (sin cambios) -->
   <div class="two-col">
 
-    <!-- ===========================
-         COLUMNA IZQUIERDA
-    ============================-->
     <div class="left">
-
       <div class="section">
         <h3>Contacto</h3>
         <div class="small">{{CONTACTO_EMERGENCIA}}</div>
@@ -152,9 +148,6 @@
 
     </div>
 
-    <!-- ===========================
-         COLUMNA DERECHA
-    ============================-->
     <div class="right">
 
       <div class="section">

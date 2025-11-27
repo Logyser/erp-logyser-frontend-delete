@@ -5,6 +5,8 @@ import { Storage } from "@google-cloud/storage";
 import { fileURLToPath } from "url";
 
 const GCS_BUCKET = process.env.GCS_BUCKET || "hojas_vida_logyser";
+const LOGO_GCS_BUCKET = process.env.LOGO_GCS_BUCKET || "logyser-public"; // bucket donde está el logo
+const LOGO_GCS_PATH = process.env.LOGO_GCS_PATH || "logo/logyser_horizontal.png"; // ruta dentro del bucket
 const storage = new Storage();
 const bucket = storage.bucket(GCS_BUCKET);
 
@@ -22,6 +24,35 @@ async function renderHtmlFromTemplate(templatePath, data) {
     html = html.replace(re, v != null ? String(v) : "");
   });
   return html;
+}
+
+// helper: try to download logo from GCS and return data URL, otherwise return public URL fallback
+async function getLogoDataUrl() {
+  try {
+    const logoBucket = storage.bucket(LOGO_GCS_BUCKET);
+    const logoFile = logoBucket.file(LOGO_GCS_PATH);
+
+    // comprobar existencia
+    const [exists] = await logoFile.exists();
+    if (exists) {
+      const [buffer] = await logoFile.download();
+      // intentar metadata para contentType
+      let contentType = "image/png";
+      try {
+        const [meta] = await logoFile.getMetadata();
+        if (meta && meta.contentType) contentType = meta.contentType;
+      } catch (errMeta) {
+        // ignore
+      }
+      const base64 = buffer.toString("base64");
+      return `data:${contentType};base64,${base64}`;
+    }
+  } catch (err) {
+    console.warn("No se pudo descargar logo desde GCS:", err && err.message ? err.message : err);
+  }
+
+  // fallback público
+  return `https://storage.googleapis.com/${LOGO_GCS_BUCKET}/${LOGO_GCS_PATH}`;
 }
 
 async function htmlToPdfBuffer(html) {
@@ -42,7 +73,12 @@ async function htmlToPdfBuffer(html) {
   }
 }
 
-export async function generateAndUploadPdf({ identificacion, dataObjects, destNamePrefix }) {
+export async function generateAndUploadPdf({ identificacion, dataObjects = {}, destNamePrefix }) {
+  // Asegurar que LOGO_URL esté disponible en dataObjects — preferir valor pasado por caller
+  if (!dataObjects.LOGO_URL) {
+    dataObjects.LOGO_URL = await getLogoDataUrl();
+  }
+
   const templatePath = TEMPLATE_PATH;
   const html = await renderHtmlFromTemplate(templatePath, dataObjects);
   const pdfBuffer = await htmlToPdfBuffer(html);
